@@ -23,7 +23,7 @@ export type Village = {
     agriculture: number;
   };
   center: { lat: number; lng: number };
-  bounds: google.maps.LatLngLiteral[];
+  bounds: { lat: number; lng: number }[];
 };
 
 export type DssRecommendation = {

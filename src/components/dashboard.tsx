@@ -1,14 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
+import dynamic from 'next/dynamic';
 import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
 import { SidebarNav } from '@/components/sidebar-nav';
-import { MapView } from '@/components/map-view';
 import { VILLAGES } from '@/lib/mock-data';
 import type { Claim, Village, DssRecommendation } from '@/types';
 import { Card, CardContent } from '@/components/ui/card';
 import { getDssRecommendation } from '@/app/actions';
 import { ClaimEdit } from './claim-edit';
+import { Skeleton } from './ui/skeleton';
 
 export function Dashboard() {
   const [claims, setClaims] = useState<Claim[]>([]);
@@ -25,6 +26,11 @@ export function Dashboard() {
   const [dssRecommendation, setDssRecommendation] = useState<DssRecommendation | null>(null);
   const [isLoadingDss, setIsLoadingDss] = useState(false);
   const [editingClaim, setEditingClaim] = useState<Claim | null>(null);
+
+  const MapView = useMemo(() => dynamic(() => import('@/components/map-view').then(mod => mod.MapView), { 
+    ssr: false,
+    loading: () => <Skeleton className="h-full w-full" />,
+  }), []);
 
   const handleClaimAdded = (newClaim: Claim) => {
     setClaims((prevClaims) => [newClaim, ...prevClaims]);
