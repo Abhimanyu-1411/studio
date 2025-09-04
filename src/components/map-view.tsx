@@ -71,32 +71,31 @@ export function MapView({ claims, villages, center, zoom, activeLayers, onVillag
   const getPolygonOptions = (village: Village) => {
     let fillColor = 'hsl(var(--primary))';
     let fillOpacity = 0.1;
-    const options = {
+    
+    if (activeLayers.water) {
+      fillColor = 'blue';
+      fillOpacity = village.assetCoverage.water / 100 * 0.6;
+    }
+    if (activeLayers.forest) {
+      fillColor = 'darkgreen';
+      fillOpacity = village.assetCoverage.forest / 100 * 0.6;
+    }
+    if (activeLayers.agriculture) {
+      fillColor = 'yellow';
+      fillOpacity = village.assetCoverage.agriculture / 100 * 0.6;
+    }
+    if (activeLayers.ndwi) {
+        fillColor = village.ndwi > 0.5 ? 'hsl(var(--chart-2))' : 'hsl(var(--chart-4))';
+        fillOpacity = 0.6;
+    }
+
+    return {
       color: 'hsl(var(--primary))',
       weight: 2,
       opacity: 0.8,
       fillColor: fillColor,
       fillOpacity: fillOpacity,
     };
-  
-    if (activeLayers.water) {
-      options.fillColor = 'blue';
-      options.fillOpacity = village.assetCoverage.water / 100 * 0.6;
-    }
-    if (activeLayers.forest) {
-      options.fillColor = 'darkgreen';
-      options.fillOpacity = village.assetCoverage.forest / 100 * 0.6;
-    }
-    if (activeLayers.agriculture) {
-      options.fillColor = 'yellow';
-      options.fillOpacity = village.assetCoverage.agriculture / 100 * 0.6;
-    }
-    if (activeLayers.ndwi) {
-        options.fillColor = village.ndwi > 0.5 ? `hsl(var(--chart-2), 0.5)` : `hsl(var(--chart-4), 0.3)`;
-        options.fillOpacity = 0.6;
-    }
-
-    return options
   };
 
   return (
