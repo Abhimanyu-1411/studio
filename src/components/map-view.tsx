@@ -109,20 +109,20 @@ const MapViewComponent = ({ claims, villages, onVillageClick, onClaimEdit, cente
           <Popup>
             <Card className="border-0 shadow-none max-w-sm">
               <CardHeader className="p-2">
-                <CardTitle className="font-headline text-base">{claim.claimantName}</CardTitle>
+                <CardTitle className="text-base">{claim.claimantName}</CardTitle>
                 <CardDescription>{claim.claimType} - {claim.area}</CardDescription>
               </CardHeader>
-              <CardContent className="p-2 space-y-2">
-                <p className="text-sm">Village: {claim.village}</p>
-                <p className="text-sm">Date: {claim.date}</p>
+              <CardContent className="p-2 space-y-2 text-sm">
+                <p>Village: {claim.village}</p>
+                <p>Date: {claim.date}</p>
                 <div>
                   {claim.linkedVillage ? (
-                    <Badge variant="default" style={{ backgroundColor: `hsl(var(--primary))`, color: `hsl(var(--primary-foreground))` }}>Linked to: {claim.linkedVillage} ({(claim.confidenceScore! * 100).toFixed(0)}%)</Badge>
+                    <Badge variant="secondary">Linked to: {claim.linkedVillage} ({(claim.confidenceScore! * 100).toFixed(0)}%)</Badge>
                   ) : (
                     <Badge variant="destructive">Unlinked</Badge>
                   )}
                   {claim.status === 'needs-review' && (
-                    <Badge variant="destructive" className="ml-2">Needs Review</Badge>
+                    <Badge variant="secondary" className="ml-2 bg-yellow-100 text-yellow-800">Needs Review</Badge>
                   )}
                 </div>
               </CardContent>
