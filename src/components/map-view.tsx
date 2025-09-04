@@ -79,24 +79,25 @@ const MapViewComponent = ({ claims, villages, onVillageClick, onClaimEdit, cente
       <MapController center={center} zoom={zoom} />
 
       {villages.map((village) => (
-        <Polygon
-          key={village.id}
-          positions={village.bounds}
-          pathOptions={getPolygonOptions(village)}
-          eventHandlers={{
-            click: () => onVillageClick(village),
-          }}
-        />
-      ))}
-
-      {activeLayers.water && villages.flatMap(v => v.assetGeometries?.water.map((poly, i) => 
-        <Polygon key={`${v.id}-water-${i}`} positions={poly} pathOptions={{...assetLayerStyles.water, fillOpacity: 0.5}} />
-      ))}
-      {activeLayers.forest && villages.flatMap(v => v.assetGeometries?.forest.map((poly, i) => 
-        <Polygon key={`${v.id}-forest-${i}`} positions={poly} pathOptions={{...assetLayerStyles.forest, fillOpacity: 0.5}} />
-      ))}
-      {activeLayers.agriculture && villages.flatMap(v => v.assetGeometries?.agriculture.map((poly, i) => 
-        <Polygon key={`${v.id}-agri-${i}`} positions={poly} pathOptions={{...assetLayerStyles.agriculture, fillOpacity: 0.5}} />
+        <React.Fragment key={village.id}>
+            <Polygon
+            positions={village.bounds}
+            pathOptions={getPolygonOptions(village)}
+            eventHandlers={{
+                click: () => onVillageClick(village),
+            }}
+            />
+            
+            {activeLayers.water && village.assetGeometries?.water.map((poly, i) => 
+                <Polygon key={`${village.id}-water-${i}`} positions={poly} pathOptions={{...assetLayerStyles.water, fillOpacity: 0.5}} />
+            )}
+            {activeLayers.forest && village.assetGeometries?.forest.map((poly, i) => 
+                <Polygon key={`${village.id}-forest-${i}`} positions={poly} pathOptions={{...assetLayerStyles.forest, fillOpacity: 0.5}} />
+            )}
+            {activeLayers.agriculture && village.assetGeometries?.agriculture.map((poly, i) => 
+                <Polygon key={`${village.id}-agri-${i}`} positions={poly} pathOptions={{...assetLayerStyles.agriculture, fillOpacity: 0.5}} />
+            )}
+        </React.Fragment>
       ))}
 
       {claims.map((claim) => (
