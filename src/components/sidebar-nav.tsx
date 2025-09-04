@@ -20,7 +20,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { ClaimUpload } from '@/components/claim-upload';
 import { WaterRiskChart } from '@/components/water-risk-chart';
-import { FileText, Layers, Download, PlusCircle } from 'lucide-react';
+import { FileText, Download, PlusCircle, Leaf, Droplets, LandPlot } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import type { Claim } from '@/types';
 
@@ -28,24 +28,55 @@ type SidebarNavProps = {
   claims: Claim[];
   onClaimAdded: (claim: Claim) => void;
   onClaimSelect: (claim: Claim) => void;
-  onLayerToggle: (layer: 'ndwi' | 'ndvi', toggled: boolean) => void;
+  onLayerToggle: (layer: string, toggled: boolean) => void;
 };
+
+const claimTypeColors = {
+  IFR: 'bg-green-500',
+  CFR: 'bg-blue-500',
+  CR: 'bg-orange-500',
+  'default': 'bg-gray-500'
+}
 
 export function SidebarNav({ claims, onClaimAdded, onClaimSelect, onLayerToggle }: SidebarNavProps) {
   const [isUploadOpen, setUploadOpen] = useState(false);
   const { toast } = useToast();
 
   const handleExport = () => {
+    if (claims.length === 0) {
+      toast({
+        variant: 'destructive',
+        title: 'No claims to export',
+        description: 'Please upload at least one claim before exporting.',
+      });
+      return;
+    }
+    const csvHeader = "ClaimID,ClaimantName,Village,ClaimType,Area,Date,Status,LinkedVillage,Confidence\n";
+    const csvRows = claims.map(c => 
+        `${c.id},"${c.claimantName}","${c.village}","${c.claimType}","${c.area}","${c.date}",${c.status},${c.linkedVillage || ''},${c.confidenceScore || 0}`
+    ).join("\n");
+    const csvContent = csvHeader + csvRows;
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    if (link.href) {
+      URL.revokeObjectURL(link.href);
+    }
+    link.href = URL.createObjectURL(blob);
+    link.download = `claims_export_${new Date().toISOString()}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
     toast({
-      title: 'Export Started',
-      description: 'Generating report for selected claims...',
+      title: 'Export Complete',
+      description: 'Your CSV report is downloading.',
     });
-    setTimeout(() => {
-        toast({
-            title: 'Export Complete',
-            description: 'Your report is downloading.',
-        });
-    }, 2000);
+  }
+  
+  const getClaimTypeColor = (claimType: string) => {
+    if (claimType in claimTypeColors) return claimTypeColors[claimType as keyof typeof claimTypeColors];
+    return claimTypeColors.default;
   }
 
   return (
@@ -74,7 +105,10 @@ export function SidebarNav({ claims, onClaimAdded, onClaimSelect, onLayerToggle 
                     <FileText />
                     <div className="flex flex-col items-start w-full">
                         <span className="font-medium">{claim.claimantName}</span>
-                        <span className="text-xs text-muted-foreground">{claim.village}</span>
+                        <div className="flex items-center gap-2">
+                            <span className={`h-2 w-2 rounded-full ${getClaimTypeColor(claim.claimType)}`}></span>
+                            <span className="text-xs text-muted-foreground">{claim.village}</span>
+                        </div>
                     </div>
                     <Badge variant={claim.status === 'linked' ? 'default' : 'secondary'} className="ml-auto">
                       {claim.status}
@@ -91,12 +125,16 @@ export function SidebarNav({ claims, onClaimAdded, onClaimSelect, onLayerToggle 
             <SidebarGroupLabel>Asset Layers</SidebarGroupLabel>
             <div className="flex flex-col gap-4 p-2">
                 <div className="flex items-center justify-between">
-                    <Label htmlFor="ndwi-toggle">NDWI Overlay</Label>
+                    <Label htmlFor="ndwi-toggle" className="flex items-center gap-2"><Droplets className="text-blue-500" />NDWI Overlay</Label>
                     <Switch id="ndwi-toggle" onCheckedChange={(c) => onLayerToggle('ndwi', c)} />
                 </div>
                  <div className="flex items-center justify-between">
-                    <Label htmlFor="ndvi-toggle">NDVI Overlay</Label>
-                    <Switch id="ndvi-toggle" onCheckedChange={(c) => onLayerToggle('ndvi', c)} />
+                    <Label htmlFor="forest-toggle" className="flex items-center gap-2"><Leaf className="text-green-600" />Forest Cover</Label>
+                    <Switch id="forest-toggle" onCheckedChange={(c) => onLayerToggle('forest', c)} />
+                </div>
+                 <div className="flex items-center justify-between">
+                    <Label htmlFor="agriculture-toggle" className="flex items-center gap-2"><LandPlot className="text-yellow-600"/>Agricultural Areas</Label>
+                    <Switch id="agriculture-toggle" onCheckedChange={(c) => onLayerToggle('agriculture', c)} />
                 </div>
             </div>
           </SidebarGroup>
@@ -106,7 +144,7 @@ export function SidebarNav({ claims, onClaimAdded, onClaimSelect, onLayerToggle 
             <WaterRiskChart />
             <Button variant="outline" className="w-full" onClick={handleExport}>
                 <Download className="mr-2" />
-                Export Report
+                Export Report as CSV
             </Button>
         </SidebarFooter>
       </Sidebar>

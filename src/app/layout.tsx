@@ -3,7 +3,7 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
-  title: 'FRA Atlas',
+  title: 'GeoClaim Insight',
   description: 'AI-Powered Geospatial Claim Analysis',
 };
 

@@ -2,7 +2,7 @@ export type Claim = {
   id: string;
   claimantName: string;
   village: string;
-  claimType: string;
+  claimType: 'IFR' | 'CFR' | 'CR' | string;
   area: string;
   date: string;
   documentUrl: string;
@@ -17,6 +17,11 @@ export type Village = {
   id: string;
   name: string;
   ndwi: number;
+  assetCoverage: {
+    water: number;
+    forest: number;
+    agriculture: number;
+  };
   center: { lat: number; lng: number };
   bounds: google.maps.LatLngLiteral[];
 };

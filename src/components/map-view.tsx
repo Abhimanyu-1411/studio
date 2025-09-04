@@ -4,7 +4,6 @@ import { APIProvider, Map, AdvancedMarker, InfoWindow } from '@vis.gl/react-goog
 import { Polygon } from '@/components/polygon';
 import { useState, useCallback } from 'react';
 import type { Claim, Village, DssRecommendation } from '@/types';
-import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { getDssRecommendation } from '@/app/actions';
 import { Loader2 } from 'lucide-react';
@@ -15,9 +14,17 @@ type MapViewProps = {
   villages: Village[];
   center: { lat: number; lng: number };
   zoom: number;
+  activeLayers: Record<string, boolean>;
 };
 
-export function MapView({ claims, villages, center, zoom }: MapViewProps) {
+const claimTypeColors = {
+  IFR: 'hsl(var(--chart-1))',
+  CFR: 'hsl(var(--chart-2))',
+  CR: 'hsl(var(--chart-5))',
+  'default': 'hsl(var(--muted-foreground))'
+}
+
+export function MapView({ claims, villages, center, zoom, activeLayers }: MapViewProps) {
   const [selectedVillage, setSelectedVillage] = useState<Village | null>(null);
   const [selectedClaim, setSelectedClaim] = useState<Claim | null>(null);
   const [dssData, setDssData] = useState<DssRecommendation | null>(null);
@@ -29,10 +36,7 @@ export function MapView({ claims, villages, center, zoom }: MapViewProps) {
     setIsLoadingDss(true);
     setDssData(null);
     try {
-      const claimsInVillage = claims.filter(c => c.linkedVillage === village.name);
-      // Using the first claim type as representative for the DSS call
-      const representativeClaimType = claimsInVillage.length > 0 ? claimsInVillage[0].claimType : "General";
-      const recommendation = await getDssRecommendation(village.id, representativeClaimType, claimsInVillage.length);
+      const recommendation = await getDssRecommendation(village.id, claims);
       setDssData(recommendation);
     } catch (error) {
       console.error("Failed to get DSS recommendation", error);
@@ -50,14 +54,39 @@ export function MapView({ claims, villages, center, zoom }: MapViewProps) {
     setSelectedVillage(null);
     setSelectedClaim(null);
   }
+  
+  const getClaimColor = (claimType: string) => {
+    if (claimType in claimTypeColors) return claimTypeColors[claimType as keyof typeof claimTypeColors];
+    return claimTypeColors.default;
+  }
 
-  const polygonOptions = (village: Village) => ({
-    strokeColor: 'hsl(var(--primary))',
-    strokeOpacity: 0.8,
-    strokeWeight: 2,
-    fillColor: village.ndwi > 0.5 ? `hsl(var(--primary), 0.5)` : `hsl(var(--accent), 0.3)`,
-    fillOpacity: 0.35,
-  });
+  const getPolygonOptions = (village: Village) => {
+    let fillColor = 'hsl(var(--primary))';
+    let fillOpacity = 0.1;
+
+    if (activeLayers.ndwi) {
+        fillColor = village.ndwi > 0.5 ? `hsl(var(--chart-2), 0.5)` : `hsl(var(--chart-4), 0.3)`;
+        fillOpacity = 0.5;
+    } else if (activeLayers.forest) {
+        fillColor = 'darkgreen';
+        fillOpacity = village.assetCoverage.forest / 100 * 0.5;
+    } else if (activeLayers.water) {
+        fillColor = 'blue';
+        fillOpacity = village.assetCoverage.water / 100 * 0.5;
+    } else if (activeLayers.agriculture) {
+        fillColor = 'yellow';
+        fillOpacity = village.assetCoverage.agriculture / 100 * 0.5;
+    }
+
+    return {
+        strokeColor: 'hsl(var(--primary))',
+        strokeOpacity: 0.8,
+        strokeWeight: 2,
+        fillColor,
+        fillOpacity,
+    }
+  };
+
 
   if (!process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY) {
     return (
@@ -73,8 +102,8 @@ export function MapView({ claims, villages, center, zoom }: MapViewProps) {
   return (
     <APIProvider apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}>
       <Map
-        defaultCenter={center}
-        defaultZoom={zoom}
+        center={center}
+        zoom={zoom}
         mapId="geoclaim_map"
         onDragend={closeInfoWindows}
         onClick={closeInfoWindows}
@@ -86,18 +115,28 @@ export function MapView({ claims, villages, center, zoom }: MapViewProps) {
           <Polygon
             key={village.id}
             paths={village.bounds}
-            options={polygonOptions(village)}
+            options={getPolygonOptions(village)}
             onClick={() => handleVillageClick(village)}
           />
         ))}
 
         {claims.map((claim) => (
-          <AdvancedMarker
+           <AdvancedMarker
             key={claim.id}
             position={claim.location}
             onClick={() => handleClaimClick(claim)}
           >
-             <span className="text-3xl">{claim.status === 'linked' ? '📍' : '❓'}</span>
+            <div className="relative">
+              <svg width="24" height="24" viewBox="0 0 32 32" className="drop-shadow-lg">
+                <path 
+                    d="M16,32C16,32,28,18,28,12C28,5.373,22.627,0,16,0C9.373,0,4,5.373,4,12C4,18,16,32,16,32Z"
+                    fill={getClaimColor(claim.claimType)}
+                />
+              </svg>
+              <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white font-bold text-xs">
+                {claim.status === 'linked' ? 'L' : '?'}
+              </span>
+            </div>
           </AdvancedMarker>
         ))}
 
@@ -117,6 +156,7 @@ export function MapView({ claims, villages, center, zoom }: MapViewProps) {
                             <p className="text-xs text-muted-foreground mt-1">{dssData.justification}</p>
                         </div>
                     )}
+                     {!isLoadingDss && !dssData && <p className="text-xs text-muted-foreground">No recommendations available.</p>}
                 </CardContent>
             </Card>
           </InfoWindow>
