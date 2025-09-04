@@ -1,66 +1,47 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import dynamic from 'next/dynamic';
-import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
-import { SidebarNav } from '@/components/sidebar-nav';
-import { VILLAGES, MOCK_CLAIMS } from '@/lib/mock-data';
-import type { Claim, Village, DssRecommendation } from '@/types';
-import { Card, CardContent } from '@/components/ui/card';
-import { getDssRecommendation } from '@/app/actions';
+import { MOCK_CLAIMS, VILLAGES } from '@/lib/mock-data';
+import type { Claim, DssRecommendation, Village } from '@/types';
 import { ClaimEdit } from './claim-edit';
 import { Skeleton } from './ui/skeleton';
+import { Header } from './header';
+import { RecentClaims } from './recent-claims';
+import { QuickActions } from './quick-actions';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Briefcase, Clock, CheckCircle, MapPin, FileText } from 'lucide-react';
 import { ClaimsTable } from './claims-table';
+import { ClaimUpload } from './claim-upload';
 
-const MapView = dynamic(() => import('@/components/map-view').then(mod => mod.MapView), { 
-    ssr: false,
-    loading: () => <Skeleton className="h-full w-full" />,
+const MapView = dynamic(() => import('@/components/map-view').then(mod => mod.MapView), {
+  ssr: false,
+  loading: () => <Skeleton className="h-[500px] w-full" />,
 });
 
-const StatsCards = ({ claims }: { claims: Claim[] }) => {
-    const totalClaims = claims.length;
-    const linkedClaims = claims.filter(c => c.status === 'linked' || c.status === 'reviewed' || c.status === 'needs-review').length;
-    const pendingClaims = totalClaims - linkedClaims;
-    const linkSuccessRate = totalClaims > 0 ? (linkedClaims / totalClaims) * 100 : 0;
+const StatsCard = ({ title, value, icon: Icon, color }: { title: string, value: number, icon: React.ElementType, color: string }) => (
+  <Card className="shadow-sm">
+    <CardContent className="flex items-center justify-between p-4">
+      <div>
+        <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
+        <p className="text-3xl font-bold">{value}</p>
+      </div>
+      <div className={`p-3 rounded-full`} style={{ backgroundColor: `${color}1A` }}>
+        <Icon className="h-6 w-6" style={{ color: color }} />
+      </div>
+    </CardContent>
+  </Card>
+);
 
-    return (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4">
-            <Card>
-                <CardContent className="p-4">
-                    <p className="text-sm text-muted-foreground">Total Claims</p>
-                    <p className="text-2xl font-bold">{totalClaims}</p>
-                </CardContent>
-            </Card>
-            <Card>
-                <CardContent className="p-4">
-                    <p className="text-sm text-muted-foreground">Linked Claims</p>
-                    <p className="text-2xl font-bold">{linkedClaims}</p>
-                </CardContent>
-            </Card>
-            <Card>
-                <CardContent className="p-4">
-                    <p className="text-sm text-muted-foreground">Pending</p>
-                    <p className="text-2xl font-bold">{pendingClaims}</p>
-                </CardContent>
-            </Card>
-            <Card>
-                <CardContent className="p-4">
-                    <p className="text-sm text-muted-foreground">Link Success</p>
-                    <p className="text-2xl font-bold">{linkSuccessRate.toFixed(0)}%</p>
-                </CardContent>
-            </Card>
-        </div>
-    );
-};
 
 export function Dashboard() {
   const [claims, setClaims] = useState<Claim[]>(MOCK_CLAIMS);
-  const [selectedVillage, setSelectedVillage] = useState<Village | null>(null);
-  const [dssRecommendation, setDssRecommendation] = useState<DssRecommendation | null>(null);
-  const [isLoadingDss, setIsLoadingDss] = useState(false);
   const [editingClaim, setEditingClaim] = useState<Claim | null>(null);
+  const [isUploadOpen, setUploadOpen] = useState(false);
   const [mapCenter, setMapCenter] = useState({ lat: 26.5, lng: 82.4 });
   const [mapZoom, setMapZoom] = useState(9);
+  const [activeView, setActiveView] = useState('dashboard');
+
 
   const handleClaimAdded = (newClaim: Claim) => {
     setClaims((prevClaims) => [newClaim, ...prevClaims]);
@@ -74,29 +55,6 @@ export function Dashboard() {
     setClaims(prev => prev.map(c => c.id === updatedClaim.id ? updatedClaim : c));
     setEditingClaim(null);
   }
-  
-  const handleVillageSelect = async (village: Village | null) => {
-    if (!village) {
-      setSelectedVillage(null);
-      setDssRecommendation(null);
-      return;
-    }
-    
-    setSelectedVillage(village);
-    setIsLoadingDss(true);
-    setDssRecommendation(null);
-    setMapCenter(village.center);
-    setMapZoom(12);
-    
-    try {
-      const recommendation = await getDssRecommendation(village.id, claims);
-      setDssRecommendation(recommendation);
-    } catch (error) {
-      console.error("Failed to get DSS recommendation", error);
-    } finally {
-      setIsLoadingDss(false);
-    }
-  }
 
   const handleClaimEdit = (claim: Claim) => {
     setEditingClaim(claim);
@@ -105,51 +63,83 @@ export function Dashboard() {
         setMapZoom(14);
     }
   }
+
+  const totalClaims = claims.length;
+  const pendingClaims = claims.filter(c => c.status === 'needs-review' || c.status === 'unlinked').length;
+  const approvedClaims = claims.filter(c => c.status === 'linked' || c.status === 'reviewed').length;
+  const totalVillages = VILLAGES.length;
   
-  const handleClaimSelect = (claim: Claim) => {
-    if(claim.location) {
-        setMapCenter(claim.location);
-        setMapZoom(14);
+  const renderContent = () => {
+    switch(activeView) {
+      case 'dashboard':
+        return (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Interactive Map</CardTitle>
+                  <CardDescription>Explore claims and village boundaries</CardDescription>
+                </CardHeader>
+                <CardContent className="h-[500px] p-0">
+                  <MapView
+                    claims={claims}
+                    villages={VILLAGES}
+                    onVillageClick={() => {}}
+                    onClaimEdit={handleClaimEdit}
+                    center={mapCenter}
+                    zoom={mapZoom}
+                  />
+                </CardContent>
+              </Card>
+            </div>
+            <div className="space-y-6">
+              <RecentClaims claims={claims.slice(0, 5)} onClaimSelect={handleClaimEdit} />
+              <QuickActions onUpload={() => setUploadOpen(true)} onViewClaims={() => setActiveView('claims-list')} />
+            </div>
+          </div>
+        );
+      case 'claims-list':
+        return <ClaimsTable claims={claims} onClaimEdit={handleClaimEdit} />;
+      case 'villages':
+        return (
+          <Card>
+            <CardHeader>
+              <CardTitle>Villages</CardTitle>
+              <CardDescription>List of all villages.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ul className="space-y-2">
+                {VILLAGES.map(v => <li key={v.id} className="p-2 border rounded-md">{v.name}</li>)}
+              </ul>
+            </CardContent>
+          </Card>
+        )
+      default:
+        return null;
     }
   }
 
   return (
-    <SidebarProvider>
-      <SidebarNav 
-        claims={claims} 
-        onClaimAdded={handleClaimAdded} 
-        selectedVillage={selectedVillage}
-        onVillageSelect={handleVillageSelect}
-        dssRecommendation={dssRecommendation}
-        isLoadingDss={isLoadingDss}
-        onClaimSelect={handleClaimSelect}
+    <>
+      <Header onNavClick={setActiveView} onUploadClick={() => setUploadOpen(true)} />
+      <main className="flex-1 p-6 space-y-6">
+        {activeView === 'dashboard' && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <StatsCard title="Total Claims" value={totalClaims} icon={FileText} color="#3b82f6" />
+            <StatsCard title="Pending Claims" value={pendingClaims} icon={Clock} color="#f59e0b" />
+            <StatsCard title="Approved Claims" value={approvedClaims} icon={CheckCircle} color="#10b981" />
+            <StatsCard title="Total Villages" value={totalVillages} icon={MapPin} color="#8b5cf6" />
+          </div>
+        )}
+        {renderContent()}
+      </main>
+      <ClaimEdit
+        claim={editingClaim}
+        onOpenChange={(isOpen) => !isOpen && setEditingClaim(null)}
+        onClaimUpdate={handleClaimUpdate}
+        availableVillages={VILLAGES.map(v => v.name)}
       />
-      <SidebarInset>
-        <div className="relative h-full w-full flex flex-col">
-            <div className="h-1/2 flex flex-col">
-              <StatsCards claims={claims} />
-              <div className="flex-grow pt-28">
-                  <MapView
-                      claims={claims} 
-                      villages={VILLAGES}
-                      onVillageClick={handleVillageSelect}
-                      onClaimEdit={handleClaimEdit}
-                      center={mapCenter}
-                      zoom={mapZoom}
-                  />
-              </div>
-            </div>
-            <div className="h-1/2 p-4 overflow-auto">
-              <ClaimsTable claims={claims} onClaimEdit={handleClaimEdit} />
-            </div>
-            <ClaimEdit
-              claim={editingClaim}
-              onOpenChange={(isOpen) => !isOpen && setEditingClaim(null)}
-              onClaimUpdate={handleClaimUpdate}
-              availableVillages={VILLAGES.map(v => v.name)}
-            />
-        </div>
-      </SidebarInset>
-    </SidebarProvider>
+      <ClaimUpload open={isUploadOpen} onOpenChange={setUploadOpen} onClaimAdded={handleClaimAdded} />
+    </>
   );
 }

@@ -19,11 +19,11 @@ type ClaimsTableProps = {
   onClaimEdit: (claim: Claim) => void;
 };
 
-const claimStatusBadges: Record<Claim['status'], 'default' | 'destructive' | 'secondary'> = {
+const claimStatusBadges: Record<Claim['status'], 'default' | 'destructive' | 'secondary' | 'outline'> = {
     linked: 'default',
     unlinked: 'destructive',
     'needs-review': 'secondary',
-    reviewed: 'default',
+    reviewed: 'outline',
 }
 
 const claimStatusText: Record<Claim['status'], string> = {
@@ -35,58 +35,53 @@ const claimStatusText: Record<Claim['status'], string> = {
 
 
 export function ClaimsTable({ claims, onClaimEdit }: ClaimsTableProps) {
-  if (claims.length === 0) {
-    return (
-        <Card>
-            <CardHeader>
-                <CardTitle>Claims Overview</CardTitle>
-                <CardDescription>No claims have been uploaded yet.</CardDescription>
-            </CardHeader>
-        </Card>
-    )
-  }
-  
   return (
     <Card>
         <CardHeader>
-            <CardTitle>Claims Overview</CardTitle>
+            <CardTitle>Claims List</CardTitle>
             <CardDescription>A list of all uploaded claims and their status.</CardDescription>
         </CardHeader>
         <CardContent>
-            <Table>
-            <TableHeader>
-                <TableRow>
-                <TableHead>Applicant Name</TableHead>
-                <TableHead>Village</TableHead>
-                <TableHead>Claim Type</TableHead>
-                <TableHead>Area</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Actions</TableHead>
-                </TableRow>
-            </TableHeader>
-            <TableBody>
-                {claims.map((claim) => (
-                <TableRow key={claim.id}>
-                    <TableCell className="font-medium">{claim.claimantName}</TableCell>
-                    <TableCell>{claim.linkedVillage || claim.village}</TableCell>
-                    <TableCell>
-                        <Badge variant="outline">{claim.claimType}</Badge>
-                    </TableCell>
-                    <TableCell>{claim.area}</TableCell>
-                    <TableCell>
-                        <Badge variant={claimStatusBadges[claim.status]}>
-                            {claimStatusText[claim.status]}
-                        </Badge>
-                    </TableCell>
-                    <TableCell>
-                         <Button variant="ghost" size="icon" onClick={() => onClaimEdit(claim)}>
-                            <Edit className="h-4 w-4" />
-                         </Button>
-                    </TableCell>
-                </TableRow>
-                ))}
-            </TableBody>
-            </Table>
+            {claims.length === 0 ? (
+                <div className="text-center py-12 text-muted-foreground">
+                    <p>No claims have been uploaded yet.</p>
+                </div>
+             ) : (
+                <Table>
+                <TableHeader>
+                    <TableRow>
+                    <TableHead>Applicant Name</TableHead>
+                    <TableHead>Village</TableHead>
+                    <TableHead>Claim Type</TableHead>
+                    <TableHead>Area</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                    {claims.map((claim) => (
+                    <TableRow key={claim.id}>
+                        <TableCell className="font-medium">{claim.claimantName}</TableCell>
+                        <TableCell>{claim.linkedVillage || claim.village}</TableCell>
+                        <TableCell>
+                            <Badge variant="outline">{claim.claimType}</Badge>
+                        </TableCell>
+                        <TableCell>{claim.area}</TableCell>
+                        <TableCell>
+                            <Badge variant={claimStatusBadges[claim.status]}>
+                                {claimStatusText[claim.status]}
+                            </Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                             <Button variant="ghost" size="icon" onClick={() => onClaimEdit(claim)}>
+                                <Edit className="h-4 w-4" />
+                             </Button>
+                        </TableCell>
+                    </TableRow>
+                    ))}
+                </TableBody>
+                </Table>
+             )}
         </CardContent>
     </Card>
   );

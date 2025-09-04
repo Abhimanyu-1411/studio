@@ -1,7 +1,7 @@
 'use client';
 
 import { MapContainer, TileLayer, Polygon, Marker, Popup, useMap } from 'react-leaflet';
-import { useState, useCallback, useEffect, memo } from 'react';
+import { useEffect, memo, useState } from 'react';
 import type { Claim, Village } from '@/types';
 import { Badge } from './ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from './ui/card';
@@ -18,22 +18,15 @@ type MapViewProps = {
   zoom: number;
 };
 
-const claimTypeColors = {
-  IFR: 'hsl(var(--chart-1))',
-  CFR: 'hsl(var(--chart-2))',
-  CR: 'hsl(var(--chart-5))',
-  'default': 'hsl(var(--muted-foreground))'
-}
-
 const claimStatusColors = {
   linked: 'hsl(var(--primary))',
   unlinked: 'hsl(var(--destructive))',
   'needs-review': 'hsl(var(--chart-4))',
   reviewed: 'hsl(var(--primary))',
-}
+};
 
 const getClaimIcon = (claim: Claim) => {
-  const color = claimStatusColors[claim.status] || claimTypeColors.default;
+  const color = claimStatusColors[claim.status] || 'hsl(var(--muted-foreground))';
   const markerHtml = `<div style="background-color: ${color}; width: 24px; height: 24px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; color: white; font-weight: bold;">${claim.status === 'unlinked' ? '?' : ''}</div>`;
   return L.divIcon({
     html: markerHtml,
@@ -52,57 +45,14 @@ const MapController = ({ center, zoom }: { center: { lat: number, lng: number },
 }
 
 const MapViewComponent = ({ claims, villages, onVillageClick, onClaimEdit, center, zoom }: MapViewProps) => {
-  const [activeLayers, setActiveLayers] = useState<Record<string, boolean>>({
-    ndwi: false,
-    water: false,
-    agriculture: false,
-    forest: false,
-  });
-
-  useEffect(() => {
-    const handleLayerToggle = (e: CustomEvent) => {
-      setActiveLayers(e.detail);
-    };
-    window.addEventListener('layer-toggle', handleLayerToggle as EventListener);
-    return () => {
-      window.removeEventListener('layer-toggle', handleLayerToggle as EventListener);
-    };
-  }, []);
-
-
   const getPolygonOptions = (village: Village) => {
-    const options: L.PathOptions = {
+    return {
       color: 'hsl(var(--primary))',
       weight: 2,
       opacity: 0.8,
       fillColor: 'hsl(var(--primary))',
       fillOpacity: 0.1,
     };
-
-    let fillOpacity = 0.1;
-    let fillColor = options.fillColor as string;
-
-    if (activeLayers.water) {
-      fillColor = 'blue';
-      fillOpacity = Math.max(fillOpacity, village.assetCoverage.water / 100 * 0.6);
-    }
-    if (activeLayers.forest) {
-      fillColor = 'darkgreen';
-      fillOpacity = Math.max(fillOpacity, village.assetCoverage.forest / 100 * 0.6);
-    }
-    if (activeLayers.agriculture) {
-      fillColor = 'yellow';
-      fillOpacity = Math.max(fillOpacity, village.assetCoverage.agriculture / 100 * 0.6);
-    }
-    if (activeLayers.ndwi) {
-      fillColor = village.ndwi > 0.5 ? 'hsl(var(--chart-2))' : 'hsl(var(--chart-4))';
-      fillOpacity = Math.max(fillOpacity, 0.6);
-    }
-    
-    options.fillColor = fillColor;
-    options.fillOpacity = fillOpacity;
-
-    return options;
   };
 
   return (
@@ -110,7 +60,7 @@ const MapViewComponent = ({ claims, villages, onVillageClick, onClaimEdit, cente
       center={center}
       zoom={zoom}
       scrollWheelZoom={true}
-      style={{ height: '100%', width: '100%' }}
+      style={{ height: '100%', width: '100%', borderRadius: 'var(--radius)' }}
     >
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
