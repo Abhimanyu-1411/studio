@@ -15,7 +15,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import type { Claim } from '@/types';
-import { Loader2, Link, Save } from 'lucide-react';
+import { Loader2, Link, Save, CheckCircle } from 'lucide-react';
 
 type ClaimEditProps = {
   claim: Claim | null;
@@ -63,8 +63,8 @@ export function ClaimEdit({ claim, onOpenChange, onClaimUpdate, availableVillage
     onClaimUpdate(updatedClaim);
     setIsSaving(false);
     toast({
-        title: 'Claim Updated',
-        description: `Successfully updated claim for ${updatedClaim.claimantName}.`
+        title: isReviewAction ? 'Claim Reviewed' : 'Claim Updated',
+        description: `Successfully updated claim for ${updatedClaim.claimantName}. It is now ready to be linked.`
     });
     onOpenChange(false);
   };
@@ -77,10 +77,10 @@ export function ClaimEdit({ claim, onOpenChange, onClaimUpdate, availableVillage
     <Dialog open={!!claim} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[480px]">
         <DialogHeader>
-          <DialogTitle>{isReviewAction ? 'Review and Link Claim' : 'Correct Claim Data'}</DialogTitle>
+          <DialogTitle>{isReviewAction ? 'Review and Finalize Claim' : 'Correct Claim Data'}</DialogTitle>
           <DialogDescription>
             {isReviewAction 
-              ? 'The AI link has low confidence. Please verify the village and correct any data.'
+              ? 'The AI link has low confidence. Please verify the village and correct any data. After reviewing, you can link it from the claims list.'
               : "Review and correct the extracted data. Click save when you're done."
             }
           </DialogDescription>
@@ -133,8 +133,8 @@ export function ClaimEdit({ claim, onOpenChange, onClaimUpdate, availableVillage
               </>
             ) : isReviewAction ? (
               <>
-                <Link className="mr-2 h-4 w-4" />
-                Review & Link
+                <CheckCircle className="mr-2 h-4 w-4" />
+                Review & Finalize
               </>
             ) : (
                <>

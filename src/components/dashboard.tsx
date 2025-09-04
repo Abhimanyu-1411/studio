@@ -240,6 +240,15 @@ export function Dashboard() {
     setEditingClaim(null);
   }
 
+  const handleClaimLink = (claimToLink: Claim) => {
+    setClaims(prev => prev.map(c => c.id === claimToLink.id ? { ...c, status: 'linked' } : c));
+    toast({
+        title: 'Claim Linked',
+        description: `Claim for ${claimToLink.claimantName} is now visible on the map.`
+    });
+  }
+
+
   const handleClaimEdit = (claim: Claim) => {
     setEditingClaim(claim);
     if(claim.location) {
@@ -250,8 +259,10 @@ export function Dashboard() {
 
   const totalClaims = claims.length;
   const pendingClaims = claims.filter(c => c.status === 'needs-review' || c.status === 'unlinked').length;
-  const approvedClaims = claims.filter(c => c.status === 'linked' || c.status === 'reviewed').length;
+  const approvedClaims = claims.filter(c => c.status === 'linked').length;
   const totalVillages = VILLAGES.length;
+
+  const linkedClaims = useMemo(() => claims.filter(c => c.status === 'linked'), [claims]);
   
   const renderContent = () => {
     switch(activeView) {
@@ -269,7 +280,7 @@ export function Dashboard() {
                 </CardHeader>
                 <CardContent className="h-[500px] p-0">
                   <MapView
-                    claims={claims}
+                    claims={linkedClaims}
                     villages={VILLAGES}
                     onVillageClick={() => {}}
                     onClaimEdit={handleClaimEdit}
@@ -287,7 +298,7 @@ export function Dashboard() {
           </div>
         );
       case 'claims-list':
-        return <ClaimsTable claims={claims} onClaimEdit={handleClaimEdit} />;
+        return <ClaimsTable claims={claims} onClaimEdit={handleClaimEdit} onClaimLink={handleClaimLink} />;
       case 'village-analysis':
         return <VillageAnalysis villages={VILLAGES} claims={claims} />;
       case 'villages':
@@ -316,8 +327,8 @@ export function Dashboard() {
         {activeView === 'dashboard' && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <StatsCard title="Total Claims" value={totalClaims} icon={FileText} color="#3b82f6" />
-            <StatsCard title="Pending Claims" value={pendingClaims} icon={Clock} color="#f59e0b" />
-            <StatsCard title="Approved Claims" value={approvedClaims} icon={CheckCircle} color="#10b981" />
+            <StatsCard title="Pending Review" value={pendingClaims} icon={Clock} color="#f59e0b" />
+            <StatsCard title="Linked to Map" value={approvedClaims} icon={CheckCircle} color="#10b981" />
             <StatsCard title="Total Villages" value={totalVillages} icon={MapPin} color="#8b5cf6" />
           </div>
         )}
@@ -333,5 +344,3 @@ export function Dashboard() {
     </>
   );
 }
-
-    

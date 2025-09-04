@@ -11,12 +11,13 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from './ui/button';
-import { Edit } from 'lucide-react';
+import { Edit, Link } from 'lucide-react';
 import type { Claim } from '@/types';
 
 type ClaimsTableProps = {
   claims: Claim[];
   onClaimEdit: (claim: Claim) => void;
+  onClaimLink: (claim: Claim) => void;
 };
 
 const claimStatusBadges: Record<Claim['status'], 'default' | 'destructive' | 'secondary' | 'outline'> = {
@@ -27,14 +28,14 @@ const claimStatusBadges: Record<Claim['status'], 'default' | 'destructive' | 'se
 }
 
 const claimStatusText: Record<Claim['status'], string> = {
-    linked: 'Linked',
+    linked: 'Linked to Map',
     unlinked: 'Unlinked',
     'needs-review': 'Needs Review',
     reviewed: 'Reviewed',
 }
 
 
-export function ClaimsTable({ claims, onClaimEdit }: ClaimsTableProps) {
+export function ClaimsTable({ claims, onClaimEdit, onClaimLink }: ClaimsTableProps) {
   return (
     <Card>
         <CardHeader>
@@ -72,8 +73,14 @@ export function ClaimsTable({ claims, onClaimEdit }: ClaimsTableProps) {
                                 {claimStatusText[claim.status]}
                             </Badge>
                         </TableCell>
-                        <TableCell className="text-right">
-                             <Button variant="ghost" size="icon" onClick={() => onClaimEdit(claim)}>
+                        <TableCell className="text-right space-x-2">
+                             {claim.status === 'reviewed' && (
+                                 <Button variant="outline" size="sm" onClick={() => onClaimLink(claim)}>
+                                    <Link className="mr-2 h-4 w-4" />
+                                    Link to Map
+                                 </Button>
+                             )}
+                             <Button variant="ghost" size="icon" onClick={() => onClaimEdit(claim)} disabled={claim.status === 'linked'}>
                                 <Edit className="h-4 w-4" />
                              </Button>
                         </TableCell>
