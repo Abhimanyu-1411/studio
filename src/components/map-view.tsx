@@ -1,7 +1,7 @@
 'use client';
 
 import { MapContainer, TileLayer, Polygon, Marker, Popup, useMap } from 'react-leaflet';
-import { useEffect, memo } from 'react';
+import { useEffect, memo, type ReactNode } from 'react';
 import type { Claim, Village } from '@/types';
 import { Badge } from './ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from './ui/card';
@@ -18,6 +18,7 @@ type MapViewProps = {
   center: { lat: number; lng: number };
   zoom: number;
   activeLayers: ActiveLayers;
+  children?: ReactNode;
 };
 
 const claimStatusColors = {
@@ -52,7 +53,7 @@ const assetLayerStyles = {
   agriculture: { color: '#ca8a04', fillColor: '#facc15', weight: 1 },
 };
 
-const MapViewComponent = ({ claims, villages, onVillageClick, onClaimEdit, center, zoom, activeLayers }: MapViewProps) => {
+const MapViewComponent = ({ claims, villages, onVillageClick, onClaimEdit, center, zoom, activeLayers, children }: MapViewProps) => {
   const getPolygonOptions = (village: Village) => {
     return {
       color: 'hsl(var(--primary))',
@@ -69,6 +70,7 @@ const MapViewComponent = ({ claims, villages, onVillageClick, onClaimEdit, cente
       zoom={zoom}
       scrollWheelZoom={true}
       style={{ height: '100%', width: '100%', borderRadius: 'var(--radius)' }}
+      className="relative"
     >
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -88,13 +90,13 @@ const MapViewComponent = ({ claims, villages, onVillageClick, onClaimEdit, cente
       ))}
 
       {activeLayers.water && villages.flatMap(v => v.assetGeometries?.water.map((poly, i) => 
-        <Polygon key={`${v.id}-water-${i}`} positions={poly} pathOptions={{...assetLayerStyles.water, fillOpacity: 0.3}} />
+        <Polygon key={`${v.id}-water-${i}`} positions={poly} pathOptions={{...assetLayerStyles.water, fillOpacity: 0.5}} />
       ))}
       {activeLayers.forest && villages.flatMap(v => v.assetGeometries?.forest.map((poly, i) => 
-        <Polygon key={`${v.id}-forest-${i}`} positions={poly} pathOptions={{...assetLayerStyles.forest, fillOpacity: 0.3}} />
+        <Polygon key={`${v.id}-forest-${i}`} positions={poly} pathOptions={{...assetLayerStyles.forest, fillOpacity: 0.5}} />
       ))}
       {activeLayers.agriculture && villages.flatMap(v => v.assetGeometries?.agriculture.map((poly, i) => 
-        <Polygon key={`${v.id}-agri-${i}`} positions={poly} pathOptions={{...assetLayerStyles.agriculture, fillOpacity: 0.3}} />
+        <Polygon key={`${v.id}-agri-${i}`} positions={poly} pathOptions={{...assetLayerStyles.agriculture, fillOpacity: 0.5}} />
       ))}
 
       {claims.map((claim) => (
@@ -133,6 +135,7 @@ const MapViewComponent = ({ claims, villages, onVillageClick, onClaimEdit, cente
           </Popup>
         </Marker>
       ))}
+      {children}
     </MapContainer>
   );
 }

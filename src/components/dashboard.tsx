@@ -86,7 +86,7 @@ export function Dashboard() {
                   <CardTitle>Interactive Map</CardTitle>
                   <CardDescription>Explore claims and village boundaries</CardDescription>
                 </CardHeader>
-                <CardContent className="h-[500px] p-0 relative">
+                <CardContent className="h-[500px] p-0">
                   <MapView
                     claims={claims}
                     villages={VILLAGES}
@@ -95,10 +95,11 @@ export function Dashboard() {
                     center={mapCenter}
                     zoom={mapZoom}
                     activeLayers={activeLayers}
-                  />
-                  <div className="absolute top-2 right-2 z-[1000]">
-                    <AssetLayersControl activeLayers={activeLayers} onActiveLayersChange={setActiveLayers} />
-                  </div>
+                  >
+                    <div className="absolute top-2 right-2 z-[1000]">
+                      <AssetLayersControl activeLayers={activeLayers} onActiveLayersChange={setActiveLayers} />
+                    </div>
+                  </MapView>
                 </CardContent>
               </Card>
             </div>
