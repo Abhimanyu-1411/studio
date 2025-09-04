@@ -12,6 +12,7 @@ import {
   SidebarGroup,
   SidebarGroupLabel,
   SidebarSeparator,
+  SidebarInput,
 } from '@/components/ui/sidebar';
 import { Logo } from '@/components/icons';
 import { Button } from '@/components/ui/button';
@@ -20,7 +21,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { ClaimUpload } from '@/components/claim-upload';
 import { WaterRiskChart } from '@/components/water-risk-chart';
-import { FileText, Download, PlusCircle, Leaf, Droplets, LandPlot } from 'lucide-react';
+import { FileText, Download, PlusCircle, Leaf, Droplets, LandPlot, Search } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import type { Claim } from '@/types';
 
@@ -40,6 +41,7 @@ const claimTypeColors = {
 
 export function SidebarNav({ claims, onClaimAdded, onClaimSelect, onLayerToggle }: SidebarNavProps) {
   const [isUploadOpen, setUploadOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
   const { toast } = useToast();
 
   const handleExport = () => {
@@ -70,7 +72,7 @@ export function SidebarNav({ claims, onClaimAdded, onClaimSelect, onLayerToggle 
     
     toast({
       title: 'Export Complete',
-      description: 'Your CSV report is downloading.',
+      description: 'Your new CSV report is downloading.',
     });
   }
   
@@ -78,6 +80,10 @@ export function SidebarNav({ claims, onClaimAdded, onClaimSelect, onLayerToggle 
     if (claimType in claimTypeColors) return claimTypeColors[claimType as keyof typeof claimTypeColors];
     return claimTypeColors.default;
   }
+
+  const filteredClaims = claims.filter(claim =>
+    claim.claimantName.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <>
@@ -96,10 +102,20 @@ export function SidebarNav({ claims, onClaimAdded, onClaimSelect, onLayerToggle 
           </SidebarMenu>
 
           <SidebarGroup>
-            <SidebarGroupLabel>Uploaded Claims ({claims.length})</SidebarGroupLabel>
-            <SidebarMenu className="mt-2 max-h-64 overflow-y-auto pr-2">
+            <SidebarGroupLabel>Uploaded Claims ({filteredClaims.length})</SidebarGroupLabel>
+            <div className="relative p-2">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <SidebarInput 
+                    placeholder="Search claims..." 
+                    className="pl-8"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                />
+            </div>
+            <SidebarMenu className="mt-2 max-h-60 overflow-y-auto pr-2">
+              {claims.length > 0 && filteredClaims.length === 0 && <p className="px-2 text-sm text-muted-foreground">No claims match your search.</p>}
               {claims.length === 0 && <p className="px-2 text-sm text-muted-foreground">No claims uploaded yet.</p>}
-              {claims.map((claim) => (
+              {filteredClaims.map((claim) => (
                 <SidebarMenuItem key={claim.id}>
                   <SidebarMenuButton onClick={() => onClaimSelect(claim)} size="lg" className="h-auto py-2">
                     <FileText />
