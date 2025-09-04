@@ -80,7 +80,7 @@ export function ClaimsTable({ claims, onClaimEdit, onClaimLink }: ClaimsTablePro
                                     Link to Map
                                  </Button>
                              )}
-                             <Button variant="ghost" size="icon" onClick={() => onClaimEdit(claim)} disabled={claim.status === 'linked'}>
+                             <Button variant="ghost" size="icon" onClick={() => onClaimEdit(claim)}>
                                 <Edit className="h-4 w-4" />
                              </Button>
                         </TableCell>
