@@ -10,7 +10,7 @@ import { Header } from './header';
 import { RecentClaims } from './recent-claims';
 import { QuickActions } from './quick-actions';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
-import { FileText, Clock, CheckCircle, MapPin, Lightbulb, ThumbsUp, Loader2 } from 'lucide-react';
+import { FileText, Clock, CheckCircle, MapPin, Lightbulb, ThumbsUp, Loader2, AlertCircle } from 'lucide-react';
 import { ClaimsTable } from './claims-table';
 import { ClaimUpload } from './claim-upload';
 import { AssetLayersControl, type ActiveLayers } from './asset-layers-control';
@@ -25,6 +25,7 @@ import { getDssRecommendation } from '@/app/actions';
 import { Button } from './ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from './ui/badge';
+import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 
 
 const MapView = dynamic(() => import('@/components/map-view').then(mod => mod.MapView), {
@@ -73,29 +74,39 @@ const VillageAnalysis = ({ villages, claims }: { villages: Village[], claims: Cl
   const [recommendations, setRecommendations] = useState<DssRecommendation[] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [actedOn, setActedOn] = useState<string[]>([]);
+  const [errorState, setErrorState] = useState<{title: string, description: string} | null>(null);
   const { toast } = useToast();
 
   const handleVillageChange = async (villageId: string) => {
     setSelectedVillageId(villageId);
     if (!villageId) {
       setRecommendations(null);
+      setErrorState(null);
       return;
     }
     
     setIsLoading(true);
     setRecommendations(null);
+    setErrorState(null);
     setActedOn([]);
 
     try {
       const result = await getDssRecommendation(villageId, claims);
       setRecommendations(result);
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      toast({
-        variant: 'destructive',
-        title: 'Error getting recommendation',
-        description: 'Could not fetch DSS recommendation for this village.',
-      });
+      if (error?.message?.includes('503') || error?.message?.includes('overloaded')) {
+        setErrorState({
+            title: 'Service Unavailable',
+            description: 'The AI recommendation service is currently overloaded. Please try again in a few moments.'
+        });
+      } else {
+        toast({
+            variant: 'destructive',
+            title: 'Error getting recommendation',
+            description: 'Could not fetch DSS recommendation for this village.',
+        });
+      }
     } finally {
       setIsLoading(false);
     }
@@ -127,7 +138,7 @@ const VillageAnalysis = ({ villages, claims }: { villages: Village[], claims: Cl
             <CardDescription>Select a village to see DSS recommendations.</CardDescription>
           </CardHeader>
           <CardContent>
-            <Select onValueChange={handleVillageChange}>
+            <Select onValueChange={handleVillageChange} value={selectedVillageId || ''}>
               <SelectTrigger>
                 <SelectValue placeholder="Select a village" />
               </SelectTrigger>
@@ -163,8 +174,25 @@ const VillageAnalysis = ({ villages, claims }: { villages: Village[], claims: Cl
           </CardHeader>
           <CardContent className="flex flex-col items-center justify-start h-full p-6 space-y-4">
             {isLoading && <Loader2 className="h-8 w-8 animate-spin text-primary" />}
-            {!isLoading && !recommendations && <div className="text-center flex-1 flex flex-col justify-center items-center"><Lightbulb className="h-12 w-12 text-muted-foreground mx-auto mb-4" /><p className="text-muted-foreground">Select a village to see recommendations.</p></div>}
-            {!isLoading && recommendations && recommendations.length === 0 && <div className="text-center flex-1 flex flex-col justify-center items-center"><CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" /><p className="text-muted-foreground">No specific recommendations triggered for this village based on current data.</p></div>}
+            
+            {!isLoading && !recommendations && !errorState && (
+                <div className="text-center flex-1 flex flex-col justify-center items-center"><Lightbulb className="h-12 w-12 text-muted-foreground mx-auto mb-4" /><p className="text-muted-foreground">Select a village to see recommendations.</p></div>
+            )}
+            
+            {errorState && (
+                 <div className="text-center flex-1 flex flex-col justify-center items-center w-full">
+                    <Alert variant="destructive">
+                      <AlertCircle className="h-4 w-4" />
+                      <AlertTitle>{errorState.title}</AlertTitle>
+                      <AlertDescription>
+                        {errorState.description}
+                      </AlertDescription>
+                    </Alert>
+                </div>
+            )}
+
+            {!isLoading && !errorState && recommendations && recommendations.length === 0 && <div className="text-center flex-1 flex flex-col justify-center items-center"><CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" /><p className="text-muted-foreground">No specific recommendations triggered for this village based on current data.</p></div>}
+            
             {recommendations && recommendations.length > 0 && (
                 <div className="w-full space-y-4">
                   {recommendations.map(rec => (
@@ -305,3 +333,5 @@ export function Dashboard() {
     </>
   );
 }
+
+    
