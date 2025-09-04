@@ -3,16 +3,17 @@
 import { useState } from 'react';
 import dynamic from 'next/dynamic';
 import { MOCK_CLAIMS, VILLAGES } from '@/lib/mock-data';
-import type { Claim, DssRecommendation, Village } from '@/types';
+import type { Claim, Village } from '@/types';
 import { ClaimEdit } from './claim-edit';
 import { Skeleton } from './ui/skeleton';
 import { Header } from './header';
 import { RecentClaims } from './recent-claims';
 import { QuickActions } from './quick-actions';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Briefcase, Clock, CheckCircle, MapPin, FileText } from 'lucide-react';
+import { FileText, Clock, CheckCircle, MapPin } from 'lucide-react';
 import { ClaimsTable } from './claims-table';
 import { ClaimUpload } from './claim-upload';
+import { AssetLayersControl, type ActiveLayers } from './asset-layers-control';
 
 const MapView = dynamic(() => import('@/components/map-view').then(mod => mod.MapView), {
   ssr: false,
@@ -23,7 +24,7 @@ const StatsCard = ({ title, value, icon: Icon, color }: { title: string, value: 
   <Card className="shadow-sm">
     <CardContent className="flex items-center justify-between p-4">
       <div>
-        <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
+        <p className="text-sm font-medium text-muted-foreground">{title}</p>
         <p className="text-3xl font-bold">{value}</p>
       </div>
       <div className={`p-3 rounded-full`} style={{ backgroundColor: `${color}1A` }}>
@@ -41,6 +42,11 @@ export function Dashboard() {
   const [mapCenter, setMapCenter] = useState({ lat: 26.5, lng: 82.4 });
   const [mapZoom, setMapZoom] = useState(9);
   const [activeView, setActiveView] = useState('dashboard');
+  const [activeLayers, setActiveLayers] = useState<ActiveLayers>({
+    water: true,
+    forest: true,
+    agriculture: true,
+  });
 
 
   const handleClaimAdded = (newClaim: Claim) => {
@@ -80,7 +86,7 @@ export function Dashboard() {
                   <CardTitle>Interactive Map</CardTitle>
                   <CardDescription>Explore claims and village boundaries</CardDescription>
                 </CardHeader>
-                <CardContent className="h-[500px] p-0">
+                <CardContent className="h-[500px] p-0 relative">
                   <MapView
                     claims={claims}
                     villages={VILLAGES}
@@ -88,7 +94,11 @@ export function Dashboard() {
                     onClaimEdit={handleClaimEdit}
                     center={mapCenter}
                     zoom={mapZoom}
+                    activeLayers={activeLayers}
                   />
+                  <div className="absolute top-2 right-2 z-[1000]">
+                    <AssetLayersControl activeLayers={activeLayers} onActiveLayersChange={setActiveLayers} />
+                  </div>
                 </CardContent>
               </Card>
             </div>

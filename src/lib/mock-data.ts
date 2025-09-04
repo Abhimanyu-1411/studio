@@ -13,6 +13,29 @@ export const VILLAGES: Village[] = [
       { lat: 26.38, lng: 82.57 },
       { lat: 26.38, lng: 82.53 },
     ],
+    assetGeometries: {
+      water: [
+        [
+          { lat: 26.415, lng: 82.535 },
+          { lat: 26.418, lng: 82.54 },
+          { lat: 26.412, lng: 82.542 },
+        ]
+      ],
+      forest: [
+        [
+          { lat: 26.39, lng: 82.54 },
+          { lat: 26.4, lng: 82.56 },
+          { lat: 26.385, lng: 82.55 },
+        ]
+      ],
+      agriculture: [
+        [
+          { lat: 26.41, lng: 82.56 },
+          { lat: 26.415, lng: 82.568 },
+          { lat: 26.405, lng: 82.565 },
+        ]
+      ]
+    }
   },
   {
     id: 'v2',
@@ -26,6 +49,23 @@ export const VILLAGES: Village[] = [
       { lat: 26.23, lng: 82.09 },
       { lat: 26.23, lng: 82.05 },
     ],
+    assetGeometries: {
+      water: [
+         [
+          { lat: 26.26, lng: 82.055 },
+          { lat: 26.265, lng: 82.06 },
+          { lat: 26.255, lng: 82.062 },
+        ]
+      ],
+      forest: [],
+      agriculture: [
+        [
+          { lat: 26.24, lng: 82.06 },
+          { lat: 26.25, lng: 82.08 },
+          { lat: 26.235, lng: 82.07 },
+        ]
+      ]
+    }
   },
   {
     id: 'v3',
@@ -39,6 +79,17 @@ export const VILLAGES: Village[] = [
       { lat: 26.77, lng: 82.73 },
       { lat: 26.77, lng: 82.69 },
     ],
+    assetGeometries: {
+      water: [],
+      forest: [
+        [
+          { lat: 26.78, lng: 82.7 },
+          { lat: 26.8, lng: 82.72 },
+          { lat: 26.775, lng: 82.71 },
+        ]
+      ],
+      agriculture: [],
+    }
   },
 ];
 

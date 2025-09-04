@@ -13,6 +13,8 @@ export type Claim = {
   location: { lat: number; lng: number };
 };
 
+type LatLng = { lat: number; lng: number };
+
 export type Village = {
   id: string;
   name: string;
@@ -22,8 +24,13 @@ export type Village = {
     forest: number;
     agriculture: number;
   };
-  center: { lat: number; lng: number };
-  bounds: { lat: number; lng: number }[];
+  center: LatLng;
+  bounds: LatLng[];
+  assetGeometries?: {
+    water: LatLng[][];
+    forest: LatLng[][];
+    agriculture: LatLng[][];
+  }
 };
 
 export type DssRecommendation = {
