@@ -15,7 +15,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import type { Claim } from '@/types';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Link, Save } from 'lucide-react';
 
 type ClaimEditProps = {
   claim: Claim | null;
@@ -51,11 +51,13 @@ export function ClaimEdit({ claim, onOpenChange, onClaimUpdate, availableVillage
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1000));
     
+    const isReviewAction = claim.status === 'needs-review';
+
     const updatedClaim: Claim = {
         ...claim,
         ...formData,
-        status: 'reviewed',
-        confidenceScore: 1.0, // Manually reviewed, so confidence is 100%
+        status: isReviewAction ? 'reviewed' : claim.status,
+        confidenceScore: isReviewAction ? 1.0 : claim.confidenceScore,
     };
     
     onClaimUpdate(updatedClaim);
@@ -69,13 +71,18 @@ export function ClaimEdit({ claim, onOpenChange, onClaimUpdate, availableVillage
 
   if (!claim) return null;
 
+  const isReviewAction = claim.status === 'needs-review';
+
   return (
     <Dialog open={!!claim} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[480px]">
         <DialogHeader>
-          <DialogTitle>Correct Claim Data</DialogTitle>
+          <DialogTitle>{isReviewAction ? 'Review and Link Claim' : 'Correct Claim Data'}</DialogTitle>
           <DialogDescription>
-            Review and correct the extracted data. Click save when you're done.
+            {isReviewAction 
+              ? 'The AI link has low confidence. Please verify the village and correct any data.'
+              : "Review and correct the extracted data. Click save when you're done."
+            }
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
@@ -124,7 +131,17 @@ export function ClaimEdit({ claim, onOpenChange, onClaimUpdate, availableVillage
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Saving...
               </>
-            ) : 'Save Changes'}
+            ) : isReviewAction ? (
+              <>
+                <Link className="mr-2 h-4 w-4" />
+                Review & Link
+              </>
+            ) : (
+               <>
+                <Save className="mr-2 h-4 w-4" />
+                Save Changes
+               </>
+            )}
           </Button>
         </DialogFooter>
       </DialogContent>
