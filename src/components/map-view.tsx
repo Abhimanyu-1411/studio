@@ -1,7 +1,7 @@
 'use client';
 
 import { MapContainer, TileLayer, Polygon, Marker, Popup, useMap } from 'react-leaflet';
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, memo } from 'react';
 import type { Claim, Village } from '@/types';
 import { Badge } from './ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from './ui/card';
@@ -53,7 +53,7 @@ const MapController = ({ center, zoom }: { center: {lat: number, lng: number}, z
     return null;
 }
 
-export function MapView({ claims, villages, center, zoom, activeLayers, onVillageClick, onClaimClick, onClaimEdit }: MapViewProps) {
+const MapViewComponent = ({ claims, villages, center, zoom, activeLayers, onVillageClick, onClaimClick, onClaimEdit }: MapViewProps) => {
   const [selectedClaimId, setSelectedClaimId] = useState<string | null>(null);
 
   const handleVillageClick = useCallback((village: Village) => {
@@ -159,3 +159,5 @@ export function MapView({ claims, villages, center, zoom, activeLayers, onVillag
     </MapContainer>
   );
 }
+
+export const MapView = memo(MapViewComponent);
