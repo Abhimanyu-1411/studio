@@ -3,9 +3,11 @@
 import { APIProvider, Map, AdvancedMarker, InfoWindow } from '@vis.gl/react-google-maps';
 import { Polygon } from '@/components/polygon';
 import { useState, useCallback } from 'react';
-import type { Claim, Village, DssRecommendation } from '@/types';
+import type { Claim, Village } from '@/types';
 import { Badge } from './ui/badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from './ui/card';
+import { Button } from './ui/button';
+import { Edit } from 'lucide-react';
 
 type MapViewProps = {
   claims: Claim[];
@@ -15,6 +17,7 @@ type MapViewProps = {
   activeLayers: Record<string, boolean>;
   onVillageClick: (village: Village) => void;
   onClaimClick: (claim: Claim) => void;
+  onClaimEdit: (claim: Claim) => void;
 };
 
 const claimTypeColors = {
@@ -24,7 +27,14 @@ const claimTypeColors = {
   'default': 'hsl(var(--muted-foreground))'
 }
 
-export function MapView({ claims, villages, center, zoom, activeLayers, onVillageClick, onClaimClick }: MapViewProps) {
+const claimStatusColors = {
+    linked: 'hsl(var(--primary))',
+    unlinked: 'hsl(var(--destructive))',
+    'needs-review': 'hsl(var(--chart-4))',
+    reviewed: 'hsl(var(--primary))',
+}
+
+export function MapView({ claims, villages, center, zoom, activeLayers, onVillageClick, onClaimClick, onClaimEdit }: MapViewProps) {
   const [selectedClaim, setSelectedClaim] = useState<Claim | null>(null);
 
   const handleVillageClick = useCallback((village: Village) => {
@@ -41,9 +51,8 @@ export function MapView({ claims, villages, center, zoom, activeLayers, onVillag
     setSelectedClaim(null);
   }
   
-  const getClaimColor = (claimType: string) => {
-    if (claimType in claimTypeColors) return claimTypeColors[claimType as keyof typeof claimTypeColors];
-    return claimTypeColors.default;
+  const getClaimPinColor = (claim: Claim) => {
+    return claimStatusColors[claim.status] || claimTypeColors.default;
   }
 
   const getPolygonOptions = (village: Village) => {
@@ -116,11 +125,11 @@ export function MapView({ claims, villages, center, zoom, activeLayers, onVillag
               <svg width="24" height="24" viewBox="0 0 32 32" className="drop-shadow-lg">
                 <path 
                     d="M16,32C16,32,28,18,28,12C28,5.373,22.627,0,16,0C9.373,0,4,5.373,4,12C4,18,16,32,16,32Z"
-                    fill={getClaimColor(claim.claimType)}
+                    fill={getClaimPinColor(claim)}
                 />
               </svg>
               <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white font-bold text-xs">
-                {claim.status === 'linked' ? 'L' : '?'}
+                {claim.status === 'unlinked' ? '?' : ''}
               </span>
             </div>
           </AdvancedMarker>
@@ -133,17 +142,28 @@ export function MapView({ claims, villages, center, zoom, activeLayers, onVillag
                     <CardTitle className="font-headline text-base">{selectedClaim.claimantName}</CardTitle>
                     <CardDescription>{selectedClaim.claimType} - {selectedClaim.area}</CardDescription>
                 </CardHeader>
-                <CardContent className="p-2">
+                <CardContent className="p-2 space-y-2">
                    <p className="text-sm">Village: {selectedClaim.village}</p>
                    <p className="text-sm">Date: {selectedClaim.date}</p>
-                   <div className="mt-2">
+                   <div>
                     {selectedClaim.linkedVillage ? (
-                        <Badge variant="default" className="bg-primary/80">Linked to: {selectedClaim.linkedVillage} ({(selectedClaim.confidenceScore! * 100).toFixed(0)}%)</Badge>
+                        <Badge variant="default" style={{backgroundColor: `hsl(var(--primary))`, color: `hsl(var(--primary-foreground))`}}>Linked to: {selectedClaim.linkedVillage} ({(selectedClaim.confidenceScore! * 100).toFixed(0)}%)</Badge>
                     ) : (
                         <Badge variant="destructive">Unlinked</Badge>
                     )}
+                    {selectedClaim.status === 'needs-review' && (
+                        <Badge variant="destructive" className="ml-2">Needs Review</Badge>
+                    )}
                    </div>
                 </CardContent>
+                {selectedClaim.status === 'needs-review' && (
+                    <CardFooter className="p-2">
+                        <Button variant="outline" size="sm" onClick={() => onClaimEdit(selectedClaim)}>
+                            <Edit className="mr-2 h-3 w-3" />
+                            Correct Data
+                        </Button>
+                    </CardFooter>
+                )}
             </Card>
           </InfoWindow>
         )}

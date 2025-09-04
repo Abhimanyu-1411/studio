@@ -8,6 +8,7 @@ import { VILLAGES } from '@/lib/mock-data';
 import type { Claim, Village, DssRecommendation } from '@/types';
 import { Card, CardContent } from '@/components/ui/card';
 import { getDssRecommendation } from '@/app/actions';
+import { ClaimEdit } from './claim-edit';
 
 export function Dashboard() {
   const [claims, setClaims] = useState<Claim[]>([]);
@@ -23,18 +24,27 @@ export function Dashboard() {
   const [selectedVillage, setSelectedVillage] = useState<Village | null>(null);
   const [dssRecommendation, setDssRecommendation] = useState<DssRecommendation | null>(null);
   const [isLoadingDss, setIsLoadingDss] = useState(false);
+  const [editingClaim, setEditingClaim] = useState<Claim | null>(null);
 
   const handleClaimAdded = (newClaim: Claim) => {
     setClaims((prevClaims) => [newClaim, ...prevClaims]);
-    // Center map on new claim
-    setMapCenter(newClaim.location);
-    setMapZoom(12);
+    if(newClaim.location) {
+        setMapCenter(newClaim.location);
+        setMapZoom(12);
+    }
   };
   
   const handleClaimSelect = (claim: Claim) => {
     setSelectedVillage(null);
-    setMapCenter(claim.location);
-    setMapZoom(14);
+    if(claim.location) {
+        setMapCenter(claim.location);
+        setMapZoom(14);
+    }
+  }
+
+  const handleClaimUpdate = (updatedClaim: Claim) => {
+    setClaims(prev => prev.map(c => c.id === updatedClaim.id ? updatedClaim : c));
+    setEditingClaim(null);
   }
   
   const handleVillageSelect = async (village: Village | null) => {
@@ -64,7 +74,7 @@ export function Dashboard() {
 
   const getStats = () => {
     const totalClaims = claims.length;
-    const linkedClaims = claims.filter(c => c.status === 'linked').length;
+    const linkedClaims = claims.filter(c => c.status === 'linked' || c.status === 'reviewed' || c.status === 'needs-review').length;
     const pendingClaims = totalClaims - linkedClaims;
     const linkSuccessRate = totalClaims > 0 ? (linkedClaims / totalClaims) * 100 : 0;
     return { totalClaims, linkedClaims, pendingClaims, linkSuccessRate };
@@ -93,6 +103,7 @@ export function Dashboard() {
                 activeLayers={activeLayers}
                 onVillageClick={handleVillageSelect}
                 onClaimClick={handleClaimSelect}
+                onClaimEdit={setEditingClaim}
             />
             <div className="absolute top-4 left-4 grid grid-cols-2 md:grid-cols-4 gap-4">
                 <Card>
@@ -120,6 +131,12 @@ export function Dashboard() {
                     </CardContent>
                 </Card>
             </div>
+            <ClaimEdit
+              claim={editingClaim}
+              onOpenChange={(isOpen) => !isOpen && setEditingClaim(null)}
+              onClaimUpdate={handleClaimUpdate}
+              availableVillages={VILLAGES.map(v => v.name)}
+            />
         </div>
       </SidebarInset>
     </SidebarProvider>

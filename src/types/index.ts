@@ -9,7 +9,7 @@ export type Claim = {
   documentType: string;
   linkedVillage: string | null;
   confidenceScore: number | null;
-  status: 'unlinked' | 'linked' | 'reviewed';
+  status: 'unlinked' | 'linked' | 'reviewed' | 'needs-review';
   location: { lat: number; lng: number };
 };
 

@@ -14,10 +14,21 @@ export async function handleClaimUpload(documentDataUri: string) {
     availableVillageNames: AVAILABLE_VILLAGE_NAMES,
   });
 
+  let status: Claim['status'] = 'unlinked';
+  if (geoLinkResult.linkedVillageName) {
+    if (geoLinkResult.confidenceScore < 0.8) {
+        status = 'needs-review';
+    } else {
+        status = 'linked';
+    }
+  }
+
+
   return {
     ...extractedData,
     linkedVillage: geoLinkResult.linkedVillageName,
     confidenceScore: geoLinkResult.confidenceScore,
+    status,
   };
 }
 

@@ -44,6 +44,21 @@ const claimTypeColors = {
   'default': 'bg-gray-500'
 }
 
+const claimStatusBadges = {
+    linked: 'default',
+    unlinked: 'destructive',
+    'needs-review': 'secondary',
+    reviewed: 'default',
+}
+
+const claimStatusText = {
+    linked: 'Linked',
+    unlinked: 'Unlinked',
+    'needs-review': 'Needs Review',
+    reviewed: 'Reviewed',
+}
+
+
 export function SidebarNav({ 
   claims, 
   onClaimAdded, 
@@ -235,8 +250,8 @@ export function SidebarNav({
                           <span className="text-xs text-muted-foreground">{claim.village}</span>
                       </div>
                   </div>
-                  <Badge variant={claim.status === 'linked' ? 'default' : 'secondary'} className="ml-auto">
-                    {claim.status}
+                  <Badge variant={claimStatusBadges[claim.status] as any} className="ml-auto">
+                    {claimStatusText[claim.status]}
                   </Badge>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -283,5 +298,3 @@ export function SidebarNav({
     </>
   );
 }
-
-    
