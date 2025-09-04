@@ -34,7 +34,7 @@ export function AssetLayersControl({ activeLayers, onActiveLayersChange }: Asset
                     Asset Layers
                 </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56">
+            <DropdownMenuContent className="w-56" align="end">
                 <DropdownMenuLabel>Toggle Layers</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
