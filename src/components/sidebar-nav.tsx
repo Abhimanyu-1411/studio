@@ -21,7 +21,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { ClaimUpload } from '@/components/claim-upload';
 import { WaterRiskChart } from '@/components/water-risk-chart';
-import { FileText, Download, PlusCircle, Leaf, Droplets, LandPlot, Search, ArrowLeft, Loader2, BarChart2, FileBox, Users } from 'lucide-react';
+import { FileText, Download, PlusCircle, Leaf, Droplets, LandPlot, Search, ArrowLeft, Loader2, BarChart2, FileBox, Users, FileDown } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import type { Claim, Village, DssRecommendation } from '@/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
@@ -89,6 +89,13 @@ export function SidebarNav({
       description: 'Your new CSV report is downloading.',
     });
   }
+
+  const handlePdfExport = () => {
+    toast({
+      title: 'PDF Export (Not Implemented)',
+      description: 'This feature is not yet available.',
+    });
+  };
   
   const getClaimTypeColor = (claimType: string) => {
     if (claimType in claimTypeColors) return claimTypeColors[claimType as keyof typeof claimTypeColors];
@@ -113,7 +120,7 @@ export function SidebarNav({
             </SidebarMenu>
         </SidebarGroup>
         <SidebarSeparator />
-        <SidebarContent>
+        <SidebarContent className="p-2">
             <Card className="bg-transparent border-none shadow-none">
                 <CardHeader>
                     <CardTitle className="font-headline text-lg">{selectedVillage?.name}</CardTitle>
@@ -179,6 +186,12 @@ export function SidebarNav({
                 </CardContent>
             </Card>
         </SidebarContent>
+        <SidebarFooter>
+             <Button variant="outline" className="w-full" onClick={handlePdfExport}>
+                <FileDown className="mr-2" />
+                Download PDF Report
+            </Button>
+        </SidebarFooter>
     </div>
   )
 
@@ -270,3 +283,5 @@ export function SidebarNav({
     </>
   );
 }
+
+    
