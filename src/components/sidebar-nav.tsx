@@ -33,6 +33,7 @@ type SidebarNavProps = {
   onVillageSelect: (village: Village | null) => void;
   dssRecommendation: DssRecommendation | null;
   isLoadingDss: boolean;
+  onClaimSelect: (claim: Claim) => void;
 };
 
 const claimTypeColors = {
@@ -68,6 +69,7 @@ const VillageDetailView = ({
     dssRecommendation,
     isLoadingDss,
     onPdfExport,
+    onClaimSelect,
 }: {
     selectedVillage: Village;
     claims: Claim[];
@@ -75,6 +77,7 @@ const VillageDetailView = ({
     dssRecommendation: DssRecommendation | null;
     isLoadingDss: boolean;
     onPdfExport: () => void;
+    onClaimSelect: (claim: Claim) => void;
 }) => {
     const claimsInVillage = claims.filter(c => c.linkedVillage === selectedVillage.name);
     return (
@@ -134,7 +137,7 @@ const VillageDetailView = ({
                         <SidebarMenu className="mt-2 max-h-48 overflow-y-auto pr-2">
                           {claimsInVillage.length === 0 && <p className="px-2 text-sm text-muted-foreground">No claims linked to this village.</p>}
                           {claimsInVillage.map((claim) => (
-                            <SidebarMenuItem key={claim.id}>
+                            <SidebarMenuItem key={claim.id} onClick={() => onClaimSelect(claim)}>
                               <SidebarMenuButton size="lg" className="h-auto py-2">
                                 <FileText />
                                 <div className="flex flex-col items-start w-full">
@@ -170,11 +173,13 @@ const GlobalView = ({
     onLayerToggle,
     setUploadOpen,
     handleExport,
+    onClaimSelect,
 }: {
     claims: Claim[];
     onLayerToggle: (layer: string, toggled: boolean) => void;
     setUploadOpen: (open: boolean) => void;
     handleExport: () => void;
+    onClaimSelect: (claim: Claim) => void;
 }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [activeLayers, setActiveLayers] = useState<Record<string, boolean>>({
@@ -191,7 +196,8 @@ const GlobalView = ({
     };
 
     const filteredClaims = claims.filter(claim =>
-        claim.claimantName.toLowerCase().includes(searchTerm.toLowerCase())
+        claim.claimantName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        claim.village.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     return (
@@ -224,14 +230,14 @@ const GlobalView = ({
             {claims.length > 0 && filteredClaims.length === 0 && <p className="px-2 text-sm text-muted-foreground">No claims match your search.</p>}
             {claims.length === 0 && <p className="px-2 text-sm text-muted-foreground">No claims uploaded yet.</p>}
             {filteredClaims.map((claim) => (
-              <SidebarMenuItem key={claim.id}>
+              <SidebarMenuItem key={claim.id} onClick={() => onClaimSelect(claim)}>
                 <SidebarMenuButton size="lg" className="h-auto py-2">
                   <FileText />
                   <div className="flex flex-col items-start w-full">
                       <span className="font-medium">{claim.claimantName}</span>
                       <div className="flex items-center gap-2">
-                          <span className={`h-2 w-2 rounded-full ${getClaimTypeColor(claim.claimType)}`}></span>
-                          <span className="text-xs text-muted-foreground">{claim.village}</span>
+                           <span className={`h-2 w-2 rounded-full ${getClaimTypeColor(claim.claimType)}`}></span>
+                           <span className="text-xs text-muted-foreground">{claim.area}</span>
                       </div>
                   </div>
                   <Badge variant={claimStatusBadges[claim.status] as any} className="ml-auto">
@@ -285,7 +291,8 @@ export function SidebarNav({
   selectedVillage, 
   onVillageSelect,
   dssRecommendation,
-  isLoadingDss 
+  isLoadingDss,
+  onClaimSelect,
 }: SidebarNavProps) {
   const [isUploadOpen, setUploadOpen] = useState(false);
   const { toast } = useToast();
@@ -348,6 +355,7 @@ export function SidebarNav({
                 dssRecommendation={dssRecommendation}
                 isLoadingDss={isLoadingDss}
                 onPdfExport={handlePdfExport}
+                onClaimSelect={onClaimSelect}
             />
         ) : (
             <GlobalView 
@@ -355,6 +363,7 @@ export function SidebarNav({
                 onLayerToggle={(layer, toggled) => setActiveLayers(prev => ({...prev, [layer]: toggled}))}
                 setUploadOpen={setUploadOpen}
                 handleExport={handleExport}
+                onClaimSelect={onClaimSelect}
             />
         )}
       </Sidebar>

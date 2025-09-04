@@ -4,12 +4,13 @@ import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
 import { SidebarNav } from '@/components/sidebar-nav';
-import { VILLAGES } from '@/lib/mock-data';
+import { VILLAGES, MOCK_CLAIMS } from '@/lib/mock-data';
 import type { Claim, Village, DssRecommendation } from '@/types';
 import { Card, CardContent } from '@/components/ui/card';
 import { getDssRecommendation } from '@/app/actions';
 import { ClaimEdit } from './claim-edit';
 import { Skeleton } from './ui/skeleton';
+import { ClaimsTable } from './claims-table';
 
 const MapView = dynamic(() => import('@/components/map-view').then(mod => mod.MapView), { 
     ssr: false,
@@ -23,7 +24,7 @@ const StatsCards = ({ claims }: { claims: Claim[] }) => {
     const linkSuccessRate = totalClaims > 0 ? (linkedClaims / totalClaims) * 100 : 0;
 
     return (
-        <div className="absolute top-4 left-4 z-10 grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4">
             <Card>
                 <CardContent className="p-4">
                     <p className="text-sm text-muted-foreground">Total Claims</p>
@@ -53,7 +54,7 @@ const StatsCards = ({ claims }: { claims: Claim[] }) => {
 };
 
 export function Dashboard() {
-  const [claims, setClaims] = useState<Claim[]>([]);
+  const [claims, setClaims] = useState<Claim[]>(MOCK_CLAIMS);
   const [selectedVillage, setSelectedVillage] = useState<Village | null>(null);
   const [dssRecommendation, setDssRecommendation] = useState<DssRecommendation | null>(null);
   const [isLoadingDss, setIsLoadingDss] = useState(false);
@@ -104,6 +105,13 @@ export function Dashboard() {
         setMapZoom(14);
     }
   }
+  
+  const handleClaimSelect = (claim: Claim) => {
+    if(claim.location) {
+        setMapCenter(claim.location);
+        setMapZoom(14);
+    }
+  }
 
   return (
     <SidebarProvider>
@@ -114,19 +122,25 @@ export function Dashboard() {
         onVillageSelect={handleVillageSelect}
         dssRecommendation={dssRecommendation}
         isLoadingDss={isLoadingDss}
+        onClaimSelect={handleClaimSelect}
       />
       <SidebarInset>
         <div className="relative h-full w-full flex flex-col">
-            <StatsCards claims={claims} />
-            <div className="flex-grow">
-                <MapView
-                    claims={claims} 
-                    villages={VILLAGES}
-                    onVillageClick={handleVillageSelect}
-                    onClaimEdit={handleClaimEdit}
-                    center={mapCenter}
-                    zoom={mapZoom}
-                />
+            <div className="h-1/2 flex flex-col">
+              <StatsCards claims={claims} />
+              <div className="flex-grow pt-28">
+                  <MapView
+                      claims={claims} 
+                      villages={VILLAGES}
+                      onVillageClick={handleVillageSelect}
+                      onClaimEdit={handleClaimEdit}
+                      center={mapCenter}
+                      zoom={mapZoom}
+                  />
+              </div>
+            </div>
+            <div className="h-1/2 p-4 overflow-auto">
+              <ClaimsTable claims={claims} onClaimEdit={handleClaimEdit} />
             </div>
             <ClaimEdit
               claim={editingClaim}

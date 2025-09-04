@@ -1,4 +1,4 @@
-import type { Village } from '@/types';
+import type { Claim, Village } from '@/types';
 
 export const VILLAGES: Village[] = [
   {
@@ -40,6 +40,93 @@ export const VILLAGES: Village[] = [
       { lat: 26.77, lng: 82.69 },
     ],
   },
+];
+
+export const MOCK_CLAIMS: Claim[] = [
+  {
+    id: 'claim-1',
+    claimantName: 'Aarav Sharma',
+    village: 'Ambedkar Nagar',
+    claimType: 'IFR',
+    area: '2.5 Hectares',
+    date: '2023-05-12',
+    documentUrl: '',
+    documentType: 'pdf',
+    linkedVillage: 'Ambedkar Nagar',
+    confidenceScore: 0.95,
+    status: 'linked',
+    location: { lat: 26.41, lng: 82.55 },
+  },
+  {
+    id: 'claim-2',
+    claimantName: 'Priya Singh',
+    village: 'Sultanpur',
+    claimType: 'CFR',
+    area: '15 Hectares',
+    date: '2023-06-01',
+    documentUrl: '',
+    documentType: 'jpg',
+    linkedVillage: 'Sultanpur',
+    confidenceScore: 0.99,
+    status: 'reviewed',
+    location: { lat: 26.26, lng: 82.06 },
+  },
+  {
+    id: 'claim-3',
+    claimantName: 'Rohan Verma',
+    village: 'Basti',
+    claimType: 'IFR',
+    area: '1.8 Hectares',
+    date: '2023-07-20',
+    documentUrl: '',
+    documentType: 'pdf',
+    linkedVillage: 'Basti',
+    confidenceScore: 0.85,
+    status: 'linked',
+    location: { lat: 26.78, lng: 82.72 },
+  },
+    {
+    id: 'claim-4',
+    claimantName: 'Sunita Devi',
+    village: 'Sultanpur',
+    claimType: 'IFR',
+    area: '3.1 Hectares',
+    date: '2023-08-15',
+    documentUrl: '',
+    documentType: 'pdf',
+    linkedVillage: 'Sultanpur',
+    confidenceScore: 0.92,
+    status: 'linked',
+    location: { lat: 26.24, lng: 82.08 },
+  },
+  {
+    id: 'claim-5',
+    claimantName: 'Amit Kumar',
+    village: 'Ambedkarnagar',
+    claimType: 'CR',
+    area: '0.5 Hectares',
+    date: '2023-09-02',
+    documentUrl: '',
+    documentType: 'jpg',
+    linkedVillage: 'Ambedkar Nagar',
+    confidenceScore: 0.75,
+    status: 'needs-review',
+    location: { lat: 26.4, lng: 82.56 },
+  },
+   {
+    id: 'claim-6',
+    claimantName: 'Geeta Patel',
+    village: 'Basti',
+    claimType: 'CFR',
+    area: '25 Hectares',
+    date: '2023-10-11',
+    documentUrl: '',
+    documentType: 'pdf',
+    linkedVillage: 'Basti',
+    confidenceScore: 1.0,
+    status: 'reviewed',
+    location: { lat: 26.80, lng: 82.70 },
+  }
 ];
 
 export const AVAILABLE_VILLAGE_NAMES = VILLAGES.map(v => v.name);
