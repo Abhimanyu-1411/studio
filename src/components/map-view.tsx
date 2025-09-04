@@ -34,7 +34,6 @@ const claimStatusColors = {
     reviewed: 'hsl(var(--primary))',
 }
 
-// Custom icon for markers
 const getClaimIcon = (claim: Claim) => {
     const color = claimStatusColors[claim.status] || claimTypeColors.default;
     const markerHtml = `<div style="background-color: ${color}; width: 24px; height: 24px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; color: white; font-weight: bold;">${claim.status === 'unlinked' ? '?' : ''}</div>`;
@@ -46,8 +45,7 @@ const getClaimIcon = (claim: Claim) => {
     });
 };
 
-
-const MapUpdater = ({ center, zoom }: { center: {lat: number, lng: number}, zoom: number}) => {
+const MapController = ({ center, zoom }: { center: {lat: number, lng: number}, zoom: number}) => {
     const map = useMap();
     useEffect(() => {
         map.setView(center, zoom);
@@ -75,16 +73,13 @@ export function MapView({ claims, villages, center, zoom, activeLayers, onVillag
     if (activeLayers.water) {
       fillColor = 'blue';
       fillOpacity = village.assetCoverage.water / 100 * 0.6;
-    }
-    if (activeLayers.forest) {
+    } else if (activeLayers.forest) {
       fillColor = 'darkgreen';
       fillOpacity = village.assetCoverage.forest / 100 * 0.6;
-    }
-    if (activeLayers.agriculture) {
+    } else if (activeLayers.agriculture) {
       fillColor = 'yellow';
       fillOpacity = village.assetCoverage.agriculture / 100 * 0.6;
-    }
-    if (activeLayers.ndwi) {
+    } else if (activeLayers.ndwi) {
         fillColor = village.ndwi > 0.5 ? 'hsl(var(--chart-2))' : 'hsl(var(--chart-4))';
         fillOpacity = 0.6;
     }
@@ -104,7 +99,7 @@ export function MapView({ claims, villages, center, zoom, activeLayers, onVillag
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
-      <MapUpdater center={center} zoom={zoom} />
+      <MapController center={center} zoom={zoom} />
       
       {villages.map((village) => (
          <Polygon
