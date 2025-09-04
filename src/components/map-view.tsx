@@ -1,5 +1,6 @@
 'use client';
 
+import * as React from 'react';
 import { MapContainer, TileLayer, Polygon, Marker, Popup, useMap } from 'react-leaflet';
 import { useEffect, memo, type ReactNode } from 'react';
 import type { Claim, Village } from '@/types';
