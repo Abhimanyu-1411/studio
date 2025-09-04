@@ -43,7 +43,7 @@ export async function getDssRecommendation(villageId: string, claims: Claim[]): 
     const result = await dssRecommendations({
         villageName: village.name,
         claimCount: claimsInVillage.length,
-        pendingClaims: claimsInVillage.filter(c => c.status !== 'reviewed').length,
+        pendingClaims: claimsInVillage.filter(c => c.status !== 'reviewed' && c.status !== 'linked').length,
         cfrClaims: claimsInVillage.filter(c => c.claimType === 'CFR').length,
         ifrClaims: claimsInVillage.filter(c => c.claimType === 'IFR').length,
         waterCoverage: village.assetCoverage.water,
