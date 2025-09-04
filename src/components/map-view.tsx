@@ -72,7 +72,6 @@ const MapViewComponent = ({ claims, villages, onVillageClick, onClaimEdit, cente
 
   const handleClaimClick = (claim: Claim) => {
     setSelectedClaimId(claim.id);
-    onClaimEdit(claim);
   };
 
   const getPolygonOptions = (village: Village) => {
@@ -85,22 +84,26 @@ const MapViewComponent = ({ claims, villages, onVillageClick, onClaimEdit, cente
     };
 
     let fillOpacity = 0.1;
+    let fillColor = options.fillColor;
+
     if (activeLayers.water) {
-      options.fillColor = 'blue';
+      fillColor = 'blue';
       fillOpacity = Math.max(fillOpacity, village.assetCoverage.water / 100 * 0.6);
     }
     if (activeLayers.forest) {
-      options.fillColor = 'darkgreen';
+      fillColor = 'darkgreen';
       fillOpacity = Math.max(fillOpacity, village.assetCoverage.forest / 100 * 0.6);
     }
     if (activeLayers.agriculture) {
-      options.fillColor = 'yellow';
+      fillColor = 'yellow';
       fillOpacity = Math.max(fillOpacity, village.assetCoverage.agriculture / 100 * 0.6);
     }
     if (activeLayers.ndwi) {
-      options.fillColor = village.ndwi > 0.5 ? 'hsl(var(--chart-2))' : 'hsl(var(--chart-4))';
+      fillColor = village.ndwi > 0.5 ? 'hsl(var(--chart-2))' : 'hsl(var(--chart-4))';
       fillOpacity = Math.max(fillOpacity, 0.6);
     }
+    
+    options.fillColor = fillColor;
     options.fillOpacity = fillOpacity;
 
     return options;
@@ -113,7 +116,6 @@ const MapViewComponent = ({ claims, villages, onVillageClick, onClaimEdit, cente
       scrollWheelZoom={true}
       style={{ height: '100%', width: '100%' }}
     >
-
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -140,41 +142,36 @@ const MapViewComponent = ({ claims, villages, onVillageClick, onClaimEdit, cente
             click: () => handleClaimClick(claim),
           }}
         >
-          {selectedClaimId === claim.id && (
-            <Popup>
-              <Card className="border-0 shadow-none max-w-sm">
-                <CardHeader className="p-2">
-                  <CardTitle className="font-headline text-base">{claim.claimantName}</CardTitle>
-                  <CardDescription>{claim.claimType} - {claim.area}</CardDescription>
-                </CardHeader>
-                <CardContent className="p-2 space-y-2">
-                  <p className="text-sm">Village: {claim.village}</p>
-                  <p className="text-sm">Date: {claim.date}</p>
-                  <div>
-                    {claim.linkedVillage ? (
-                      <Badge variant="default" style={{ backgroundColor: `hsl(var(--primary))`, color: `hsl(var(--primary-foreground))` }}>Linked to: {claim.linkedVillage} ({(claim.confidenceScore! * 100).toFixed(0)}%)</Badge>
-                    ) : (
-                      <Badge variant="destructive">Unlinked</Badge>
-                    )}
-                    {claim.status === 'needs-review' && (
-                      <Badge variant="destructive" className="ml-2">Needs Review</Badge>
-                    )}
-                  </div>
-                </CardContent>
-                {claim.status === 'needs-review' && (
-                  <CardFooter className="p-2">
-                    <Button variant="outline" size="sm" onClick={() => onClaimEdit(claim)}>
-                      <Edit className="mr-2 h-3 w-3" />
-                      Correct Data
-                    </Button>
-                  </CardFooter>
-                )}
-              </Card>
-            </Popup>
-          )}
+          <Popup>
+            <Card className="border-0 shadow-none max-w-sm">
+              <CardHeader className="p-2">
+                <CardTitle className="font-headline text-base">{claim.claimantName}</CardTitle>
+                <CardDescription>{claim.claimType} - {claim.area}</CardDescription>
+              </CardHeader>
+              <CardContent className="p-2 space-y-2">
+                <p className="text-sm">Village: {claim.village}</p>
+                <p className="text-sm">Date: {claim.date}</p>
+                <div>
+                  {claim.linkedVillage ? (
+                    <Badge variant="default" style={{ backgroundColor: `hsl(var(--primary))`, color: `hsl(var(--primary-foreground))` }}>Linked to: {claim.linkedVillage} ({(claim.confidenceScore! * 100).toFixed(0)}%)</Badge>
+                  ) : (
+                    <Badge variant="destructive">Unlinked</Badge>
+                  )}
+                  {claim.status === 'needs-review' && (
+                    <Badge variant="destructive" className="ml-2">Needs Review</Badge>
+                  )}
+                </div>
+              </CardContent>
+              <CardFooter className="p-2">
+                <Button variant="outline" size="sm" onClick={() => onClaimEdit(claim)}>
+                  <Edit className="mr-2 h-3 w-3" />
+                  Correct Data
+                </Button>
+              </CardFooter>
+            </Card>
+          </Popup>
         </Marker>
       ))}
-
     </MapContainer>
   );
 }
