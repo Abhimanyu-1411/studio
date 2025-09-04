@@ -21,7 +21,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { ClaimUpload } from '@/components/claim-upload';
 import { WaterRiskChart } from '@/components/water-risk-chart';
-import { FileText, Download, PlusCircle, Leaf, Droplets, LandPlot, Search, ArrowLeft, Loader2, BarChart2, FileBox, Users, FileDown, Waves } from 'lucide-react';
+import { FileText, Download, PlusCircle, Leaf, Droplets, LandPlot, Search, ArrowLeft, Loader2, FileDown, Waves } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import type { Claim, Village, DssRecommendation } from '@/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
@@ -58,72 +58,30 @@ const claimStatusText = {
     reviewed: 'Reviewed',
 }
 
-
-export function SidebarNav({ 
-  claims, 
-  onClaimAdded, 
-  onClaimSelect, 
-  onLayerToggle, 
-  selectedVillage, 
-  onVillageSelect,
-  dssRecommendation,
-  isLoadingDss 
-}: SidebarNavProps) {
-  const [isUploadOpen, setUploadOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const { toast } = useToast();
-
-  const handleExport = () => {
-    if (claims.length === 0) {
-      toast({
-        variant: 'destructive',
-        title: 'No claims to export',
-        description: 'Please upload at least one claim before exporting.',
-      });
-      return;
-    }
-    const csvHeader = "ClaimID,ClaimantName,Village,ClaimType,Area,Date,Status,LinkedVillage,Confidence\n";
-    const csvRows = claims.map(c => 
-        `${c.id},"${c.claimantName}","${c.village}","${c.claimType}","${c.area}","${c.date}",${c.status},${c.linkedVillage || ''},${c.confidenceScore || 0}`
-    ).join("\n");
-    const csvContent = csvHeader + csvRows;
-
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    if (link.href) {
-      URL.revokeObjectURL(link.href);
-    }
-    link.href = URL.createObjectURL(blob);
-    link.download = `claims_export_${new Date().toISOString()}.csv`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    
-    toast({
-      title: 'Export Complete',
-      description: 'Your new CSV report is downloading.',
-    });
-  }
-
-  const handlePdfExport = () => {
-    toast({
-      title: 'PDF Export (Not Implemented)',
-      description: 'This feature is not yet available.',
-    });
-  };
-  
-  const getClaimTypeColor = (claimType: string) => {
+const getClaimTypeColor = (claimType: string) => {
     if (claimType in claimTypeColors) return claimTypeColors[claimType as keyof typeof claimTypeColors];
     return claimTypeColors.default;
-  }
+}
 
-  const filteredClaims = claims.filter(claim =>
-    !selectedVillage && claim.claimantName.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-  
-  const claimsInVillage = selectedVillage ? claims.filter(c => c.linkedVillage === selectedVillage.name) : [];
-  
-  const VillageDetailView = () => (
+const VillageDetailView = ({
+    selectedVillage,
+    claims,
+    onVillageSelect,
+    onClaimSelect,
+    dssRecommendation,
+    isLoadingDss,
+    onPdfExport,
+}: {
+    selectedVillage: Village;
+    claims: Claim[];
+    onVillageSelect: (village: Village | null) => void;
+    onClaimSelect: (claim: Claim) => void;
+    dssRecommendation: DssRecommendation | null;
+    isLoadingDss: boolean;
+    onPdfExport: () => void;
+}) => {
+    const claimsInVillage = claims.filter(c => c.linkedVillage === selectedVillage.name);
+    return (
      <div className="flex flex-col h-full">
         <SidebarGroup>
             <SidebarMenu>
@@ -202,15 +160,34 @@ export function SidebarNav({
             </Card>
         </SidebarContent>
         <SidebarFooter>
-             <Button variant="outline" className="w-full" onClick={handlePdfExport}>
+             <Button variant="outline" className="w-full" onClick={onPdfExport}>
                 <FileDown className="mr-2" />
                 Download PDF Report
             </Button>
         </SidebarFooter>
     </div>
   )
+}
 
-  const GlobalView = () => (
+const GlobalView = ({
+    claims,
+    onClaimSelect,
+    onLayerToggle,
+    setUploadOpen,
+    handleExport,
+}: {
+    claims: Claim[];
+    onClaimSelect: (claim: Claim) => void;
+    onLayerToggle: (layer: string, toggled: boolean) => void;
+    setUploadOpen: (open: boolean) => void;
+    handleExport: () => void;
+}) => {
+    const [searchTerm, setSearchTerm] = useState('');
+    const filteredClaims = claims.filter(claim =>
+        claim.claimantName.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    return (
     <>
       <SidebarHeader>
         <Logo />
@@ -292,11 +269,83 @@ export function SidebarNav({
       </SidebarFooter>
     </>
   )
+}
 
+
+export function SidebarNav({ 
+  claims, 
+  onClaimAdded, 
+  onClaimSelect, 
+  onLayerToggle, 
+  selectedVillage, 
+  onVillageSelect,
+  dssRecommendation,
+  isLoadingDss 
+}: SidebarNavProps) {
+  const [isUploadOpen, setUploadOpen] = useState(false);
+  const { toast } = useToast();
+
+  const handleExport = () => {
+    if (claims.length === 0) {
+      toast({
+        variant: 'destructive',
+        title: 'No claims to export',
+        description: 'Please upload at least one claim before exporting.',
+      });
+      return;
+    }
+    const csvHeader = "ClaimID,ClaimantName,Village,ClaimType,Area,Date,Status,LinkedVillage,Confidence\n";
+    const csvRows = claims.map(c => 
+        `${c.id},"${c.claimantName}","${c.village}","${c.claimType}","${c.area}","${c.date}",${c.status},${c.linkedVillage || ''},${c.confidenceScore || 0}`
+    ).join("\n");
+    const csvContent = csvHeader + csvRows;
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    if (link.href) {
+      URL.revokeObjectURL(link.href);
+    }
+    link.href = URL.createObjectURL(blob);
+    link.download = `claims_export_${new Date().toISOString()}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    toast({
+      title: 'Export Complete',
+      description: 'Your new CSV report is downloading.',
+    });
+  }
+
+  const handlePdfExport = () => {
+    toast({
+      title: 'PDF Export (Not Implemented)',
+      description: 'This feature is not yet available.',
+    });
+  };
+  
   return (
     <>
       <Sidebar>
-        { selectedVillage ? <VillageDetailView /> : <GlobalView /> }
+        { selectedVillage ? (
+            <VillageDetailView 
+                selectedVillage={selectedVillage}
+                claims={claims}
+                onVillageSelect={onVillageSelect}
+                onClaimSelect={onClaimSelect}
+                dssRecommendation={dssRecommendation}
+                isLoadingDss={isLoadingDss}
+                onPdfExport={handlePdfExport}
+            />
+        ) : (
+            <GlobalView 
+                claims={claims}
+                onClaimSelect={onClaimSelect}
+                onLayerToggle={onLayerToggle}
+                setUploadOpen={setUploadOpen}
+                handleExport={handleExport}
+            />
+        )}
       </Sidebar>
       <ClaimUpload open={isUploadOpen} onOpenChange={setUploadOpen} onClaimAdded={onClaimAdded} />
     </>
