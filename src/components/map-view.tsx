@@ -5,8 +5,6 @@ import { Polygon } from '@/components/polygon';
 import { useState, useCallback } from 'react';
 import type { Claim, Village, DssRecommendation } from '@/types';
 import { Badge } from './ui/badge';
-import { getDssRecommendation } from '@/app/actions';
-import { Loader2 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 
 type MapViewProps = {
@@ -15,6 +13,8 @@ type MapViewProps = {
   center: { lat: number; lng: number };
   zoom: number;
   activeLayers: Record<string, boolean>;
+  onVillageClick: (village: Village) => void;
+  onClaimClick: (claim: Claim) => void;
 };
 
 const claimTypeColors = {
@@ -24,34 +24,20 @@ const claimTypeColors = {
   'default': 'hsl(var(--muted-foreground))'
 }
 
-export function MapView({ claims, villages, center, zoom, activeLayers }: MapViewProps) {
-  const [selectedVillage, setSelectedVillage] = useState<Village | null>(null);
+export function MapView({ claims, villages, center, zoom, activeLayers, onVillageClick, onClaimClick }: MapViewProps) {
   const [selectedClaim, setSelectedClaim] = useState<Claim | null>(null);
-  const [dssData, setDssData] = useState<DssRecommendation | null>(null);
-  const [isLoadingDss, setIsLoadingDss] = useState(false);
 
-  const handleVillageClick = useCallback(async (village: Village) => {
+  const handleVillageClick = useCallback((village: Village) => {
     setSelectedClaim(null);
-    setSelectedVillage(village);
-    setIsLoadingDss(true);
-    setDssData(null);
-    try {
-      const recommendation = await getDssRecommendation(village.id, claims);
-      setDssData(recommendation);
-    } catch (error) {
-      console.error("Failed to get DSS recommendation", error);
-    } finally {
-      setIsLoadingDss(false);
-    }
-  }, [claims]);
+    onVillageClick(village);
+  }, [onVillageClick]);
 
   const handleClaimClick = (claim: Claim) => {
-    setSelectedVillage(null);
     setSelectedClaim(claim);
+    onClaimClick(claim)
   };
   
   const closeInfoWindows = () => {
-    setSelectedVillage(null);
     setSelectedClaim(null);
   }
   
@@ -139,28 +125,6 @@ export function MapView({ claims, villages, center, zoom, activeLayers }: MapVie
             </div>
           </AdvancedMarker>
         ))}
-
-        {selectedVillage && (
-          <InfoWindow position={selectedVillage.center} onCloseClick={closeInfoWindows}>
-            <Card className="border-0 shadow-none max-w-sm">
-                <CardHeader className="p-2">
-                    <CardTitle className="font-headline text-base">{selectedVillage.name}</CardTitle>
-                    <CardDescription>NDWI: {selectedVillage.ndwi}</CardDescription>
-                </CardHeader>
-                <CardContent className="p-2">
-                    <h4 className="font-bold text-sm mb-2">Decision Support</h4>
-                    {isLoadingDss && <div className="flex items-center"><Loader2 className="mr-2 h-4 w-4 animate-spin" />Loading...</div>}
-                    {dssData && (
-                        <div>
-                            <p className="text-sm font-semibold text-primary">{dssData.recommendation}</p>
-                            <p className="text-xs text-muted-foreground mt-1">{dssData.justification}</p>
-                        </div>
-                    )}
-                     {!isLoadingDss && !dssData && <p className="text-xs text-muted-foreground">No recommendations available.</p>}
-                </CardContent>
-            </Card>
-          </InfoWindow>
-        )}
 
         {selectedClaim && (
            <InfoWindow position={selectedClaim.location} onCloseClick={closeInfoWindows}>

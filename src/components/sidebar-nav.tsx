@@ -21,15 +21,20 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { ClaimUpload } from '@/components/claim-upload';
 import { WaterRiskChart } from '@/components/water-risk-chart';
-import { FileText, Download, PlusCircle, Leaf, Droplets, LandPlot, Search } from 'lucide-react';
+import { FileText, Download, PlusCircle, Leaf, Droplets, LandPlot, Search, ArrowLeft, Loader2, BarChart2, FileBox, Users } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import type { Claim } from '@/types';
+import type { Claim, Village, DssRecommendation } from '@/types';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 
 type SidebarNavProps = {
   claims: Claim[];
   onClaimAdded: (claim: Claim) => void;
   onClaimSelect: (claim: Claim) => void;
   onLayerToggle: (layer: string, toggled: boolean) => void;
+  selectedVillage: Village | null;
+  onVillageSelect: (village: Village | null) => void;
+  dssRecommendation: DssRecommendation | null;
+  isLoadingDss: boolean;
 };
 
 const claimTypeColors = {
@@ -39,7 +44,16 @@ const claimTypeColors = {
   'default': 'bg-gray-500'
 }
 
-export function SidebarNav({ claims, onClaimAdded, onClaimSelect, onLayerToggle }: SidebarNavProps) {
+export function SidebarNav({ 
+  claims, 
+  onClaimAdded, 
+  onClaimSelect, 
+  onLayerToggle, 
+  selectedVillage, 
+  onVillageSelect,
+  dssRecommendation,
+  isLoadingDss 
+}: SidebarNavProps) {
   const [isUploadOpen, setUploadOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const { toast } = useToast();
@@ -82,87 +96,175 @@ export function SidebarNav({ claims, onClaimAdded, onClaimSelect, onLayerToggle 
   }
 
   const filteredClaims = claims.filter(claim =>
-    claim.claimantName.toLowerCase().includes(searchTerm.toLowerCase())
+    !selectedVillage && claim.claimantName.toLowerCase().includes(searchTerm.toLowerCase())
   );
+  
+  const claimsInVillage = selectedVillage ? claims.filter(c => c.linkedVillage === selectedVillage.name) : [];
+  
+  const VillageDetailView = () => (
+     <div className="flex flex-col h-full">
+        <SidebarGroup>
+            <SidebarMenu>
+                <SidebarMenuItem>
+                    <Button variant="ghost" onClick={() => onVillageSelect(null)} className="w-full justify-start">
+                        <ArrowLeft /> Back to All Claims
+                    </Button>
+                </SidebarMenuItem>
+            </SidebarMenu>
+        </SidebarGroup>
+        <SidebarSeparator />
+        <SidebarContent>
+            <Card className="bg-transparent border-none shadow-none">
+                <CardHeader>
+                    <CardTitle className="font-headline text-lg">{selectedVillage?.name}</CardTitle>
+                    <CardDescription>Asset & Claim Overview</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <div>
+                        <h4 className="font-semibold text-sm mb-2 text-primary">Decision Support</h4>
+                         <div className="p-2 border rounded-lg bg-primary/5">
+                            {isLoadingDss && <div className="flex items-center"><Loader2 className="mr-2 h-4 w-4 animate-spin" />Loading recommendation...</div>}
+                            {dssRecommendation && (
+                                <div>
+                                    <p className="text-sm font-semibold text-primary">{dssRecommendation.recommendation}</p>
+                                    <p className="text-xs text-muted-foreground mt-1">{dssRecommendation.justification}</p>
+                                </div>
+                            )}
+                            {!isLoadingDss && !dssRecommendation && <p className="text-xs text-muted-foreground">No recommendations available.</p>}
+                        </div>
+                    </div>
+                    <div>
+                         <h4 className="font-semibold text-sm mb-2">Asset Coverage</h4>
+                         <div className="grid grid-cols-3 gap-2 text-center">
+                            <div className="p-2 rounded-md bg-muted">
+                                <Droplets className="mx-auto text-blue-500 mb-1" />
+                                <p className="font-bold text-sm">{selectedVillage?.assetCoverage.water}%</p>
+                                <p className="text-xs">Water</p>
+                            </div>
+                             <div className="p-2 rounded-md bg-muted">
+                                <Leaf className="mx-auto text-green-600 mb-1" />
+                                <p className="font-bold text-sm">{selectedVillage?.assetCoverage.forest}%</p>
+                                <p className="text-xs">Forest</p>
+                            </div>
+                             <div className="p-2 rounded-md bg-muted">
+                                <LandPlot className="mx-auto text-yellow-600 mb-1" />
+                                <p className="font-bold text-sm">{selectedVillage?.assetCoverage.agriculture}%</p>
+                                <p className="text-xs">Agriculture</p>
+                            </div>
+                         </div>
+                    </div>
+                    <div>
+                        <h4 className="font-semibold text-sm mb-2">Claims in Village ({claimsInVillage.length})</h4>
+                        <SidebarMenu className="mt-2 max-h-48 overflow-y-auto pr-2">
+                          {claimsInVillage.length === 0 && <p className="px-2 text-sm text-muted-foreground">No claims linked to this village.</p>}
+                          {claimsInVillage.map((claim) => (
+                            <SidebarMenuItem key={claim.id}>
+                              <SidebarMenuButton onClick={() => onClaimSelect(claim)} size="lg" className="h-auto py-2">
+                                <FileText />
+                                <div className="flex flex-col items-start w-full">
+                                    <span className="font-medium">{claim.claimantName}</span>
+                                    <div className="flex items-center gap-2">
+                                        <span className={`h-2 w-2 rounded-full ${getClaimTypeColor(claim.claimType)}`}></span>
+                                        <span className="text-xs text-muted-foreground">{claim.area}</span>
+                                    </div>
+                                </div>
+                                <Badge variant="secondary" className="ml-auto">
+                                  {claim.claimType}
+                                </Badge>
+                              </SidebarMenuButton>
+                            </SidebarMenuItem>
+                          ))}
+                        </SidebarMenu>
+                    </div>
+                </CardContent>
+            </Card>
+        </SidebarContent>
+    </div>
+  )
+
+  const GlobalView = () => (
+    <>
+      <SidebarHeader>
+        <Logo />
+      </SidebarHeader>
+      <SidebarContent>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <Button className="w-full" onClick={() => setUploadOpen(true)}>
+              <PlusCircle className="mr-2" />
+              Upload New Claim
+            </Button>
+          </SidebarMenuItem>
+        </SidebarMenu>
+
+        <SidebarGroup>
+          <SidebarGroupLabel>Uploaded Claims ({filteredClaims.length})</SidebarGroupLabel>
+          <div className="relative p-2">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <SidebarInput 
+                  placeholder="Search claims..." 
+                  className="pl-8"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+              />
+          </div>
+          <SidebarMenu className="mt-2 max-h-60 overflow-y-auto pr-2">
+            {claims.length > 0 && filteredClaims.length === 0 && <p className="px-2 text-sm text-muted-foreground">No claims match your search.</p>}
+            {claims.length === 0 && <p className="px-2 text-sm text-muted-foreground">No claims uploaded yet.</p>}
+            {filteredClaims.map((claim) => (
+              <SidebarMenuItem key={claim.id}>
+                <SidebarMenuButton onClick={() => onClaimSelect(claim)} size="lg" className="h-auto py-2">
+                  <FileText />
+                  <div className="flex flex-col items-start w-full">
+                      <span className="font-medium">{claim.claimantName}</span>
+                      <div className="flex items-center gap-2">
+                          <span className={`h-2 w-2 rounded-full ${getClaimTypeColor(claim.claimType)}`}></span>
+                          <span className="text-xs text-muted-foreground">{claim.village}</span>
+                      </div>
+                  </div>
+                  <Badge variant={claim.status === 'linked' ? 'default' : 'secondary'} className="ml-auto">
+                    {claim.status}
+                  </Badge>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            ))}
+          </SidebarMenu>
+        </SidebarGroup>
+
+        <SidebarSeparator />
+
+        <SidebarGroup>
+          <SidebarGroupLabel>Asset Layers</SidebarGroupLabel>
+          <div className="flex flex-col gap-4 p-2">
+              <div className="flex items-center justify-between">
+                  <Label htmlFor="ndwi-toggle" className="flex items-center gap-2"><Droplets className="text-blue-500" />NDWI Overlay</Label>
+                  <Switch id="ndwi-toggle" onCheckedChange={(c) => onLayerToggle('ndwi', c)} />
+              </div>
+               <div className="flex items-center justify-between">
+                  <Label htmlFor="forest-toggle" className="flex items-center gap-2"><Leaf className="text-green-600" />Forest Cover</Label>
+                  <Switch id="forest-toggle" onCheckedChange={(c) => onLayerToggle('forest', c)} />
+              </div>
+               <div className="flex items-center justify-between">
+                  <Label htmlFor="agriculture-toggle" className="flex items-center gap-2"><LandPlot className="text-yellow-600"/>Agricultural Areas</Label>
+                  <Switch id="agriculture-toggle" onCheckedChange={(c) => onLayerToggle('agriculture', c)} />
+              </div>
+          </div>
+        </SidebarGroup>
+      </SidebarContent>
+      <SidebarFooter className="gap-4">
+        <WaterRiskChart />
+        <Button variant="outline" className="w-full" onClick={handleExport}>
+            <Download className="mr-2" />
+            Export Report as CSV
+        </Button>
+      </SidebarFooter>
+    </>
+  )
 
   return (
     <>
       <Sidebar>
-        <SidebarHeader>
-          <Logo />
-        </SidebarHeader>
-        <SidebarContent>
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <Button className="w-full" onClick={() => setUploadOpen(true)}>
-                <PlusCircle className="mr-2" />
-                Upload New Claim
-              </Button>
-            </SidebarMenuItem>
-          </SidebarMenu>
-
-          <SidebarGroup>
-            <SidebarGroupLabel>Uploaded Claims ({filteredClaims.length})</SidebarGroupLabel>
-            <div className="relative p-2">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <SidebarInput 
-                    placeholder="Search claims..." 
-                    className="pl-8"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                />
-            </div>
-            <SidebarMenu className="mt-2 max-h-60 overflow-y-auto pr-2">
-              {claims.length > 0 && filteredClaims.length === 0 && <p className="px-2 text-sm text-muted-foreground">No claims match your search.</p>}
-              {claims.length === 0 && <p className="px-2 text-sm text-muted-foreground">No claims uploaded yet.</p>}
-              {filteredClaims.map((claim) => (
-                <SidebarMenuItem key={claim.id}>
-                  <SidebarMenuButton onClick={() => onClaimSelect(claim)} size="lg" className="h-auto py-2">
-                    <FileText />
-                    <div className="flex flex-col items-start w-full">
-                        <span className="font-medium">{claim.claimantName}</span>
-                        <div className="flex items-center gap-2">
-                            <span className={`h-2 w-2 rounded-full ${getClaimTypeColor(claim.claimType)}`}></span>
-                            <span className="text-xs text-muted-foreground">{claim.village}</span>
-                        </div>
-                    </div>
-                    <Badge variant={claim.status === 'linked' ? 'default' : 'secondary'} className="ml-auto">
-                      {claim.status}
-                    </Badge>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroup>
-
-          <SidebarSeparator />
-
-          <SidebarGroup>
-            <SidebarGroupLabel>Asset Layers</SidebarGroupLabel>
-            <div className="flex flex-col gap-4 p-2">
-                <div className="flex items-center justify-between">
-                    <Label htmlFor="ndwi-toggle" className="flex items-center gap-2"><Droplets className="text-blue-500" />NDWI Overlay</Label>
-                    <Switch id="ndwi-toggle" onCheckedChange={(c) => onLayerToggle('ndwi', c)} />
-                </div>
-                 <div className="flex items-center justify-between">
-                    <Label htmlFor="forest-toggle" className="flex items-center gap-2"><Leaf className="text-green-600" />Forest Cover</Label>
-                    <Switch id="forest-toggle" onCheckedChange={(c) => onLayerToggle('forest', c)} />
-                </div>
-                 <div className="flex items-center justify-between">
-                    <Label htmlFor="agriculture-toggle" className="flex items-center gap-2"><LandPlot className="text-yellow-600"/>Agricultural Areas</Label>
-                    <Switch id="agriculture-toggle" onCheckedChange={(c) => onLayerToggle('agriculture', c)} />
-                </div>
-            </div>
-          </SidebarGroup>
-
-        </SidebarContent>
-        <SidebarFooter className="gap-4">
-            <WaterRiskChart />
-            <Button variant="outline" className="w-full" onClick={handleExport}>
-                <Download className="mr-2" />
-                Export Report as CSV
-            </Button>
-        </SidebarFooter>
+        { selectedVillage ? <VillageDetailView /> : <GlobalView /> }
       </Sidebar>
       <ClaimUpload open={isUploadOpen} onOpenChange={setUploadOpen} onClaimAdded={onClaimAdded} />
     </>

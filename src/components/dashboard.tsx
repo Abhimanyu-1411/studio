@@ -5,8 +5,9 @@ import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
 import { SidebarNav } from '@/components/sidebar-nav';
 import { MapView } from '@/components/map-view';
 import { VILLAGES } from '@/lib/mock-data';
-import type { Claim } from '@/types';
+import type { Claim, Village, DssRecommendation } from '@/types';
 import { Card, CardContent } from '@/components/ui/card';
+import { getDssRecommendation } from '@/app/actions';
 
 export function Dashboard() {
   const [claims, setClaims] = useState<Claim[]>([]);
@@ -19,6 +20,9 @@ export function Dashboard() {
     agriculture: false,
     forest: false,
   });
+  const [selectedVillage, setSelectedVillage] = useState<Village | null>(null);
+  const [dssRecommendation, setDssRecommendation] = useState<DssRecommendation | null>(null);
+  const [isLoadingDss, setIsLoadingDss] = useState(false);
 
   const handleClaimAdded = (newClaim: Claim) => {
     setClaims((prevClaims) => [newClaim, ...prevClaims]);
@@ -28,8 +32,30 @@ export function Dashboard() {
   };
   
   const handleClaimSelect = (claim: Claim) => {
+    setSelectedVillage(null);
     setMapCenter(claim.location);
     setMapZoom(14);
+  }
+  
+  const handleVillageSelect = async (village: Village | null) => {
+    if (!village) {
+      setSelectedVillage(null);
+      setDssRecommendation(null);
+      return;
+    }
+    
+    setSelectedVillage(village);
+    setIsLoadingDss(true);
+    setDssRecommendation(null);
+    
+    try {
+      const recommendation = await getDssRecommendation(village.id, claims);
+      setDssRecommendation(recommendation);
+    } catch (error) {
+      console.error("Failed to get DSS recommendation", error);
+    } finally {
+      setIsLoadingDss(false);
+    }
   }
   
   const handleLayerToggle = (layer: string, toggled: boolean) => {
@@ -47,7 +73,16 @@ export function Dashboard() {
 
   return (
     <SidebarProvider>
-      <SidebarNav claims={claims} onClaimAdded={handleClaimAdded} onClaimSelect={handleClaimSelect} onLayerToggle={handleLayerToggle} />
+      <SidebarNav 
+        claims={claims} 
+        onClaimAdded={handleClaimAdded} 
+        onClaimSelect={handleClaimSelect} 
+        onLayerToggle={handleLayerToggle}
+        selectedVillage={selectedVillage}
+        onVillageSelect={handleVillageSelect}
+        dssRecommendation={dssRecommendation}
+        isLoadingDss={isLoadingDss}
+      />
       <SidebarInset>
         <div className="relative h-full w-full">
             <MapView 
@@ -56,6 +91,8 @@ export function Dashboard() {
                 center={mapCenter}
                 zoom={mapZoom}
                 activeLayers={activeLayers}
+                onVillageClick={handleVillageSelect}
+                onClaimClick={handleClaimSelect}
             />
             <div className="absolute top-4 left-4 grid grid-cols-2 md:grid-cols-4 gap-4">
                 <Card>
