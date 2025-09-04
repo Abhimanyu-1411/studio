@@ -71,7 +71,6 @@ const MapViewComponent = ({ claims, villages, onVillageClick, onClaimEdit, cente
       zoom={zoom}
       scrollWheelZoom={true}
       style={{ height: '100%', width: '100%', borderRadius: 'var(--radius)' }}
-      className="relative"
     >
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
