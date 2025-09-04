@@ -59,16 +59,25 @@ export function MapView({ claims, villages, center, zoom, activeLayers, onVillag
     let fillColor = 'hsl(var(--primary))';
     let fillOpacity = 0.1;
 
+    // This logic allows multiple layers to be overlaid.
+    // It is not perfect, as colors will blend.
+    // A more advanced implementation might use separate polygon layers.
     if (activeLayers.ndwi) {
         fillColor = village.ndwi > 0.5 ? `hsl(var(--chart-2), 0.5)` : `hsl(var(--chart-4), 0.3)`;
         fillOpacity = 0.5;
-    } else if (activeLayers.forest) {
+    } 
+    
+    if (activeLayers.forest) {
         fillColor = 'darkgreen';
         fillOpacity = village.assetCoverage.forest / 100 * 0.5;
-    } else if (activeLayers.water) {
+    }
+    
+    if (activeLayers.water) {
         fillColor = 'blue';
         fillOpacity = village.assetCoverage.water / 100 * 0.5;
-    } else if (activeLayers.agriculture) {
+    }
+    
+    if (activeLayers.agriculture) {
         fillColor = 'yellow';
         fillOpacity = village.assetCoverage.agriculture / 100 * 0.5;
     }
