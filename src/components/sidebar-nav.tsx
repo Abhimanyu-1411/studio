@@ -21,7 +21,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { ClaimUpload } from '@/components/claim-upload';
 import { WaterRiskChart } from '@/components/water-risk-chart';
-import { FileText, Download, PlusCircle, Leaf, Droplets, LandPlot, Search, ArrowLeft, Loader2, BarChart2, FileBox, Users, FileDown } from 'lucide-react';
+import { FileText, Download, PlusCircle, Leaf, Droplets, LandPlot, Search, ArrowLeft, Loader2, BarChart2, FileBox, Users, FileDown, Waves } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import type { Claim, Village, DssRecommendation } from '@/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
@@ -267,6 +267,10 @@ export function SidebarNav({
               <div className="flex items-center justify-between">
                   <Label htmlFor="ndwi-toggle" className="flex items-center gap-2"><Droplets className="text-blue-500" />NDWI Overlay</Label>
                   <Switch id="ndwi-toggle" onCheckedChange={(c) => onLayerToggle('ndwi', c)} />
+              </div>
+              <div className="flex items-center justify-between">
+                  <Label htmlFor="water-toggle" className="flex items-center gap-2"><Waves className="text-cyan-500" />Water Bodies</Label>
+                  <Switch id="water-toggle" onCheckedChange={(c) => onLayerToggle('water', c)} />
               </div>
                <div className="flex items-center justify-between">
                   <Label htmlFor="forest-toggle" className="flex items-center gap-2"><Leaf className="text-green-600" />Forest Cover</Label>
