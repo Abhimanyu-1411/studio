@@ -1,13 +1,13 @@
 'use client';
 
-import { APIProvider, Map, AdvancedMarker, InfoWindow } from '@vis.gl/react-google-maps';
-import { Polygon } from '@/components/polygon';
-import { useState, useCallback } from 'react';
+import { MapContainer, TileLayer, Polygon, Marker, Popup, useMap } from 'react-leaflet';
+import { useState, useCallback, useEffect } from 'react';
 import type { Claim, Village } from '@/types';
 import { Badge } from './ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from './ui/card';
 import { Button } from './ui/button';
 import { Edit } from 'lucide-react';
+import L from 'leaflet';
 
 type MapViewProps = {
   claims: Claim[];
@@ -34,149 +34,134 @@ const claimStatusColors = {
     reviewed: 'hsl(var(--primary))',
 }
 
+// Custom icon for markers
+const getClaimIcon = (claim: Claim) => {
+    const color = claimStatusColors[claim.status] || claimTypeColors.default;
+    const markerHtml = `<div style="background-color: ${color}; width: 24px; height: 24px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; color: white; font-weight: bold;">${claim.status === 'unlinked' ? '?' : ''}</div>`;
+    return L.divIcon({
+        html: markerHtml,
+        className: '', // important to clear default styling
+        iconSize: [24, 24],
+        iconAnchor: [12, 12],
+    });
+};
+
+
+const MapUpdater = ({ center, zoom }: { center: {lat: number, lng: number}, zoom: number}) => {
+    const map = useMap();
+    useEffect(() => {
+        map.setView(center, zoom);
+    }, [center, zoom, map]);
+    return null;
+}
+
 export function MapView({ claims, villages, center, zoom, activeLayers, onVillageClick, onClaimClick, onClaimEdit }: MapViewProps) {
-  const [selectedClaim, setSelectedClaim] = useState<Claim | null>(null);
+  const [selectedClaimId, setSelectedClaimId] = useState<string | null>(null);
 
   const handleVillageClick = useCallback((village: Village) => {
-    setSelectedClaim(null);
+    setSelectedClaimId(null);
     onVillageClick(village);
   }, [onVillageClick]);
 
   const handleClaimClick = (claim: Claim) => {
-    setSelectedClaim(claim);
+    setSelectedClaimId(claim.id);
     onClaimClick(claim)
   };
   
-  const closeInfoWindows = () => {
-    setSelectedClaim(null);
-  }
-  
-  const getClaimPinColor = (claim: Claim) => {
-    return claimStatusColors[claim.status] || claimTypeColors.default;
-  }
-
   const getPolygonOptions = (village: Village) => {
     let fillColor = 'hsl(var(--primary))';
     let fillOpacity = 0.1;
-
-    // This logic allows multiple layers to be overlaid.
-    // It is not perfect, as colors will blend.
-    // A more advanced implementation might use separate polygon layers.
-    if (activeLayers.ndwi) {
-        fillColor = village.ndwi > 0.5 ? `hsl(var(--chart-2), 0.5)` : `hsl(var(--chart-4), 0.3)`;
-        fillOpacity = 0.5;
-    } 
-    
-    if (activeLayers.forest) {
-        fillColor = 'darkgreen';
-        fillOpacity = village.assetCoverage.forest / 100 * 0.5;
-    }
-    
+    const options = {
+      color: 'hsl(var(--primary))',
+      weight: 2,
+      opacity: 0.8,
+      fillColor: fillColor,
+      fillOpacity: fillOpacity,
+    };
+  
     if (activeLayers.water) {
-        fillColor = 'blue';
-        fillOpacity = village.assetCoverage.water / 100 * 0.5;
+      options.fillColor = 'blue';
+      options.fillOpacity = village.assetCoverage.water / 100 * 0.6;
     }
-    
+    if (activeLayers.forest) {
+      options.fillColor = 'darkgreen';
+      options.fillOpacity = village.assetCoverage.forest / 100 * 0.6;
+    }
     if (activeLayers.agriculture) {
-        fillColor = 'yellow';
-        fillOpacity = village.assetCoverage.agriculture / 100 * 0.5;
+      options.fillColor = 'yellow';
+      options.fillOpacity = village.assetCoverage.agriculture / 100 * 0.6;
+    }
+    if (activeLayers.ndwi) {
+        options.fillColor = village.ndwi > 0.5 ? `hsl(var(--chart-2), 0.5)` : `hsl(var(--chart-4), 0.3)`;
+        options.fillOpacity = 0.6;
     }
 
-    return {
-        strokeColor: 'hsl(var(--primary))',
-        strokeOpacity: 0.8,
-        strokeWeight: 2,
-        fillColor,
-        fillOpacity,
-    }
+    return options
   };
 
-
-  if (!process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY) {
-    return (
-        <div className="flex h-full w-full items-center justify-center bg-muted">
-            <div className="text-center p-8">
-                <h2 className="text-lg font-semibold">Google Maps API Key Missing</h2>
-                <p className="text-muted-foreground">Please set the <code className="bg-destructive/20 text-destructive p-1 rounded-sm">NEXT_PUBLIC_GOOGLE_MAPS_API_KEY</code> environment variable.</p>
-            </div>
-        </div>
-    )
-  }
-
   return (
-    <APIProvider apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}>
-      <Map
-        center={center}
-        zoom={zoom}
-        mapId="geoclaim_map"
-        onDragend={closeInfoWindows}
-        onClick={closeInfoWindows}
-        gestureHandling={'greedy'}
-        disableDefaultUI={true}
-        className="h-full w-full"
-      >
-        {villages.map((village) => (
-          <Polygon
+    <MapContainer center={center} zoom={zoom} scrollWheelZoom={true} style={{ height: '100%', width: '100%' }}>
+      <TileLayer
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+      />
+      <MapUpdater center={center} zoom={zoom} />
+      
+      {villages.map((village) => (
+         <Polygon
             key={village.id}
-            paths={village.bounds}
-            options={getPolygonOptions(village)}
-            onClick={() => handleVillageClick(village)}
+            positions={village.bounds}
+            pathOptions={getPolygonOptions(village)}
+            eventHandlers={{
+                click: () => handleVillageClick(village),
+            }}
           />
-        ))}
-
-        {claims.map((claim) => (
-           <AdvancedMarker
-            key={claim.id}
-            position={claim.location}
-            onClick={() => handleClaimClick(claim)}
-          >
-            <div className="relative">
-              <svg width="24" height="24" viewBox="0 0 32 32" className="drop-shadow-lg">
-                <path 
-                    d="M16,32C16,32,28,18,28,12C28,5.373,22.627,0,16,0C9.373,0,4,5.373,4,12C4,18,16,32,16,32Z"
-                    fill={getClaimPinColor(claim)}
-                />
-              </svg>
-              <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white font-bold text-xs">
-                {claim.status === 'unlinked' ? '?' : ''}
-              </span>
-            </div>
-          </AdvancedMarker>
-        ))}
-
-        {selectedClaim && (
-           <InfoWindow position={selectedClaim.location} onCloseClick={closeInfoWindows}>
-             <Card className="border-0 shadow-none max-w-sm">
+      ))}
+      
+      {claims.map((claim) => (
+        <Marker 
+          key={claim.id} 
+          position={claim.location} 
+          icon={getClaimIcon(claim)}
+          eventHandlers={{
+            click: () => handleClaimClick(claim),
+          }}
+        >
+          {selectedClaimId === claim.id && (
+            <Popup>
+               <Card className="border-0 shadow-none max-w-sm">
                 <CardHeader className="p-2">
-                    <CardTitle className="font-headline text-base">{selectedClaim.claimantName}</CardTitle>
-                    <CardDescription>{selectedClaim.claimType} - {selectedClaim.area}</CardDescription>
+                    <CardTitle className="font-headline text-base">{claim.claimantName}</CardTitle>
+                    <CardDescription>{claim.claimType} - {claim.area}</CardDescription>
                 </CardHeader>
                 <CardContent className="p-2 space-y-2">
-                   <p className="text-sm">Village: {selectedClaim.village}</p>
-                   <p className="text-sm">Date: {selectedClaim.date}</p>
+                   <p className="text-sm">Village: {claim.village}</p>
+                   <p className="text-sm">Date: {claim.date}</p>
                    <div>
-                    {selectedClaim.linkedVillage ? (
-                        <Badge variant="default" style={{backgroundColor: `hsl(var(--primary))`, color: `hsl(var(--primary-foreground))`}}>Linked to: {selectedClaim.linkedVillage} ({(selectedClaim.confidenceScore! * 100).toFixed(0)}%)</Badge>
+                    {claim.linkedVillage ? (
+                        <Badge variant="default" style={{backgroundColor: `hsl(var(--primary))`, color: `hsl(var(--primary-foreground))`}}>Linked to: {claim.linkedVillage} ({(claim.confidenceScore! * 100).toFixed(0)}%)</Badge>
                     ) : (
                         <Badge variant="destructive">Unlinked</Badge>
                     )}
-                    {selectedClaim.status === 'needs-review' && (
+                    {claim.status === 'needs-review' && (
                         <Badge variant="destructive" className="ml-2">Needs Review</Badge>
                     )}
                    </div>
                 </CardContent>
-                {selectedClaim.status === 'needs-review' && (
+                {claim.status === 'needs-review' && (
                     <CardFooter className="p-2">
-                        <Button variant="outline" size="sm" onClick={() => onClaimEdit(selectedClaim)}>
+                        <Button variant="outline" size="sm" onClick={() => onClaimEdit(claim)}>
                             <Edit className="mr-2 h-3 w-3" />
                             Correct Data
                         </Button>
                     </CardFooter>
                 )}
             </Card>
-          </InfoWindow>
-        )}
-      </Map>
-    </APIProvider>
+            </Popup>
+          )}
+        </Marker>
+      ))}
+
+    </MapContainer>
   );
 }
