@@ -14,6 +14,8 @@ type MapViewProps = {
   villages: Village[];
   onVillageClick: (village: Village) => void;
   onClaimEdit: (claim: Claim) => void;
+  center: { lat: number; lng: number };
+  zoom: number;
 };
 
 const claimTypeColors = {
@@ -49,10 +51,8 @@ const MapController = ({ center, zoom }: { center: {lat: number, lng: number}, z
     return null;
 }
 
-const MapViewComponent = ({ claims, villages, onVillageClick, onClaimEdit }: MapViewProps) => {
+const MapViewComponent = ({ claims, villages, onVillageClick, onClaimEdit, center, zoom }: MapViewProps) => {
   const [selectedClaimId, setSelectedClaimId] = useState<string | null>(null);
-  const [mapCenter, setMapCenter] = useState({ lat: 26.5, lng: 82.4 });
-  const [mapZoom, setMapZoom] = useState(9);
   const [activeLayers, setActiveLayers] = useState<Record<string, boolean>>({
     ndwi: false,
     water: false,
@@ -60,27 +60,23 @@ const MapViewComponent = ({ claims, villages, onVillageClick, onClaimEdit }: Map
     forest: false,
   });
 
+   useEffect(() => {
+    const handleLayerToggle = (e: CustomEvent) => {
+      setActiveLayers(e.detail);
+    };
+    window.addEventListener('layer-toggle', handleLayerToggle as EventListener);
+    return () => {
+      window.removeEventListener('layer-toggle', handleLayerToggle as EventListener);
+    };
+  }, []);
+
   const handleClaimClick = (claim: Claim) => {
     setSelectedClaimId(claim.id);
-    if(claim.location) {
-        setMapCenter(claim.location);
-        setMapZoom(14);
-    }
+    onClaimEdit(claim);
   };
-
-  useEffect(() => {
-    if (claims.length > 0) {
-        const lastClaim = claims[0];
-        if (lastClaim.location) {
-            setMapCenter(lastClaim.location);
-            setMapZoom(12);
-        }
-    }
-  }, [claims]);
-
-
+  
   const getPolygonOptions = (village: Village) => {
-    const options = {
+    const options: L.PathOptions = {
       color: 'hsl(var(--primary))',
       weight: 2,
       opacity: 0.8,
@@ -88,33 +84,35 @@ const MapViewComponent = ({ claims, villages, onVillageClick, onClaimEdit }: Map
       fillOpacity: 0.1,
     };
 
+    let fillOpacity = 0.1;
     if (activeLayers.water) {
       options.fillColor = 'blue';
-      options.fillOpacity = village.assetCoverage.water / 100 * 0.6;
+      fillOpacity = Math.max(fillOpacity, village.assetCoverage.water / 100 * 0.6);
     }
     if (activeLayers.forest) {
       options.fillColor = 'darkgreen';
-      options.fillOpacity = village.assetCoverage.forest / 100 * 0.6;
+      fillOpacity = Math.max(fillOpacity, village.assetCoverage.forest / 100 * 0.6);
     }
     if (activeLayers.agriculture) {
       options.fillColor = 'yellow';
-      options.fillOpacity = village.assetCoverage.agriculture / 100 * 0.6;
+       fillOpacity = Math.max(fillOpacity, village.assetCoverage.agriculture / 100 * 0.6);
     }
     if (activeLayers.ndwi) {
         options.fillColor = village.ndwi > 0.5 ? 'hsl(var(--chart-2))' : 'hsl(var(--chart-4))';
-        options.fillOpacity = 0.6;
+        fillOpacity = Math.max(fillOpacity, 0.6);
     }
+    options.fillOpacity = fillOpacity;
 
     return options;
   };
 
   return (
-    <MapContainer center={mapCenter} zoom={mapZoom} scrollWheelZoom={true} style={{ height: '100%', width: '100%' }}>
+    <MapContainer center={center} zoom={zoom} scrollWheelZoom={true} style={{ height: '100%', width: '100%' }}>
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
-      <MapController center={mapCenter} zoom={mapZoom} />
+      <MapController center={center} zoom={zoom} />
       
       {villages.map((village) => (
          <Polygon

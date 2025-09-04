@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
 import { SidebarNav } from '@/components/sidebar-nav';
@@ -23,9 +23,15 @@ export function Dashboard() {
   const [dssRecommendation, setDssRecommendation] = useState<DssRecommendation | null>(null);
   const [isLoadingDss, setIsLoadingDss] = useState(false);
   const [editingClaim, setEditingClaim] = useState<Claim | null>(null);
+  const [mapCenter, setMapCenter] = useState({ lat: 26.5, lng: 82.4 });
+  const [mapZoom, setMapZoom] = useState(9);
 
   const handleClaimAdded = (newClaim: Claim) => {
     setClaims((prevClaims) => [newClaim, ...prevClaims]);
+    if (newClaim.location) {
+        setMapCenter(newClaim.location);
+        setMapZoom(12);
+    }
   };
   
   const handleClaimUpdate = (updatedClaim: Claim) => {
@@ -43,6 +49,8 @@ export function Dashboard() {
     setSelectedVillage(village);
     setIsLoadingDss(true);
     setDssRecommendation(null);
+    setMapCenter(village.center);
+    setMapZoom(12);
     
     try {
       const recommendation = await getDssRecommendation(village.id, claims);
@@ -51,6 +59,14 @@ export function Dashboard() {
       console.error("Failed to get DSS recommendation", error);
     } finally {
       setIsLoadingDss(false);
+    }
+  }
+
+  const handleClaimEdit = (claim: Claim) => {
+    setEditingClaim(claim);
+    if(claim.location) {
+        setMapCenter(claim.location);
+        setMapZoom(14);
     }
   }
   
@@ -106,7 +122,9 @@ export function Dashboard() {
                     claims={claims} 
                     villages={VILLAGES}
                     onVillageClick={handleVillageSelect}
-                    onClaimEdit={setEditingClaim}
+                    onClaimEdit={handleClaimEdit}
+                    center={mapCenter}
+                    zoom={mapZoom}
                 />
             </div>
             <ClaimEdit
