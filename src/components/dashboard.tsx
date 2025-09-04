@@ -24,6 +24,7 @@ import {
 import { getDssRecommendation } from '@/app/actions';
 import { Button } from './ui/button';
 import { useToast } from '@/hooks/use-toast';
+import { Badge } from './ui/badge';
 
 
 const MapView = dynamic(() => import('@/components/map-view').then(mod => mod.MapView), {
@@ -45,27 +46,49 @@ const StatsCard = ({ title, value, icon: Icon, color }: { title: string, value: 
   </Card>
 );
 
+const RecommendationCard = ({ recommendation, onActed, isActedOn }: { recommendation: DssRecommendation, onActed: () => void, isActedOn: boolean }) => {
+  return (
+    <Card className="w-full">
+      <CardHeader>
+        <div className="flex justify-between items-start">
+          <div>
+            <CardTitle className="text-lg">{recommendation.recommendation}</CardTitle>
+          </div>
+          <Badge variant="secondary">Priority: {recommendation.priority}</Badge>
+        </div>
+         <CardDescription>{recommendation.justification}</CardDescription>
+      </CardHeader>
+      <CardFooter className="justify-end">
+         <Button onClick={onActed} disabled={isActedOn}>
+            <ThumbsUp className="mr-2 h-4 w-4" />
+            {isActedOn ? 'Reviewed' : 'Mark as Reviewed'}
+          </Button>
+      </CardFooter>
+    </Card>
+  )
+}
+
 const VillageAnalysis = ({ villages, claims }: { villages: Village[], claims: Claim[] }) => {
   const [selectedVillageId, setSelectedVillageId] = useState<string | null>(null);
-  const [recommendation, setRecommendation] = useState<DssRecommendation | null>(null);
+  const [recommendations, setRecommendations] = useState<DssRecommendation[] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [isActedOn, setIsActedOn] = useState(false);
+  const [actedOn, setActedOn] = useState<string[]>([]);
   const { toast } = useToast();
 
   const handleVillageChange = async (villageId: string) => {
     setSelectedVillageId(villageId);
     if (!villageId) {
-      setRecommendation(null);
+      setRecommendations(null);
       return;
     }
     
     setIsLoading(true);
-    setRecommendation(null);
-    setIsActedOn(false);
+    setRecommendations(null);
+    setActedOn([]);
 
     try {
       const result = await getDssRecommendation(villageId, claims);
-      setRecommendation(result);
+      setRecommendations(result);
     } catch (error) {
       console.error(error);
       toast({
@@ -87,11 +110,11 @@ const VillageAnalysis = ({ villages, claims }: { villages: Village[], claims: Cl
     return claims.filter(c => c.linkedVillage === selectedVillage.name);
   }, [selectedVillage, claims]);
 
-  const handleMarkAsActed = () => {
-    setIsActedOn(true);
+  const handleMarkAsActed = (recommendation: string) => {
+    setActedOn(prev => [...prev, recommendation]);
     toast({
       title: "Recommendation Actioned",
-      description: `The recommendation for ${selectedVillage?.name} has been marked as reviewed.`,
+      description: `The recommendation for "${recommendation}" has been marked as reviewed.`,
     })
   }
   
@@ -135,29 +158,26 @@ const VillageAnalysis = ({ villages, claims }: { villages: Village[], claims: Cl
       <div className="lg:col-span-2">
         <Card className="h-full">
           <CardHeader>
-            <CardTitle>DSS Recommendation</CardTitle>
-             <CardDescription>AI-powered recommendation based on village data.</CardDescription>
+            <CardTitle>DSS Recommendations</CardTitle>
+             <CardDescription>AI-powered recommendations based on village data.</CardDescription>
           </CardHeader>
-          <CardContent className="flex flex-col items-center justify-center h-full text-center p-6">
+          <CardContent className="flex flex-col items-center justify-start h-full p-6 space-y-4">
             {isLoading && <Loader2 className="h-8 w-8 animate-spin text-primary" />}
-            {!isLoading && !recommendation && <p className="text-muted-foreground">Select a village to see recommendations.</p>}
-            {recommendation && (
-                <div className="space-y-4">
-                  <Lightbulb className="h-12 w-12 text-yellow-400 mx-auto" />
-                  <h3 className="text-xl font-bold text-primary">{recommendation.recommendation}</h3>
-                  <p className="text-muted-foreground max-w-md mx-auto">{recommendation.justification}</p>
-                  
+            {!isLoading && !recommendations && <div className="text-center flex-1 flex flex-col justify-center items-center"><Lightbulb className="h-12 w-12 text-muted-foreground mx-auto mb-4" /><p className="text-muted-foreground">Select a village to see recommendations.</p></div>}
+            {!isLoading && recommendations && recommendations.length === 0 && <div className="text-center flex-1 flex flex-col justify-center items-center"><CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" /><p className="text-muted-foreground">No specific recommendations triggered for this village based on current data.</p></div>}
+            {recommendations && recommendations.length > 0 && (
+                <div className="w-full space-y-4">
+                  {recommendations.map(rec => (
+                    <RecommendationCard 
+                      key={rec.recommendation}
+                      recommendation={rec}
+                      onActed={() => handleMarkAsActed(rec.recommendation)}
+                      isActedOn={actedOn.includes(rec.recommendation)}
+                    />
+                  ))}
                 </div>
             )}
           </CardContent>
-          {recommendation && (
-            <CardFooter className="justify-end">
-              <Button onClick={handleMarkAsActed} disabled={isActedOn}>
-                <ThumbsUp className="mr-2 h-4 w-4" />
-                {isActedOn ? 'Reviewed' : 'Mark as Reviewed'}
-              </Button>
-            </CardFooter>
-          )}
         </Card>
       </div>
     </div>

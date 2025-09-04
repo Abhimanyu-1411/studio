@@ -24,10 +24,14 @@ const DSSRecommendationsInputSchema = z.object({
 });
 export type DSSRecommendationsInput = z.infer<typeof DSSRecommendationsInputSchema>;
 
-const DSSRecommendationsOutputSchema = z.object({
-  recommendation: z.string().describe('The recommended action with a priority score.'),
+const RecommendationSchema = z.object({
+  recommendation: z.string().describe('The recommended action.'),
   justification: z.string().describe('The justification for the recommendation.'),
+  priority: z.number().describe('A priority score for the recommendation.'),
 });
+
+const DSSRecommendationsOutputSchema = z.array(RecommendationSchema);
+
 export type DSSRecommendationsOutput = z.infer<typeof DSSRecommendationsOutputSchema>;
 
 export async function dssRecommendations(input: DSSRecommendationsInput): Promise<DSSRecommendationsOutput> {
@@ -40,7 +44,7 @@ const prompt = ai.definePrompt({
   output: {schema: DSSRecommendationsOutputSchema},
   prompt: `You are an expert in providing recommendations for village development schemes based on geospatial and claim data.
 
-  Based on the following information, provide a recommendation and a justification for it.
+  Based on the following information, provide a list of all applicable recommendations and a justification for each.
 
   Village Name: {{{villageName}}}
   Total Claims: {{{claimCount}}}
@@ -51,14 +55,14 @@ const prompt = ai.definePrompt({
   Forest Coverage: {{{forestCoverage}}}%
   Agricultural Area: {{{agriculturalArea}}}%
 
-  Consider the following rules when providing a recommendation, including the priority score in the recommendation text:
+  Consider the following rules when providing a recommendation. Return all rules that match. Include the priority score in the output for each recommendation.
   - IF water_coverage < 30% AND total_claims > 5 THEN recommend "JJM Borewell Program" (priority: 8)
   - IF forest_coverage > 60% AND cfr_claims > 0 THEN recommend "Community Forest Management Scheme" (priority: 7)
   - IF agricultural_area > 40% AND ifr_claims > 3 THEN recommend "PM-KISAN Direct Benefit Transfer" (priority: 6)
   - IF total_claims > 10 AND pending_claims > 5 THEN recommend "Fast Track FRA Processing" (priority: 9)
   - IF water_coverage < 20% THEN recommend "MGNREGA Water Conservation Works" (priority: 7)
 
-  Provide a concise recommendation and a clear justification. Pick the highest priority recommendation if multiple rules match.
+  Provide a concise recommendation and a clear justification for each applicable scheme.
   `,
 });
 

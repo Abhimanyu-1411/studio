@@ -36,4 +36,5 @@ export type Village = {
 export type DssRecommendation = {
   recommendation: string;
   justification: string;
+  priority: number;
 };

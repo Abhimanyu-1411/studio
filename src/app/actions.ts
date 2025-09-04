@@ -32,7 +32,7 @@ export async function handleClaimUpload(documentDataUri: string) {
   };
 }
 
-export async function getDssRecommendation(villageId: string, claims: Claim[]): Promise<DssRecommendation> {
+export async function getDssRecommendation(villageId: string, claims: Claim[]): Promise<DssRecommendation[]> {
     const village = VILLAGES.find(v => v.id === villageId);
     if (!village) {
         throw new Error("Village not found");
@@ -51,5 +51,5 @@ export async function getDssRecommendation(villageId: string, claims: Claim[]): 
         agriculturalArea: village.assetCoverage.agriculture,
     });
 
-    return result;
+    return result.sort((a, b) => b.priority - a.priority);
 }
