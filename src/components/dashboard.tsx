@@ -82,11 +82,14 @@ export function Dashboard() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-6">
               <Card>
-                <CardHeader>
-                  <CardTitle>Interactive Map</CardTitle>
-                  <CardDescription>Explore claims and village boundaries</CardDescription>
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <div>
+                    <CardTitle>Interactive Map</CardTitle>
+                    <CardDescription>Explore claims and village boundaries</CardDescription>
+                  </div>
+                  <AssetLayersControl activeLayers={activeLayers} onActiveLayersChange={setActiveLayers} />
                 </CardHeader>
-                <CardContent className="h-[500px] p-0 relative">
+                <CardContent className="h-[500px] p-0">
                   <MapView
                     claims={claims}
                     villages={VILLAGES}
@@ -96,9 +99,6 @@ export function Dashboard() {
                     zoom={mapZoom}
                     activeLayers={activeLayers}
                   />
-                   <div className="absolute top-2 right-2 z-10">
-                      <AssetLayersControl activeLayers={activeLayers} onActiveLayersChange={setActiveLayers} />
-                    </div>
                 </CardContent>
               </Card>
             </div>
