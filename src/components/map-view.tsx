@@ -1,6 +1,7 @@
 'use client';
 
-import { APIProvider, Map, AdvancedMarker, Polygon, InfoWindow } from '@vis.gl/react-google-maps';
+import { APIProvider, Map, AdvancedMarker, InfoWindow } from '@vis.gl/react-google-maps';
+import { Polygon } from '@/components/polygon';
 import { useState, useCallback } from 'react';
 import type { Claim, Village, DssRecommendation } from '@/types';
 import { Button } from './ui/button';
