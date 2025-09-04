@@ -9,30 +9,43 @@ export const VILLAGES: Village[] = [
     center: { lat: 26.4, lng: 82.55 },
     bounds: [
       { lat: 26.42, lng: 82.53 },
+      { lat: 26.425, lng: 82.55 },
       { lat: 26.42, lng: 82.57 },
+      { lat: 26.4, lng: 82.58 },
       { lat: 26.38, lng: 82.57 },
+      { lat: 26.375, lng: 82.55 },
       { lat: 26.38, lng: 82.53 },
+      { lat: 26.4, lng: 82.52 },
     ],
     assetGeometries: {
       water: [
         [
           { lat: 26.415, lng: 82.535 },
           { lat: 26.418, lng: 82.54 },
+          { lat: 26.419, lng: 82.545 },
+          { lat: 26.416, lng: 82.548 },
           { lat: 26.412, lng: 82.542 },
+          { lat: 26.413, lng: 82.537 },
         ]
       ],
       forest: [
         [
           { lat: 26.39, lng: 82.54 },
+          { lat: 26.395, lng: 82.545 },
           { lat: 26.4, lng: 82.56 },
+          { lat: 26.395, lng: 82.565 },
           { lat: 26.385, lng: 82.55 },
+          { lat: 26.387, lng: 82.545 },
         ]
       ],
       agriculture: [
         [
           { lat: 26.41, lng: 82.56 },
           { lat: 26.415, lng: 82.568 },
+          { lat: 26.412, lng: 82.572 },
+          { lat: 26.408, lng: 82.571 },
           { lat: 26.405, lng: 82.565 },
+          { lat: 26.407, lng: 82.562 },
         ]
       ]
     }
@@ -45,16 +58,24 @@ export const VILLAGES: Village[] = [
     center: { lat: 26.25, lng: 82.07 },
     bounds: [
       { lat: 26.27, lng: 82.05 },
+      { lat: 26.275, lng: 82.06 },
       { lat: 26.27, lng: 82.09 },
+      { lat: 26.26, lng: 82.095 },
       { lat: 26.23, lng: 82.09 },
+      { lat: 26.225, lng: 82.08 },
       { lat: 26.23, lng: 82.05 },
+      { lat: 26.24, lng: 82.045 },
+      { lat: 26.26, lng: 82.045 },
     ],
     assetGeometries: {
       water: [
          [
           { lat: 26.26, lng: 82.055 },
           { lat: 26.265, lng: 82.06 },
+          { lat: 26.268, lng: 82.065 },
+          { lat: 26.263, lng: 82.068 },
           { lat: 26.255, lng: 82.062 },
+          { lat: 26.257, lng: 82.057 },
         ]
       ],
       forest: [],
@@ -62,7 +83,10 @@ export const VILLAGES: Village[] = [
         [
           { lat: 26.24, lng: 82.06 },
           { lat: 26.25, lng: 82.08 },
+          { lat: 26.245, lng: 82.085 },
+          { lat: 26.238, lng: 82.082 },
           { lat: 26.235, lng: 82.07 },
+          { lat: 26.237, lng: 82.065 },
         ]
       ]
     }
@@ -75,9 +99,14 @@ export const VILLAGES: Village[] = [
     center: { lat: 26.79, lng: 82.71 },
     bounds: [
       { lat: 26.81, lng: 82.69 },
+      { lat: 26.815, lng: 82.70 },
       { lat: 26.81, lng: 82.73 },
+      { lat: 26.80, lng: 82.735 },
       { lat: 26.77, lng: 82.73 },
+      { lat: 26.765, lng: 82.72 },
       { lat: 26.77, lng: 82.69 },
+      { lat: 26.78, lng: 82.685 },
+      { lat: 26.80, lng: 82.685 },
     ],
     assetGeometries: {
       water: [],
@@ -85,7 +114,10 @@ export const VILLAGES: Village[] = [
         [
           { lat: 26.78, lng: 82.7 },
           { lat: 26.8, lng: 82.72 },
+          { lat: 26.795, lng: 82.725 },
+          { lat: 26.785, lng: 82.728 },
           { lat: 26.775, lng: 82.71 },
+          { lat: 26.778, lng: 82.705 },
         ]
       ],
       agriculture: [],
