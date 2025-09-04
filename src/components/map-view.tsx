@@ -12,11 +12,7 @@ import L from 'leaflet';
 type MapViewProps = {
   claims: Claim[];
   villages: Village[];
-  center: { lat: number; lng: number };
-  zoom: number;
-  activeLayers: Record<string, boolean>;
   onVillageClick: (village: Village) => void;
-  onClaimClick: (claim: Claim) => void;
   onClaimEdit: (claim: Claim) => void;
 };
 
@@ -53,53 +49,72 @@ const MapController = ({ center, zoom }: { center: {lat: number, lng: number}, z
     return null;
 }
 
-const MapViewComponent = ({ claims, villages, center, zoom, activeLayers, onVillageClick, onClaimClick, onClaimEdit }: MapViewProps) => {
+const MapViewComponent = ({ claims, villages, onVillageClick, onClaimEdit }: MapViewProps) => {
   const [selectedClaimId, setSelectedClaimId] = useState<string | null>(null);
-
-  const handleVillageClick = useCallback((village: Village) => {
-    setSelectedClaimId(null);
-    onVillageClick(village);
-  }, [onVillageClick]);
+  const [mapCenter, setMapCenter] = useState({ lat: 26.5, lng: 82.4 });
+  const [mapZoom, setMapZoom] = useState(9);
+  const [activeLayers, setActiveLayers] = useState<Record<string, boolean>>({
+    ndwi: false,
+    water: false,
+    agriculture: false,
+    forest: false,
+  });
 
   const handleClaimClick = (claim: Claim) => {
     setSelectedClaimId(claim.id);
-    onClaimClick(claim)
-  };
-  
-  const getPolygonOptions = (village: Village) => {
-    let fillColor = 'hsl(var(--primary))';
-    let fillOpacity = 0.1;
-    
-    if (activeLayers.water) {
-      fillColor = 'blue';
-      fillOpacity = village.assetCoverage.water / 100 * 0.6;
-    } else if (activeLayers.forest) {
-      fillColor = 'darkgreen';
-      fillOpacity = village.assetCoverage.forest / 100 * 0.6;
-    } else if (activeLayers.agriculture) {
-      fillColor = 'yellow';
-      fillOpacity = village.assetCoverage.agriculture / 100 * 0.6;
-    } else if (activeLayers.ndwi) {
-        fillColor = village.ndwi > 0.5 ? 'hsl(var(--chart-2))' : 'hsl(var(--chart-4))';
-        fillOpacity = 0.6;
+    if(claim.location) {
+        setMapCenter(claim.location);
+        setMapZoom(14);
     }
+  };
 
-    return {
+  useEffect(() => {
+    if (claims.length > 0) {
+        const lastClaim = claims[0];
+        if (lastClaim.location) {
+            setMapCenter(lastClaim.location);
+            setMapZoom(12);
+        }
+    }
+  }, [claims]);
+
+
+  const getPolygonOptions = (village: Village) => {
+    const options = {
       color: 'hsl(var(--primary))',
       weight: 2,
       opacity: 0.8,
-      fillColor: fillColor,
-      fillOpacity: fillOpacity,
+      fillColor: 'hsl(var(--primary))',
+      fillOpacity: 0.1,
     };
+
+    if (activeLayers.water) {
+      options.fillColor = 'blue';
+      options.fillOpacity = village.assetCoverage.water / 100 * 0.6;
+    }
+    if (activeLayers.forest) {
+      options.fillColor = 'darkgreen';
+      options.fillOpacity = village.assetCoverage.forest / 100 * 0.6;
+    }
+    if (activeLayers.agriculture) {
+      options.fillColor = 'yellow';
+      options.fillOpacity = village.assetCoverage.agriculture / 100 * 0.6;
+    }
+    if (activeLayers.ndwi) {
+        options.fillColor = village.ndwi > 0.5 ? 'hsl(var(--chart-2))' : 'hsl(var(--chart-4))';
+        options.fillOpacity = 0.6;
+    }
+
+    return options;
   };
 
   return (
-    <MapContainer center={center} zoom={zoom} scrollWheelZoom={true} style={{ height: '100%', width: '100%' }}>
+    <MapContainer center={mapCenter} zoom={mapZoom} scrollWheelZoom={true} style={{ height: '100%', width: '100%' }}>
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
-      <MapController center={center} zoom={zoom} />
+      <MapController center={mapCenter} zoom={mapZoom} />
       
       {villages.map((village) => (
          <Polygon
@@ -107,7 +122,7 @@ const MapViewComponent = ({ claims, villages, center, zoom, activeLayers, onVill
             positions={village.bounds}
             pathOptions={getPolygonOptions(village)}
             eventHandlers={{
-                click: () => handleVillageClick(village),
+                click: () => onVillageClick(village),
             }}
           />
       ))}

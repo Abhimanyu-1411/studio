@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Sidebar,
   SidebarHeader,
@@ -29,8 +29,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/
 type SidebarNavProps = {
   claims: Claim[];
   onClaimAdded: (claim: Claim) => void;
-  onClaimSelect: (claim: Claim) => void;
-  onLayerToggle: (layer: string, toggled: boolean) => void;
   selectedVillage: Village | null;
   onVillageSelect: (village: Village | null) => void;
   dssRecommendation: DssRecommendation | null;
@@ -67,7 +65,6 @@ const VillageDetailView = ({
     selectedVillage,
     claims,
     onVillageSelect,
-    onClaimSelect,
     dssRecommendation,
     isLoadingDss,
     onPdfExport,
@@ -75,7 +72,6 @@ const VillageDetailView = ({
     selectedVillage: Village;
     claims: Claim[];
     onVillageSelect: (village: Village | null) => void;
-    onClaimSelect: (claim: Claim) => void;
     dssRecommendation: DssRecommendation | null;
     isLoadingDss: boolean;
     onPdfExport: () => void;
@@ -139,7 +135,7 @@ const VillageDetailView = ({
                           {claimsInVillage.length === 0 && <p className="px-2 text-sm text-muted-foreground">No claims linked to this village.</p>}
                           {claimsInVillage.map((claim) => (
                             <SidebarMenuItem key={claim.id}>
-                              <SidebarMenuButton onClick={() => onClaimSelect(claim)} size="lg" className="h-auto py-2">
+                              <SidebarMenuButton size="lg" className="h-auto py-2">
                                 <FileText />
                                 <div className="flex flex-col items-start w-full">
                                     <span className="font-medium">{claim.claimantName}</span>
@@ -171,18 +167,29 @@ const VillageDetailView = ({
 
 const GlobalView = ({
     claims,
-    onClaimSelect,
     onLayerToggle,
     setUploadOpen,
     handleExport,
 }: {
     claims: Claim[];
-    onClaimSelect: (claim: Claim) => void;
     onLayerToggle: (layer: string, toggled: boolean) => void;
     setUploadOpen: (open: boolean) => void;
     handleExport: () => void;
 }) => {
     const [searchTerm, setSearchTerm] = useState('');
+    const [activeLayers, setActiveLayers] = useState<Record<string, boolean>>({
+      ndwi: false,
+      water: false,
+      agriculture: false,
+      forest: false,
+    });
+
+    const handleLayerToggle = (layer: string, toggled: boolean) => {
+        const newLayers = { ...activeLayers, [layer]: toggled };
+        setActiveLayers(newLayers);
+        onLayerToggle(layer, toggled);
+    };
+
     const filteredClaims = claims.filter(claim =>
         claim.claimantName.toLowerCase().includes(searchTerm.toLowerCase())
     );
@@ -218,7 +225,7 @@ const GlobalView = ({
             {claims.length === 0 && <p className="px-2 text-sm text-muted-foreground">No claims uploaded yet.</p>}
             {filteredClaims.map((claim) => (
               <SidebarMenuItem key={claim.id}>
-                <SidebarMenuButton onClick={() => onClaimSelect(claim)} size="lg" className="h-auto py-2">
+                <SidebarMenuButton size="lg" className="h-auto py-2">
                   <FileText />
                   <div className="flex flex-col items-start w-full">
                       <span className="font-medium">{claim.claimantName}</span>
@@ -243,19 +250,19 @@ const GlobalView = ({
           <div className="flex flex-col gap-4 p-2">
               <div className="flex items-center justify-between">
                   <Label htmlFor="ndwi-toggle" className="flex items-center gap-2"><Droplets className="text-blue-500" />NDWI Overlay</Label>
-                  <Switch id="ndwi-toggle" onCheckedChange={(c) => onLayerToggle('ndwi', c)} />
+                  <Switch id="ndwi-toggle" onCheckedChange={(c) => handleLayerToggle('ndwi', c)} />
               </div>
               <div className="flex items-center justify-between">
                   <Label htmlFor="water-toggle" className="flex items-center gap-2"><Waves className="text-cyan-500" />Water Bodies</Label>
-                  <Switch id="water-toggle" onCheckedChange={(c) => onLayerToggle('water', c)} />
+                  <Switch id="water-toggle" onCheckedChange={(c) => handleLayerToggle('water', c)} />
               </div>
                <div className="flex items-center justify-between">
                   <Label htmlFor="forest-toggle" className="flex items-center gap-2"><Leaf className="text-green-600" />Forest Cover</Label>
-                  <Switch id="forest-toggle" onCheckedChange={(c) => onLayerToggle('forest', c)} />
+                  <Switch id="forest-toggle" onCheckedChange={(c) => handleLayerToggle('forest', c)} />
               </div>
                <div className="flex items-center justify-between">
                   <Label htmlFor="agriculture-toggle" className="flex items-center gap-2"><LandPlot className="text-yellow-600"/>Agricultural Areas</Label>
-                  <Switch id="agriculture-toggle" onCheckedChange={(c) => onLayerToggle('agriculture', c)} />
+                  <Switch id="agriculture-toggle" onCheckedChange={(c) => handleLayerToggle('agriculture', c)} />
               </div>
           </div>
         </SidebarGroup>
@@ -275,8 +282,6 @@ const GlobalView = ({
 export function SidebarNav({ 
   claims, 
   onClaimAdded, 
-  onClaimSelect, 
-  onLayerToggle, 
   selectedVillage, 
   onVillageSelect,
   dssRecommendation,
@@ -284,6 +289,14 @@ export function SidebarNav({
 }: SidebarNavProps) {
   const [isUploadOpen, setUploadOpen] = useState(false);
   const { toast } = useToast();
+  const [activeLayers, setActiveLayers] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    // This is a workaround to pass layer changes to the map view
+    // A better solution would be a global state manager like Zustand or Redux
+    const event = new CustomEvent('layer-toggle', { detail: activeLayers });
+    window.dispatchEvent(event);
+  }, [activeLayers]);
 
   const handleExport = () => {
     if (claims.length === 0) {
@@ -332,7 +345,6 @@ export function SidebarNav({
                 selectedVillage={selectedVillage}
                 claims={claims}
                 onVillageSelect={onVillageSelect}
-                onClaimSelect={onClaimSelect}
                 dssRecommendation={dssRecommendation}
                 isLoadingDss={isLoadingDss}
                 onPdfExport={handlePdfExport}
@@ -340,8 +352,7 @@ export function SidebarNav({
         ) : (
             <GlobalView 
                 claims={claims}
-                onClaimSelect={onClaimSelect}
-                onLayerToggle={onLayerToggle}
+                onLayerToggle={(layer, toggled) => setActiveLayers(prev => ({...prev, [layer]: toggled}))}
                 setUploadOpen={setUploadOpen}
                 handleExport={handleExport}
             />

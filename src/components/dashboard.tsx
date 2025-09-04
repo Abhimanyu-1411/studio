@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import dynamic from 'next/dynamic';
 import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
 import { SidebarNav } from '@/components/sidebar-nav';
@@ -10,9 +10,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { getDssRecommendation } from '@/app/actions';
 import { ClaimEdit } from './claim-edit';
 import { Skeleton } from './ui/skeleton';
-import { MapView } from './map-view';
 
-const MapViewDynamic = dynamic(() => import('@/components/map-view').then(mod => mod.MapView), { 
+const MapView = dynamic(() => import('@/components/map-view').then(mod => mod.MapView), { 
     ssr: false,
     loading: () => <Skeleton className="h-full w-full" />,
 });
@@ -20,15 +19,6 @@ const MapViewDynamic = dynamic(() => import('@/components/map-view').then(mod =>
 
 export function Dashboard() {
   const [claims, setClaims] = useState<Claim[]>([]);
-  const [mapCenter, setMapCenter] = useState({ lat: 26.5, lng: 82.4 });
-  const [mapZoom, setMapZoom] = useState(9);
-  const [activeLayers, setActiveLayers] = useState<Record<string, boolean>>({
-    ndwi: false,
-    ndvi: false,
-    water: false,
-    agriculture: false,
-    forest: false,
-  });
   const [selectedVillage, setSelectedVillage] = useState<Village | null>(null);
   const [dssRecommendation, setDssRecommendation] = useState<DssRecommendation | null>(null);
   const [isLoadingDss, setIsLoadingDss] = useState(false);
@@ -36,20 +26,8 @@ export function Dashboard() {
 
   const handleClaimAdded = (newClaim: Claim) => {
     setClaims((prevClaims) => [newClaim, ...prevClaims]);
-    if(newClaim.location) {
-        setMapCenter(newClaim.location);
-        setMapZoom(12);
-    }
   };
   
-  const handleClaimSelect = (claim: Claim) => {
-    setSelectedVillage(null);
-    if(claim.location) {
-        setMapCenter(claim.location);
-        setMapZoom(14);
-    }
-  }
-
   const handleClaimUpdate = (updatedClaim: Claim) => {
     setClaims(prev => prev.map(c => c.id === updatedClaim.id ? updatedClaim : c));
     setEditingClaim(null);
@@ -76,10 +54,6 @@ export function Dashboard() {
     }
   }
   
-  const handleLayerToggle = (layer: string, toggled: boolean) => {
-    setActiveLayers(prev => ({ ...prev, [layer]: toggled }));
-  }
-
   const getStats = () => {
     const totalClaims = claims.length;
     const linkedClaims = claims.filter(c => c.status === 'linked' || c.status === 'reviewed' || c.status === 'needs-review').length;
@@ -94,26 +68,14 @@ export function Dashboard() {
       <SidebarNav 
         claims={claims} 
         onClaimAdded={handleClaimAdded} 
-        onClaimSelect={handleClaimSelect} 
-        onLayerToggle={handleLayerToggle}
         selectedVillage={selectedVillage}
         onVillageSelect={handleVillageSelect}
         dssRecommendation={dssRecommendation}
         isLoadingDss={isLoadingDss}
       />
       <SidebarInset>
-        <div className="relative h-full w-full">
-            <MapViewDynamic
-                claims={claims} 
-                villages={VILLAGES}
-                center={mapCenter}
-                zoom={mapZoom}
-                activeLayers={activeLayers}
-                onVillageClick={handleVillageSelect}
-                onClaimClick={handleClaimSelect}
-                onClaimEdit={setEditingClaim}
-            />
-            <div className="absolute top-4 left-4 grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="relative h-full w-full flex flex-col">
+            <div className="absolute top-4 left-4 z-10 grid grid-cols-2 md:grid-cols-4 gap-4">
                 <Card>
                     <CardContent className="p-4">
                         <p className="text-sm text-muted-foreground">Total Claims</p>
@@ -138,6 +100,14 @@ export function Dashboard() {
                         <p className="text-2xl font-bold">{stats.linkSuccessRate.toFixed(0)}%</p>
                     </CardContent>
                 </Card>
+            </div>
+            <div className="flex-grow">
+                <MapView
+                    claims={claims} 
+                    villages={VILLAGES}
+                    onVillageClick={handleVillageSelect}
+                    onClaimEdit={setEditingClaim}
+                />
             </div>
             <ClaimEdit
               claim={editingClaim}
