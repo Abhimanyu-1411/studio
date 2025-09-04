@@ -17,7 +17,7 @@ import { Loader2, UploadCloud, FileCheck2, XCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { handleClaimUpload } from '@/app/actions';
 import type { Claim } from '@/types';
-// import { useDropzone } from 'react-dropzone';
+import { useDropzone } from 'react-dropzone';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
 
@@ -58,15 +58,11 @@ export function ClaimUpload({ open, onOpenChange, onClaimAdded }: ClaimUploadPro
     }
   }, [toast]);
   
-  // const { getRootProps, getInputProps, isDragActive } = useDropzone({
-  //   onDrop,
-  //   accept: { 'image/*': ['.jpeg', '.png'], 'application/pdf': ['.pdf'] },
-  //   multiple: false
-  // });
-
-  const getRootProps = () => ({});
-  const getInputProps = () => ({});
-  const isDragActive = false;
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: { 'image/*': ['.jpeg', '.png'], 'application/pdf': ['.pdf'] },
+    multiple: false
+  });
 
   const resetState = () => {
     setFile(null);
