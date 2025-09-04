@@ -16,6 +16,41 @@ const MapView = dynamic(() => import('@/components/map-view').then(mod => mod.Ma
     loading: () => <Skeleton className="h-full w-full" />,
 });
 
+const StatsCards = ({ claims }: { claims: Claim[] }) => {
+    const totalClaims = claims.length;
+    const linkedClaims = claims.filter(c => c.status === 'linked' || c.status === 'reviewed' || c.status === 'needs-review').length;
+    const pendingClaims = totalClaims - linkedClaims;
+    const linkSuccessRate = totalClaims > 0 ? (linkedClaims / totalClaims) * 100 : 0;
+
+    return (
+        <div className="absolute top-4 left-4 z-10 grid grid-cols-2 md:grid-cols-4 gap-4">
+            <Card>
+                <CardContent className="p-4">
+                    <p className="text-sm text-muted-foreground">Total Claims</p>
+                    <p className="text-2xl font-bold">{totalClaims}</p>
+                </CardContent>
+            </Card>
+            <Card>
+                <CardContent className="p-4">
+                    <p className="text-sm text-muted-foreground">Linked Claims</p>
+                    <p className="text-2xl font-bold">{linkedClaims}</p>
+                </CardContent>
+            </Card>
+            <Card>
+                <CardContent className="p-4">
+                    <p className="text-sm text-muted-foreground">Pending</p>
+                    <p className="text-2xl font-bold">{pendingClaims}</p>
+                </CardContent>
+            </Card>
+            <Card>
+                <CardContent className="p-4">
+                    <p className="text-sm text-muted-foreground">Link Success</p>
+                    <p className="text-2xl font-bold">{linkSuccessRate.toFixed(0)}%</p>
+                </CardContent>
+            </Card>
+        </div>
+    );
+};
 
 export function Dashboard() {
   const [claims, setClaims] = useState<Claim[]>([]);
@@ -69,15 +104,6 @@ export function Dashboard() {
         setMapZoom(14);
     }
   }
-  
-  const getStats = () => {
-    const totalClaims = claims.length;
-    const linkedClaims = claims.filter(c => c.status === 'linked' || c.status === 'reviewed' || c.status === 'needs-review').length;
-    const pendingClaims = totalClaims - linkedClaims;
-    const linkSuccessRate = totalClaims > 0 ? (linkedClaims / totalClaims) * 100 : 0;
-    return { totalClaims, linkedClaims, pendingClaims, linkSuccessRate };
-  }
-  const stats = getStats();
 
   return (
     <SidebarProvider>
@@ -91,32 +117,7 @@ export function Dashboard() {
       />
       <SidebarInset>
         <div className="relative h-full w-full flex flex-col">
-            <div className="absolute top-4 left-4 z-10 grid grid-cols-2 md:grid-cols-4 gap-4">
-                <Card>
-                    <CardContent className="p-4">
-                        <p className="text-sm text-muted-foreground">Total Claims</p>
-                        <p className="text-2xl font-bold">{stats.totalClaims}</p>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardContent className="p-4">
-                        <p className="text-sm text-muted-foreground">Linked Claims</p>
-                        <p className="text-2xl font-bold">{stats.linkedClaims}</p>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardContent className="p-4">
-                        <p className="text-sm text-muted-foreground">Pending</p>
-                        <p className="text-2xl font-bold">{stats.pendingClaims}</p>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardContent className="p-4">
-                        <p className="text-sm text-muted-foreground">Link Success</p>
-                        <p className="text-2xl font-bold">{stats.linkSuccessRate.toFixed(0)}%</p>
-                    </CardContent>
-                </Card>
-            </div>
+            <StatsCards claims={claims} />
             <div className="flex-grow">
                 <MapView
                     claims={claims} 

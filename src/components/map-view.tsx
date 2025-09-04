@@ -52,7 +52,6 @@ const MapController = ({ center, zoom }: { center: { lat: number, lng: number },
 }
 
 const MapViewComponent = ({ claims, villages, onVillageClick, onClaimEdit, center, zoom }: MapViewProps) => {
-  const [selectedClaimId, setSelectedClaimId] = useState<string | null>(null);
   const [activeLayers, setActiveLayers] = useState<Record<string, boolean>>({
     ndwi: false,
     water: false,
@@ -70,9 +69,6 @@ const MapViewComponent = ({ claims, villages, onVillageClick, onClaimEdit, cente
     };
   }, []);
 
-  const handleClaimClick = (claim: Claim) => {
-    setSelectedClaimId(claim.id);
-  };
 
   const getPolygonOptions = (village: Village) => {
     const options: L.PathOptions = {
@@ -84,7 +80,7 @@ const MapViewComponent = ({ claims, villages, onVillageClick, onClaimEdit, cente
     };
 
     let fillOpacity = 0.1;
-    let fillColor = options.fillColor;
+    let fillColor = options.fillColor as string;
 
     if (activeLayers.water) {
       fillColor = 'blue';
@@ -138,9 +134,6 @@ const MapViewComponent = ({ claims, villages, onVillageClick, onClaimEdit, cente
           key={claim.id}
           position={claim.location}
           icon={getClaimIcon(claim)}
-          eventHandlers={{
-            click: () => handleClaimClick(claim),
-          }}
         >
           <Popup>
             <Card className="border-0 shadow-none max-w-sm">
