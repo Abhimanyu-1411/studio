@@ -174,27 +174,22 @@ export default function DashboardPage() {
   }
   
   const MainContent = () => (
-    <>
-      <div className="grid auto-rows-max items-start gap-4 md:gap-8 lg:col-span-2 xl:col-span-3">
-           <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4">
-              <StatsCard title="Total Claims" value={totalClaims} icon={FileText} color="#3b82f6" />
-              <StatsCard title="Pending Review" value={pendingClaims} icon={Clock} color="#f59e0b" />
-              <StatsCard title="Linked to Map" value={approvedClaims} icon={CheckCircle} color="#10b981" />
-              <StatsCard title="Total Villages" value={totalVillages} icon={MapPin} color="#8b5cf6" />
-           </div>
-           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
-              <MapCard className="h-[40vh] md:h-[60vh] xl:h-[calc(100vh-220px)]" />
-              <div className="space-y-4">
-                  <RecentClaims claims={claims.slice(0, 5)} onClaimSelect={handleClaimEdit} />
-                  <QuickActions 
-                    onUpload={() => setUploadOpen(true)} 
-                    onViewClaims={() => { router.push('/claims')}} 
-                    onUploadShapefile={() => setShapefileUploadOpen(true)}
-                    />
-              </div>
-          </div>
-      </div>
-    </>
+    <div className="grid auto-rows-max items-start gap-4 md:gap-8 lg:col-span-2">
+         <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4">
+            <StatsCard title="Total Claims" value={totalClaims} icon={FileText} color="#3b82f6" />
+            <StatsCard title="Pending Review" value={pendingClaims} icon={Clock} color="#f59e0b" />
+            <StatsCard title="Linked to Map" value={approvedClaims} icon={CheckCircle} color="#10b981" />
+            <StatsCard title="Total Villages" value={totalVillages} icon={MapPin} color="#8b5cf6" />
+         </div>
+         <div className="grid gap-4 lg:grid-cols-1">
+            <RecentClaims claims={claims.slice(0, 5)} onClaimSelect={handleClaimEdit} />
+            <QuickActions 
+              onUpload={() => setUploadOpen(true)} 
+              onViewClaims={() => { router.push('/claims')}} 
+              onUploadShapefile={() => setShapefileUploadOpen(true)}
+              />
+        </div>
+    </div>
   );
 
   const renderContent = () => {
@@ -232,13 +227,22 @@ export default function DashboardPage() {
         );
     }
     
-    return <MainContent />;
+    // Main Dashboard Layout
+    return (
+        <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-8">
+            <div className="lg:col-span-2 xl:col-span-3">
+                 <MapCard className="h-[40vh] md:h-[60vh] xl:h-[calc(100vh-220px)]" />
+            </div>
+            <div className="lg:col-span-1 xl:col-span-1">
+                 <MainContent />
+            </div>
+        </div>
+    );
   }
 
   return (
     <>
-      <div className={cn("grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8", 
-        !editingClaim && !isShapefileUploadOpen && "lg:grid-cols-3 xl:grid-cols-4")}>
+      <div className={cn("grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8")}>
           {renderContent()}
       </div>
 
