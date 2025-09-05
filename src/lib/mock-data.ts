@@ -1,5 +1,5 @@
 
-import type { Claim, Village } from '@/types';
+import type { Claim, Village, TimeSeriesDataPoint } from '@/types';
 
 // Generate mock time-series data
 const generateTimeSeries = (startValue: number, length: number, seasonality: number[], trend: number) => {
@@ -12,16 +12,23 @@ const generateTimeSeries = (startValue: number, length: number, seasonality: num
     const month = date.getMonth();
     
     // Apply seasonality, trend, and some randomness
-    const value = startValue 
-      + (seasonality[month % 12] * startValue) 
-      + (i * trend)
-      + (Math.random() - 0.5) * 0.1 * startValue; // noise
-      
+    const rainfallValue = Math.max(0, startValue + (seasonality[month % 12] * startValue) + (i * trend) + (Math.random() - 0.5) * 0.1 * startValue);
+    const ndwiValue = Math.max(0, Math.min(1, startValue / 200 + (seasonality[month % 12]) + (i * trend / 1000) + (Math.random() - 0.5) * 0.1));
+    const ndviValue = Math.max(0, Math.min(1, startValue / 150 + (seasonality[month % 12]) + (i * trend / 1000) + (Math.random() - 0.5) * 0.1));
+    
+    // Calculate deforestation risk (example logic)
+    // Lower NDVI (less vegetation) and extreme rainfall (stress) could increase risk
+    const ndviRisk = 1 - ndviValue; // Lower NDVI = higher risk
+    const rainfallRisk = Math.abs(rainfallValue - 100) / 200; // Deviating from a norm of 100mm increases risk, normalized
+    const deforestationRisk = Math.max(0, Math.min(1, (ndviRisk * 0.7) + (rainfallRisk * 0.3) + (Math.random() - 0.5) * 0.1));
+
+
     series.push({
       date: date.toISOString().split('T')[0],
-      rainfall: Math.max(0, value), // rainfall can't be negative
-      ndwi: Math.max(0, Math.min(1, startValue / 200 + (seasonality[month % 12]) + (i * trend / 1000) + (Math.random() - 0.5) * 0.1)), // NDWI between 0 and 1
-      ndvi: Math.max(0, Math.min(1, startValue / 150 + (seasonality[month % 12]) + (i * trend / 1000) + (Math.random() - 0.5) * 0.1)), // NDVI between 0 and 1
+      rainfall: rainfallValue,
+      ndwi: ndwiValue,
+      ndvi: ndviValue,
+      deforestationRisk,
     });
   }
   return series;
@@ -343,3 +350,4 @@ export const MOCK_CLAIMS: Claim[] = [
 ];
 
 export const AVAILABLE_VILLAGE_NAMES = VILLAGES.map(v => v.name);
+

@@ -1,4 +1,5 @@
 
+
 type FieldWithConfidence<T> = {
   value: T;
   confidence: number;
@@ -26,6 +27,7 @@ export type TimeSeriesDataPoint = {
   rainfall: number; // in mm
   ndwi: number; // index value
   ndvi: number; // index value
+  deforestationRisk: number; // index value 0-1
 }
 
 export type Village = {
@@ -52,3 +54,4 @@ export type DssRecommendation = {
   justification: string;
   priority: number;
 };
+

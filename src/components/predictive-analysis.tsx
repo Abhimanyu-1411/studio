@@ -36,6 +36,7 @@ const metricOptions: { value: Metric; label: string }[] = [
   { value: 'rainfall', label: 'Rainfall (mm)' },
   { value: 'ndwi', label: 'NDWI (Water Availability)' },
   { value: 'ndvi', label: 'NDVI (Vegetation Health)' },
+  { value: 'deforestationRisk', label: 'Deforestation Risk Score' },
 ];
 
 export function PredictiveAnalysis({ villages }: PredictiveAnalysisProps) {
@@ -197,3 +198,4 @@ export function PredictiveAnalysis({ villages }: PredictiveAnalysisProps) {
     </div>
   );
 }
+
