@@ -68,7 +68,7 @@ export function Header({ onNavClick, onUploadClick }: HeaderProps) {
   )
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
+    <header className="sticky top-0 z-40 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
       <div className="flex items-center gap-2 md:gap-4">
         <Sheet open={isMobileMenuOpen} onOpenChange={setMobileMenuOpen}>
           <SheetTrigger asChild>
@@ -79,7 +79,7 @@ export function Header({ onNavClick, onUploadClick }: HeaderProps) {
           </SheetTrigger>
           <SheetContent side="left" className="p-0 sm:max-w-xs">
             <SheetHeader className="p-4 border-b">
-              <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+              <SheetTitle>Navigation Menu</SheetTitle>
               <SheetDescription className="sr-only">Main navigation links for the application.</SheetDescription>
               <Logo />
             </SheetHeader>
