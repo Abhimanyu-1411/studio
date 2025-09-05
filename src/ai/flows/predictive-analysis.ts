@@ -51,7 +51,7 @@ Provide the forecast in JSON format.
 const predictiveAnalysisFlow = ai.defineFlow(
   {
     name: 'predictiveAnalysisFlow',
-    inputSchema: Predictive.AnalysisInputSchema,
+    inputSchema: PredictiveAnalysisInputSchema,
     outputSchema: PredictiveAnalysisOutputSchema,
   },
   async input => {
