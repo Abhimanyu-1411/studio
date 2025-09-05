@@ -242,7 +242,6 @@ export default function DashboardPage() {
           {renderContent()}
       </div>
 
-       {/* Modals and Fullscreen overlays */}
        {isMapFullScreen && (
          <div className="fixed inset-0 z-50 bg-background">
              <MapCard className="h-full w-full border-none rounded-none" inFullScreen={true} />
@@ -250,7 +249,6 @@ export default function DashboardPage() {
        )}
 
       <ClaimUpload open={isUploadOpen} onOpenChange={setUploadOpen} onClaimAdded={handleClaimAdded} />
-      <ShapefileUpload open={isShapefileUploadOpen && !editingClaim} onClose={() => setShapefileUploadOpen(false)} onPattasAdded={handlePattasAdded} />
       <AssetEdit 
         open={isAssetEditOpen} 
         onOpenChange={setAssetEditOpen} 
