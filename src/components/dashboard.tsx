@@ -68,7 +68,8 @@ export const VillageAnalysis = ({ villages, claims }: { villages: Village[], cla
       setRecommendations(result);
     } catch (error: any) {
       console.error(error);
-      if (error?.message?.includes('503') || error?.message?.includes('overloaded')) {
+      const errorMessage = error.message || '';
+      if (errorMessage.includes('503') || errorMessage.includes('overloaded')) {
         setErrorState({
             title: 'Service Unavailable',
             description: 'The AI recommendation service is currently overloaded. Please try again in a few moments.'

@@ -24,8 +24,9 @@ import { getPrediction } from '@/app/actions';
 import type { Village, TimeSeriesDataPoint } from '@/types';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, BrainCircuit } from 'lucide-react';
+import { Loader2, BrainCircuit, AlertCircle } from 'lucide-react';
 import { format } from 'date-fns';
+import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 
 type PredictiveAnalysisProps = {
   villages: Village[];
@@ -46,6 +47,7 @@ export function PredictiveAnalysis({ villages }: PredictiveAnalysisProps) {
   const [forecastPeriods, setForecastPeriods] = useState(12);
   const [chartData, setChartData] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [errorState, setErrorState] = useState<{title: string, description: string} | null>(null);
   const { toast } = useToast();
 
   const handleGenerateForecast = async () => {
@@ -60,6 +62,7 @@ export function PredictiveAnalysis({ villages }: PredictiveAnalysisProps) {
     
     setIsLoading(true);
     setChartData([]);
+    setErrorState(null);
 
     try {
       const data = await getPrediction(selectedVillageId, selectedMetric, forecastPeriods);
@@ -68,13 +71,21 @@ export function PredictiveAnalysis({ villages }: PredictiveAnalysisProps) {
         title: 'Forecast Generated',
         description: `Successfully forecasted ${metricOptions.find(m => m.value === selectedMetric)?.label} for the next ${forecastPeriods} months.`,
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      toast({
-        variant: 'destructive',
-        title: 'Error generating forecast',
-        description: 'Could not generate the forecast. Please try again.',
-      });
+      const errorMessage = error.message || '';
+      if (errorMessage.includes('503') || errorMessage.includes('overloaded')) {
+        setErrorState({
+            title: 'Service Unavailable',
+            description: 'The AI forecasting service is currently overloaded. Please try again in a few moments.'
+        });
+      } else {
+        toast({
+          variant: 'destructive',
+          title: 'Error generating forecast',
+          description: 'Could not generate the forecast. Please try again.',
+        });
+      }
     } finally {
       setIsLoading(false);
     }
@@ -177,20 +188,29 @@ export function PredictiveAnalysis({ villages }: PredictiveAnalysisProps) {
               Historical data and AI-powered predictions for the selected metric.
             </CardDescription>
           </CardHeader>
-          <CardContent className="h-[85%]">
+          <CardContent className="h-[85%] flex items-center justify-center">
             {isLoading && (
               <div className="flex flex-col items-center justify-center h-full">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
                 <p className="mt-4 text-muted-foreground">The AI is analyzing the data...</p>
               </div>
             )}
-            {!isLoading && chartData.length === 0 && (
+            {!isLoading && !errorState && chartData.length === 0 && (
                  <div className="flex flex-col items-center justify-center h-full text-center p-4">
                     <BrainCircuit className="h-16 w-16 text-muted-foreground mb-4" />
                     <p className="text-muted-foreground">Select a village and metric, then click "Generate Forecast" to see the prediction.</p>
                  </div>
             )}
-            {!isLoading && chartData.length > 0 && (
+            {errorState && (
+                <Alert variant="destructive" className="w-auto">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertTitle>{errorState.title}</AlertTitle>
+                    <AlertDescription>
+                    {errorState.description}
+                    </AlertDescription>
+                </Alert>
+            )}
+            {!isLoading && !errorState && chartData.length > 0 && (
                 <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={chartData} margin={{ top: 5, right: 20, left: 0, bottom: 25 }}>
                         <CartesianGrid strokeDasharray="3 3" />
