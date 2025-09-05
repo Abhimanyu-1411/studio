@@ -8,6 +8,9 @@ import { LayoutGrid, Upload, List, Map, Menu, Lightbulb, TrendingUp, LandPlot } 
 import {
   Sheet,
   SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet"
 
@@ -75,9 +78,11 @@ export function Header({ onNavClick, onUploadClick }: HeaderProps) {
             </Button>
           </SheetTrigger>
           <SheetContent side="left" className="p-0 sm:max-w-xs">
-            <div className="p-4 border-b">
+            <SheetHeader className="p-4 border-b">
+              <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+              <SheetDescription className="sr-only">Main navigation links for the application.</SheetDescription>
               <Logo />
-            </div>
+            </SheetHeader>
             <nav className="grid gap-2 text-base font-medium p-4">
               {navLinks}
             </nav>
