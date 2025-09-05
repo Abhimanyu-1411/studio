@@ -62,12 +62,12 @@ export function ClaimsTable({ claims, onClaimEdit, onClaimLink }: ClaimsTablePro
                 <TableBody>
                     {claims.map((claim) => (
                     <TableRow key={claim.id}>
-                        <TableCell className="font-medium">{claim.claimantName}</TableCell>
-                        <TableCell>{claim.linkedVillage || claim.village}</TableCell>
+                        <TableCell className="font-medium">{claim.claimantName.value}</TableCell>
+                        <TableCell>{claim.linkedVillage || claim.village.value}</TableCell>
                         <TableCell>
-                            <Badge variant="outline">{claim.claimType}</Badge>
+                            <Badge variant="outline">{claim.claimType.value}</Badge>
                         </TableCell>
-                        <TableCell>{claim.area}</TableCell>
+                        <TableCell>{claim.area.value}</TableCell>
                         <TableCell>
                             <Badge variant={claimStatusBadges[claim.status]}>
                                 {claimStatusText[claim.status]}

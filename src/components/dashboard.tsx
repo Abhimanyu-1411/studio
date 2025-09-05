@@ -157,8 +157,8 @@ const VillageAnalysis = ({ villages, claims }: { villages: Village[], claims: Cl
             <CardContent className="text-sm space-y-2">
                 <p><strong>Total Claims:</strong> {villageClaims.length}</p>
                 <p><strong>Pending Claims:</strong> {villageClaims.filter(c => c.status !== 'reviewed' && c.status !== 'linked').length}</p>
-                <p><strong>CFR Claims:</strong> {villageClaims.filter(c => c.claimType === 'CFR').length}</p>
-                <p><strong>IFR Claims:</strong> {villageClaims.filter(c => c.claimType === 'IFR').length}</p>
+                <p><strong>CFR Claims:</strong> {villageClaims.filter(c => c.claimType.value === 'CFR').length}</p>
+                <p><strong>IFR Claims:</strong> {villageClaims.filter(c => c.claimType.value === 'IFR').length}</p>
                 <p><strong>Water Coverage:</strong> {selectedVillage.assetCoverage.water}%</p>
                 <p><strong>Forest Coverage:</strong> {selectedVillage.assetCoverage.forest}%</p>
                 <p><strong>Agricultural Area:</strong> {selectedVillage.assetCoverage.agriculture}%</p>
@@ -225,6 +225,7 @@ export function Dashboard() {
     forest: false,
     agriculture: false,
   });
+  const { toast } = useToast();
 
 
   const handleClaimAdded = (newClaim: Claim) => {
@@ -244,7 +245,7 @@ export function Dashboard() {
     setClaims(prev => prev.map(c => c.id === claimToLink.id ? { ...c, status: 'linked' } : c));
     toast({
         title: 'Claim Linked',
-        description: `Claim for ${claimToLink.claimantName} is now visible on the map.`
+        description: `Claim for ${claimToLink.claimantName.value} is now visible on the map.`
     });
   }
 

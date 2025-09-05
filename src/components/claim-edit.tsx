@@ -37,11 +37,21 @@ export function ClaimEdit({ claim, onOpenChange, onClaimUpdate, availableVillage
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData(prev => ({ 
+        ...prev, 
+        [name]: { ...prev[name as keyof Claim], value: value } 
+    }));
   };
 
   const handleSelectChange = (name: keyof Claim) => (value: string) => {
-    setFormData(prev => ({ ...prev, [name]: value }));
+    if (name === 'linkedVillage') {
+        setFormData(prev => ({ ...prev, [name]: value }));
+    } else {
+        setFormData(prev => ({ 
+            ...prev, 
+            [name]: { ...prev[name as keyof Claim], value: value } 
+        }));
+    }
   }
 
   const handleSubmit = async () => {
@@ -53,18 +63,25 @@ export function ClaimEdit({ claim, onOpenChange, onClaimUpdate, availableVillage
     
     const isReviewAction = claim.status === 'needs-review';
 
-    const updatedClaim: Claim = {
+    let updatedClaim: Claim = {
         ...claim,
         ...formData,
-        status: isReviewAction ? 'reviewed' : claim.status,
-        confidenceScore: isReviewAction ? 1.0 : claim.confidenceScore,
+        status: claim.status, // Keep original status unless changed by action
     };
+
+    if (isReviewAction) {
+        updatedClaim.status = 'reviewed';
+        updatedClaim.geoLinkConfidence = 1.0;
+        if (updatedClaim.linkedVillage) {
+            updatedClaim.village = { value: updatedClaim.linkedVillage, confidence: 1.0 };
+        }
+    }
     
     onClaimUpdate(updatedClaim);
     setIsSaving(false);
     toast({
         title: isReviewAction ? 'Claim Reviewed' : 'Claim Updated',
-        description: `Successfully updated claim for ${updatedClaim.claimantName}. It is now ready to be linked.`
+        description: `Successfully updated claim for ${updatedClaim.claimantName.value}.`
     });
     onOpenChange(false);
   };
@@ -88,7 +105,7 @@ export function ClaimEdit({ claim, onOpenChange, onClaimUpdate, availableVillage
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="claimantName" className="text-right">Claimant</Label>
-            <Input id="claimantName" name="claimantName" value={formData.claimantName || ''} onChange={handleInputChange} className="col-span-3" />
+            <Input id="claimantName" name="claimantName" value={formData.claimantName?.value || ''} onChange={handleInputChange} className="col-span-3" />
           </div>
            <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="village" className="text-right">Village</Label>
@@ -103,7 +120,7 @@ export function ClaimEdit({ claim, onOpenChange, onClaimUpdate, availableVillage
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="claimType" className="text-right">Claim Type</Label>
-             <Select name="claimType" value={formData.claimType || ''} onValueChange={handleSelectChange('claimType')}>
+             <Select name="claimType" value={formData.claimType?.value || ''} onValueChange={handleSelectChange('claimType')}>
                 <SelectTrigger className="col-span-3">
                     <SelectValue placeholder="Select a type" />
                 </SelectTrigger>
@@ -116,11 +133,11 @@ export function ClaimEdit({ claim, onOpenChange, onClaimUpdate, availableVillage
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="area" className="text-right">Area</Label>
-            <Input id="area" name="area" value={formData.area || ''} onChange={handleInputChange} className="col-span-3" />
+            <Input id="area" name="area" value={formData.area?.value || ''} onChange={handleInputChange} className="col-span-3" />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="date" className="text-right">Date</Label>
-            <Input id="date" name="date" value={formData.date || ''} onChange={handleInputChange} className="col-span-3" />
+            <Input id="date" name="date" value={formData.date?.value || ''} onChange={handleInputChange} className="col-span-3" />
           </div>
         </div>
         <DialogFooter>

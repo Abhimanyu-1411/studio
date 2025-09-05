@@ -10,7 +10,7 @@ export async function handleClaimUpload(documentDataUri: string) {
   const extractedData = await extractClaimData({ documentDataUri });
 
   const geoLinkResult = await intelligentGeoLinking({
-    claimVillageName: extractedData.village,
+    claimVillageName: extractedData.village.value,
     availableVillageNames: AVAILABLE_VILLAGE_NAMES,
   });
 
@@ -31,8 +31,9 @@ export async function handleClaimUpload(documentDataUri: string) {
   
   const newClaim: Omit<Claim, 'id' | 'documentUrl' | 'documentType'> = {
     ...extractedData,
+    village: extractedData.village, // Keep the object with value and confidence
     linkedVillage: geoLinkResult.linkedVillageName,
-    confidenceScore: geoLinkResult.confidenceScore,
+    geoLinkConfidence: geoLinkResult.confidenceScore,
     status,
     location: randomLocation
   };
@@ -52,8 +53,8 @@ export async function getDssRecommendation(villageId: string, claims: Claim[]): 
         villageName: village.name,
         claimCount: claimsInVillage.length,
         pendingClaims: claimsInVillage.filter(c => c.status !== 'reviewed' && c.status !== 'linked').length,
-        cfrClaims: claimsInVillage.filter(c => c.claimType === 'CFR').length,
-        ifrClaims: claimsInVillage.filter(c => c.claimType === 'IFR').length,
+        cfrClaims: claimsInVillage.filter(c => c.claimType.value === 'CFR').length,
+        ifrClaims: claimsInVillage.filter(c => c.claimType.value === 'IFR').length,
         waterCoverage: village.assetCoverage.water,
         forestCoverage: village.assetCoverage.forest,
         agriculturalArea: village.assetCoverage.agriculture,

@@ -30,8 +30,8 @@ export function RecentClaims({ claims, onClaimSelect }: RecentClaimsProps) {
                     <FileText className="h-5 w-5 text-muted-foreground" />
                 </div>
                 <div className="flex-grow">
-                  <p className="font-medium">{claim.claimantName}</p>
-                  <p className="text-sm text-muted-foreground">{claim.village}</p>
+                  <p className="font-medium">{claim.claimantName.value}</p>
+                  <p className="text-sm text-muted-foreground">{claim.village.value}</p>
                 </div>
                 <Button variant="ghost" size="sm" onClick={() => onClaimSelect(claim)}>View</Button>
               </li>

@@ -20,12 +20,17 @@ const ExtractClaimDataInputSchema = z.object({
 });
 export type ExtractClaimDataInput = z.infer<typeof ExtractClaimDataInputSchema>;
 
+const FieldWithConfidenceSchema = z.object({
+    value: z.string(),
+    confidence: z.number().min(0).max(1).describe('The confidence score of the extraction, from 0 to 1.'),
+});
+
 const ExtractClaimDataOutputSchema = z.object({
-  claimantName: z.string().describe('The name of the claimant.'),
-  village: z.string().describe('The village where the claim is located.'),
-  claimType: z.string().describe('The type of claim.'),
-  area: z.string().describe('The area of the claim.'),
-  date: z.string().describe('The date of the claim.'),
+  claimantName: FieldWithConfidenceSchema.describe('The name of the claimant.'),
+  village: FieldWithConfidenceSchema.describe('The village where the claim is located.'),
+  claimType: FieldWithConfidenceSchema.describe('The type of claim.'),
+  area: FieldWithConfidenceSchema.describe('The area of the claim.'),
+  date: FieldWithConfidenceSchema.describe('The date of the claim.'),
 });
 export type ExtractClaimDataOutput = z.infer<typeof ExtractClaimDataOutputSchema>;
 
@@ -45,6 +50,8 @@ You will receive a claim document and you will extract the following information
 - claimType: The type of claim.
 - area: The area of the claim.
 - date: The date of the claim.
+
+For each field, provide the extracted value and a confidence score from 0.0 to 1.0 representing how certain you are about the accuracy of the extraction. A score of 1.0 means you are 100% confident.
 
 Here is the claim document: {{media url=documentDataUri}}
 
