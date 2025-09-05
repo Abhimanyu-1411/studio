@@ -1,10 +1,11 @@
+
 'use client';
 
 import { Button } from '@/components/ui/button';
 import { Upload, Menu } from 'lucide-react';
 import { ClaimUpload } from './claim-upload';
 import { useState } from 'react';
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from './ui/sheet';
+import { Sheet, SheetContent, SheetTrigger } from './ui/sheet';
 import { usePathname, useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { LayoutGrid, List, Map, Lightbulb, TrendingUp, LandPlot } from 'lucide-react';
@@ -42,12 +43,6 @@ export function Header({ onMenuClick }: HeaderProps) {
                 </Button>
             </SheetTrigger>
             <SheetContent side="left" className="sm:max-w-xs">
-                 <SheetHeader className="p-4">
-                    <SheetTitle>FRA Atlas</SheetTitle>
-                    <SheetDescription>
-                        Forest Rights Act Decision Support System
-                    </SheetDescription>
-                </SheetHeader>
                 <nav className="grid gap-6 text-lg font-medium mt-4">
                     {navItems.map(item => (
                         <button
