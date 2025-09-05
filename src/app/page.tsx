@@ -210,30 +210,14 @@ export default function DashboardPage() {
           </div>
         );
     }
-
-    if (isShapefileUploadOpen) {
-        return (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full">
-            <div className="lg:col-span-2 h-[50vh] lg:h-full">
-              <MapCard />
-            </div>
-            <div className="lg:col-span-1 h-full">
-              <ShapefileUpload 
-                onClose={() => setShapefileUploadOpen(false)}
-                onPattasAdded={handlePattasAdded}
-              />
-            </div>
-          </div>
-        );
-    }
     
     // Main Dashboard Layout
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-8">
-            <div className="lg:col-span-2 xl:col-span-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-8">
+            <div className="md:col-span-2 lg:col-span-2 xl:col-span-3">
                  <MapCard className="h-[40vh] md:h-[60vh] xl:h-[calc(100vh-220px)]" />
             </div>
-            <div className="lg:col-span-1 xl:col-span-1">
+            <div className="md:col-span-2 lg:col-span-1 xl:col-span-1">
                  <MainContent />
             </div>
         </div>
@@ -247,12 +231,17 @@ export default function DashboardPage() {
       </div>
 
        {isMapFullScreen && (
-         <div className="fixed inset-0 z-50 bg-background">
+         <div className="fixed inset-0 z-40 bg-background">
              <MapCard className="h-full w-full border-none rounded-none" inFullScreen={true} />
          </div>
        )}
 
       <ClaimUpload open={isUploadOpen} onOpenChange={setUploadOpen} onClaimAdded={handleClaimAdded} />
+      <ShapefileUpload 
+          open={isShapefileUploadOpen}
+          onOpenChange={setShapefileUploadOpen}
+          onPattasAdded={handlePattasAdded}
+      />
       <AssetEdit 
         open={isAssetEditOpen} 
         onOpenChange={setAssetEditOpen} 
