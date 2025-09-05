@@ -24,12 +24,20 @@ export async function handleClaimUpload(documentDataUri: string) {
   }
 
 
-  return {
+  const randomLocation = {
+      lat: 26.5 + (Math.random() - 0.5) * 0.5,
+      lng: 82.4 + (Math.random() - 0.5) * 0.8
+  };
+  
+  const newClaim: Omit<Claim, 'id' | 'documentUrl' | 'documentType'> = {
     ...extractedData,
     linkedVillage: geoLinkResult.linkedVillageName,
     confidenceScore: geoLinkResult.confidenceScore,
     status,
+    location: randomLocation
   };
+
+  return newClaim;
 }
 
 export async function getDssRecommendation(villageId: string, claims: Claim[]): Promise<DssRecommendation[]> {

@@ -87,19 +87,12 @@ export function ClaimUpload({ open, onOpenChange, onClaimAdded }: ClaimUploadPro
     try {
       const extractedData = await handleClaimUpload(preview);
       setProgress(80);
-
-      const randomLocation = {
-          lat: 26.5 + (Math.random() - 0.5) * 0.5,
-          lng: 82.4 + (Math.random() - 0.5) * 0.8
-      };
       
       const newClaim: Claim = {
         id: `claim-${Date.now()}`,
         ...extractedData,
         documentUrl: preview,
         documentType: file.type,
-        status: extractedData.linkedVillage ? 'linked' : 'unlinked',
-        location: randomLocation
       };
 
       onClaimAdded(newClaim);
