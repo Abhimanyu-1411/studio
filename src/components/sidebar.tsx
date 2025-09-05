@@ -3,9 +3,10 @@
 
 import { Logo } from '@/components/icons';
 import { LayoutGrid, List, Map, Lightbulb, TrendingUp, LandPlot } from 'lucide-react';
-import { usePathname, useRouter } from 'next/navigation'; 
+import { usePathname } from 'next/navigation'; 
 import { cn } from '@/lib/utils';
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from './ui/tooltip';
+import Link from 'next/link';
 
 
 const navItems = [
@@ -20,25 +21,20 @@ const navItems = [
 
 export function Sidebar() {
   const pathname = usePathname();
-  const router = useRouter();
-
-  const handleNav = (href: string) => {
-    router.push(href);
-  }
 
   return (
-     <aside className="fixed inset-y-0 left-0 z-40 hidden w-14 flex-col border-r bg-background sm:flex">
-        <button onClick={() => handleNav('/')} className="flex h-14 items-center justify-center">
+     <aside className="fixed inset-y-0 left-0 z-10 hidden w-14 flex-col border-r bg-background sm:flex">
+        <Link href="/" className="flex h-14 items-center justify-center">
             <Logo />
             <span className="sr-only">FRA Atlas</span>
-        </button>
+        </Link>
       <nav className="flex flex-col items-center gap-4 px-2 sm:py-5">
         <TooltipProvider>
             {navItems.map(item => (
                 <Tooltip key={item.id}>
                     <TooltipTrigger asChild>
-                         <button
-                            onClick={() => handleNav(item.href)}
+                         <Link
+                            href={item.href}
                             className={cn(
                                 "flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8",
                                 pathname === item.href && "bg-accent text-accent-foreground"
@@ -46,7 +42,7 @@ export function Sidebar() {
                             >
                             <item.icon className="h-5 w-5" />
                             <span className="sr-only">{item.label}</span>
-                        </button>
+                        </Link>
                     </TooltipTrigger>
                     <TooltipContent side="right">{item.label}</TooltipContent>
                 </Tooltip>
