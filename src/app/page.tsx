@@ -9,7 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { RecentClaims } from '@/components/recent-claims';
 import { QuickActions } from '@/components/quick-actions';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { FileText, Clock, CheckCircle, MapPin } from 'lucide-react';
+import { FileText, Clock, CheckCircle, MapPin, Maximize, Minimize } from 'lucide-react';
 import { ClaimUpload } from '@/components/claim-upload';
 import { AssetLayersControl, type ActiveLayers } from '@/components/asset-layers-control';
 import { useToast } from '@/hooks/use-toast';
@@ -17,6 +17,7 @@ import { useRouter } from 'next/navigation';
 import { AssetEdit } from '@/components/asset-edit';
 import { getClaims, getVillages, getCommunityAssets, updateClaim, addCommunityAsset, handleClaimUpload } from './actions';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 const MapView = dynamic(() => import('@/components/map-view').then(mod => mod.MapView), {
   ssr: false,
@@ -47,6 +48,7 @@ export default function DashboardPage() {
   const [mapCenter, setMapCenter] = useState({ lat: 26.5, lng: 82.4 });
   const [mapZoom, setMapZoom] = useState(9);
   const [loading, setLoading] = useState(true);
+  const [isMapFullScreen, setMapFullScreen] = useState(false);
   
   const router = useRouter();
 
@@ -109,6 +111,36 @@ export default function DashboardPage() {
         setMapZoom(14);
     }
   }
+  
+  const MapCard = ({ className, inFullScreen = false }: { className?: string, inFullScreen?: boolean }) => (
+    <Card className={cn("h-full flex flex-col", className)}>
+        <CardHeader className="flex flex-row items-center justify-between p-4 md:p-6">
+            <div>
+                <CardTitle>Interactive Map</CardTitle>
+                <CardDescription>Explore claims and village boundaries</CardDescription>
+            </div>
+            <div className="flex items-center gap-2">
+                <AssetLayersControl activeLayers={activeLayers} onActiveLayersChange={setActiveLayers} />
+                <Button variant="outline" size="icon" onClick={() => setMapFullScreen(!isMapFullScreen)}>
+                    {inFullScreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
+                </Button>
+            </div>
+        </CardHeader>
+        <CardContent className="flex-1 p-0">
+            <MapView
+                claims={linkedClaims}
+                villages={villages}
+                assets={assets}
+                onVillageClick={() => {}}
+                onClaimEdit={handleClaimEdit}
+                center={mapCenter}
+                zoom={mapZoom}
+                activeLayers={activeLayers}
+            />
+        </CardContent>
+    </Card>
+  );
+
 
   const totalClaims = claims.length;
   const pendingClaims = claims.filter(c => c.status === 'needs-review' || c.status === 'unlinked').length;
@@ -125,31 +157,19 @@ export default function DashboardPage() {
     );
   }
 
+  if (isMapFullScreen) {
+    return (
+        <div className="fixed inset-0 z-50 bg-background">
+            <MapCard className="h-full w-full border-none rounded-none" inFullScreen={true} />
+        </div>
+    );
+  }
+
   if (editingClaim) {
     return (
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full">
         <div className="lg:col-span-2 h-[50vh] lg:h-full">
-          <Card className="h-full flex flex-col">
-            <CardHeader className="flex flex-row items-center justify-between p-4 md:p-6">
-              <div>
-                <CardTitle>Interactive Map</CardTitle>
-                <CardDescription>Reference the map to correct claim data</CardDescription>
-              </div>
-              <AssetLayersControl activeLayers={activeLayers} onActiveLayersChange={setActiveLayers} />
-            </CardHeader>
-            <CardContent className="flex-1 p-0">
-              <MapView
-                claims={linkedClaims}
-                villages={villages}
-                assets={assets}
-                onVillageClick={() => {}}
-                onClaimEdit={handleClaimEdit}
-                center={mapCenter}
-                zoom={mapZoom}
-                activeLayers={activeLayers}
-              />
-            </CardContent>
-          </Card>
+          <MapCard />
         </div>
         <div className="lg:col-span-1 h-full">
           <ClaimEdit
@@ -173,27 +193,7 @@ export default function DashboardPage() {
               <StatsCard title="Total Villages" value={totalVillages} icon={MapPin} color="#8b5cf6" />
            </div>
            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
-              <Card className="h-[40vh] md:h-[60vh]">
-                  <CardHeader className="flex flex-row items-center justify-between">
-                      <div>
-                          <CardTitle>Interactive Map</CardTitle>
-                          <CardDescription>Explore claims and village boundaries</CardDescription>
-                      </div>
-                      <AssetLayersControl activeLayers={activeLayers} onActiveLayersChange={setActiveLayers} />
-                  </CardHeader>
-                  <CardContent className="h-[calc(100%-4rem)] p-0">
-                      <MapView
-                          claims={linkedClaims}
-                          villages={villages}
-                          assets={assets}
-                          onVillageClick={() => {}}
-                          onClaimEdit={handleClaimEdit}
-                          center={mapCenter}
-                          zoom={mapZoom}
-                          activeLayers={activeLayers}
-                      />
-                  </CardContent>
-              </Card>
+              <MapCard className="h-[40vh] md:h-[60vh]" />
               <div className="space-y-4">
                   <RecentClaims claims={claims.slice(0, 5)} onClaimSelect={handleClaimEdit} />
                   <QuickActions onUpload={() => setUploadOpen(true)} onViewClaims={() => { router.push('/claims')}} />
