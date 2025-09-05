@@ -117,16 +117,22 @@ export function ClaimEdit({ claim, onOpenChange, onClaimUpdate, availableVillage
             <div className="border rounded-lg bg-muted/20 p-2 h-[60vh] flex flex-col">
                 <Label className="text-center pb-2">Document Preview</Label>
                 <div className="flex-1 w-full h-full">
-                { isDocumentImage ? (
-                    <Image 
-                        src={claim.documentUrl} 
-                        alt="Claim document" 
-                        width={500} 
-                        height={700}
-                        className="object-contain w-full h-full"
-                    />
+                {claim.documentUrl ? (
+                  isDocumentImage ? (
+                      <Image 
+                          src={claim.documentUrl} 
+                          alt="Claim document" 
+                          width={500} 
+                          height={700}
+                          className="object-contain w-full h-full"
+                      />
+                  ) : (
+                      <iframe src={claim.documentUrl} className="w-full h-full" title="Claim Document" />
+                  )
                 ) : (
-                     <iframe src={claim.documentUrl} className="w-full h-full" title="Claim Document" />
+                  <div className="flex items-center justify-center h-full text-muted-foreground">
+                    <p>No document preview available.</p>
+                  </div>
                 )}
                 </div>
             </div>
