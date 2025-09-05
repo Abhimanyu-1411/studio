@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/icons';
-import { LayoutGrid, Upload, List, Map, Menu, Lightbulb } from 'lucide-react';
+import { LayoutGrid, Upload, List, Map, Menu, Lightbulb, TrendingUp } from 'lucide-react';
 import {
   Sheet,
   SheetContent,
@@ -20,6 +20,7 @@ const navItems = [
   { id: 'claims-list', label: 'Claims List', icon: List },
   { id: 'villages', label: 'Villages', icon: Map },
   { id: 'village-analysis', label: 'Village Analysis', icon: Lightbulb },
+  { id: 'predictive-analysis', label: 'Predictive Analysis', icon: TrendingUp },
 ];
 
 export function Header({ onNavClick, onUploadClick }: HeaderProps) {

@@ -26,6 +26,7 @@ import { Button } from './ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from './ui/badge';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
+import { PredictiveAnalysis } from './predictive-analysis';
 
 
 const MapView = dynamic(() => import('@/components/map-view').then(mod => mod.MapView), {
@@ -302,6 +303,8 @@ export function Dashboard() {
         return <ClaimsTable claims={claims} onClaimEdit={handleClaimEdit} onClaimLink={handleClaimLink} />;
       case 'village-analysis':
         return <VillageAnalysis villages={VILLAGES} claims={claims} />;
+      case 'predictive-analysis':
+        return <PredictiveAnalysis villages={VILLAGES} />;
       case 'villages':
         return (
           <Card>

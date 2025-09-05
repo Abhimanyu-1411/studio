@@ -3,8 +3,9 @@
 import { extractClaimData } from '@/ai/flows/extract-claim-data';
 import { intelligentGeoLinking } from '@/ai/flows/intelligent-geo-linking';
 import { dssRecommendations } from '@/ai/flows/dss-recommendations';
+import { predictiveAnalysis } from '@/ai/flows/predictive-analysis';
 import { AVAILABLE_VILLAGE_NAMES, VILLAGES } from '@/lib/mock-data';
-import type { DssRecommendation, Claim } from '@/types';
+import type { DssRecommendation, Claim, Village, TimeSeriesDataPoint } from '@/types';
 
 export async function handleClaimUpload(documentDataUri: string) {
   const extractedData = await extractClaimData({ documentDataUri });
@@ -26,7 +27,7 @@ export async function handleClaimUpload(documentDataUri: string) {
   const lowestConfidence = Math.min(...allConfidences);
 
   let status: Claim['status'] = 'linked';
-  if (!geoLinkResult.linkedVillage || lowestConfidence < 0.8) {
+  if (!geoLinkResult.linkedVillageName || lowestConfidence < 0.8) {
       status = 'needs-review';
   }
 
@@ -68,4 +69,40 @@ export async function getDssRecommendation(villageId: string, claims: Claim[]): 
     });
 
     return result.sort((a, b) => b.priority - a.priority);
+}
+
+export async function getPrediction(
+    villageId: string,
+    metric: keyof Omit<TimeSeriesDataPoint, 'date'>,
+    forecastPeriods: number
+): Promise<any[]> {
+    const village = VILLAGES.find(v => v.id === villageId);
+    if (!village || !village.timeSeriesData) {
+        throw new Error('Village or time-series data not found');
+    }
+
+    const historicalData = village.timeSeriesData.map(d => ({
+        date: d.date,
+        value: d[metric]
+    }));
+
+    const forecast = await predictiveAnalysis({
+        metricName: metric,
+        historicalData,
+        forecastPeriods,
+    });
+    
+    const formattedHistoricalData = historicalData.map(d => ({
+        date: d.date,
+        historical: d.value,
+        predicted: null,
+    }));
+    
+    const formattedForecastData = forecast.map(d => ({
+        date: d.date,
+        historical: null,
+        predicted: d.value,
+    }));
+
+    return [...formattedHistoricalData, ...formattedForecastData];
 }
