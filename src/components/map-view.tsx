@@ -101,13 +101,13 @@ const MapViewComponent = ({ claims, villages, assets, onVillageClick, onClaimEdi
             </Polygon>
             
             {activeLayers.ndwi && village.assetGeometries?.ndwi.map((poly, i) => 
-                <Polygon key={`${village.id}-ndwi-${i}`} positions={poly.polygon} pathOptions={{...assetLayerStyles.ndwi, fillOpacity: 0.5}} />
+                <Polygon key={`${village.id}-ndwi-${i}`} positions={poly} pathOptions={{...assetLayerStyles.ndwi, fillOpacity: 0.5}} />
             )}
             {activeLayers.forest && village.assetGeometries?.forest.map((poly, i) => 
-                <Polygon key={`${village.id}-forest-${i}`} positions={poly.polygon} pathOptions={{...assetLayerStyles.forest, fillOpacity: 0.5}} />
+                <Polygon key={`${village.id}-forest-${i}`} positions={poly} pathOptions={{...assetLayerStyles.forest, fillOpacity: 0.5}} />
             )}
             {activeLayers.agriculture && village.assetGeometries?.agriculture.map((poly, i) => 
-                <Polygon key={`${village.id}-agri-${i}`} positions={poly.polygon} pathOptions={{...assetLayerStyles.agriculture, fillOpacity: 0.5}} />
+                <Polygon key={`${village.id}-agri-${i}`} positions={poly} pathOptions={{...assetLayerStyles.agriculture, fillOpacity: 0.5}} />
             )}
         </React.Fragment>
       ))}

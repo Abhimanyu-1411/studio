@@ -1,25 +1,20 @@
 
 'use server';
 
-import { collection, addDoc, getDocs, doc, updateDoc, query, where, writeBatch, getDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
 import { extractClaimData } from '@/ai/flows/extract-claim-data';
 import { intelligentGeoLinking } from '@/ai/flows/intelligent-geo-linking';
 import { dssRecommendations } from '@/ai/flows/dss-recommendations';
 import { predictiveAnalysis } from '@/ai/flows/predictive-analysis';
-import { MOCK_CLAIMS, VILLAGES } from '@/lib/mock-data';
-import type { DssRecommendation, Claim, Village, TimeSeriesDataPoint } from '@/types';
+import { MOCK_CLAIMS, VILLAGES, AVAILABLE_VILLAGE_NAMES } from '@/lib/mock-data';
+import type { DssRecommendation, Claim, Village, CommunityAsset, TimeSeriesDataPoint } from '@/types';
 
 
 export async function handleClaimUpload(documentDataUri: string) {
   const extractedData = await extractClaimData({ documentDataUri });
 
-  const villagesSnapshot = await getDocs(collection(db, 'villages'));
-  const availableVillageNames = villagesSnapshot.docs.map(doc => doc.data().name);
-
   const geoLinkResult = await intelligentGeoLinking({
     claimVillageName: extractedData.village.value,
-    availableVillageNames: availableVillageNames,
+    availableVillageNames: AVAILABLE_VILLAGE_NAMES,
   });
   
   const allConfidences = [
@@ -54,26 +49,25 @@ export async function handleClaimUpload(documentDataUri: string) {
     documentType: '', // Ditto
   };
   
-  const docRef = await addDoc(collection(db, "claims"), newClaimData);
+  const newClaim = { id: `claim-${Date.now()}`, ...newClaimData };
 
-  return { id: docRef.id, ...newClaimData };
+  return newClaim;
 }
 
 export async function updateClaim(claimId: string, updatedData: Partial<Claim>) {
-    const claimRef = doc(db, 'claims', claimId);
-    await updateDoc(claimRef, updatedData);
+    // This is a mock implementation. In a real app, you would update the database.
+    console.log(`Updating claim ${claimId} with`, updatedData);
+    await new Promise(resolve => setTimeout(resolve, 500));
+    return;
 }
 
 export async function getDssRecommendation(villageId: string): Promise<DssRecommendation[]> {
-    const villageDoc = await getDoc(doc(db, 'villages', villageId));
-    if (!villageDoc.exists()) {
+    const village = VILLAGES.find(v => v.id === villageId);
+    if (!village) {
         throw new Error("Village not found");
     }
-    const village = { id: villageDoc.id, ...villageDoc.data() } as Village;
 
-    const q = query(collection(db, 'claims'), where('linkedVillage', '==', village.name));
-    const claimsSnapshot = await getDocs(q);
-    const claimsInVillage: Claim[] = claimsSnapshot.docs.map(d => ({id: d.id, ...d.data()}) as Claim);
+    const claimsInVillage = MOCK_CLAIMS.filter(c => c.linkedVillage === village.name);
 
     const result = await dssRecommendations({
         villageName: village.name,
@@ -94,11 +88,10 @@ export async function getPrediction(
     metric: keyof Omit<TimeSeriesDataPoint, 'date'>,
     forecastPeriods: number
 ): Promise<any[]> {
-    const villageDoc = await getDoc(doc(db, 'villages', villageId));
-    if (!villageDoc.exists() || !villageDoc.data().timeSeriesData) {
+    const village = VILLAGES.find(v => v.id === villageId);
+    if (!village || !village.timeSeriesData) {
         throw new Error('Village or time-series data not found');
     }
-    const village = villageDoc.data() as Village;
 
     const historicalData = village.timeSeriesData.map(d => ({
         date: d.date,
@@ -127,52 +120,31 @@ export async function getPrediction(
 }
 
 export async function getClaims(): Promise<Claim[]> {
-    const claimsSnapshot = await getDocs(collection(db, 'claims'));
-    return claimsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Claim));
+    // Simulate fetching from a database
+    await new Promise(resolve => setTimeout(resolve, 300));
+    return MOCK_CLAIMS;
 }
 
 export async function getVillages(): Promise<Village[]> {
-    const villagesSnapshot = await getDocs(collection(db, 'villages'));
-    return villagesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Village));
+    // Simulate fetching from a database
+    await new Promise(resolve => setTimeout(resolve, 300));
+    return VILLAGES;
 }
 
+let mockCommunityAssets: CommunityAsset[] = [];
+
 export async function addCommunityAsset(asset: Omit<CommunityAsset, 'id'>): Promise<CommunityAsset> {
-    const docRef = await addDoc(collection(db, 'community_assets'), asset);
-    return { id: docRef.id, ...asset };
+    const newAsset = { id: `asset-${Date.now()}`, ...asset };
+    mockCommunityAssets.push(newAsset);
+    return newAsset;
 }
 
 export async function getCommunityAssets(): Promise<CommunityAsset[]> {
-    const assetsSnapshot = await getDocs(collection(db, 'community_assets'));
-    return assetsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as CommunityAsset));
+    return mockCommunityAssets;
 }
 
-// NOTE: This is a one-time seeding action.
+// NOTE: This is a mock seeding action.
 export async function seedInitialData() {
-    const claimsCollection = collection(db, 'claims');
-    const villagesCollection = collection(db, 'villages');
-
-    const claimsSnapshot = await getDocs(claimsCollection);
-    const villagesSnapshot = await getDocs(villagesCollection);
-
-    if (claimsSnapshot.empty && villagesSnapshot.empty) {
-        console.log("Seeding initial data...");
-        const batch = writeBatch(db);
-
-        VILLAGES.forEach(village => {
-            const docRef = doc(db, "villages", village.id);
-            batch.set(docRef, village);
-        });
-
-        MOCK_CLAIMS.forEach(claim => {
-            const docRef = doc(db, "claims", claim.id);
-            batch.set(docRef, claim);
-        });
-
-        await batch.commit();
-        console.log("Seeding complete.");
-        return { success: true, message: "Initial data seeded successfully." };
-    } else {
-        console.log("Data already exists. Skipping seed.");
-        return { success: false, message: "Data already exists. Skipping seed." };
-    }
+    console.log("Using mock data. No seeding necessary.");
+    return { success: true, message: "Using mock data." };
 }

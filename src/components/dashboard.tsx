@@ -91,8 +91,6 @@ export const VillageAnalysis = ({ villages, claims }: { villages: Village[], cla
 
   const villageClaims = useMemo(() => {
     if (!selectedVillage) return [];
-    // This is now slightly incorrect as claims are not passed down, but the count is handled server side.
-    // We can show a loading state or just the data from the village object itself.
     return claims.filter(c => c.linkedVillage === selectedVillage.name);
   }, [selectedVillage, claims]);
 
@@ -130,10 +128,13 @@ export const VillageAnalysis = ({ villages, claims }: { villages: Village[], cla
               <CardDescription>Data used for the recommendation.</CardDescription>
             </CardHeader>
             <CardContent className="text-sm space-y-2">
+                <p><strong>Total Claims:</strong> {villageClaims.length}</p>
+                <p><strong>Pending Claims:</strong> {villageClaims.filter(c => c.status !== 'reviewed' && c.status !== 'linked').length}</p>
+                <p><strong>CFR Claims:</strong> {villageClaims.filter(c => c.claimType.value === 'CFR').length}</p>
+                <p><strong>IFR Claims:</strong> {villageClaims.filter(c => c.claimType.value === 'IFR').length}</p>
                 <p><strong>Water Coverage:</strong> {selectedVillage.assetCoverage.water}%</p>
                 <p><strong>Forest Coverage:</strong> {selectedVillage.assetCoverage.forest}%</p>
                 <p><strong>Agricultural Area:</strong> {selectedVillage.assetCoverage.agriculture}%</p>
-                 <p className="text-muted-foreground text-xs pt-2">Claim counts are now calculated on the server.</p>
             </CardContent>
           </Card>
         )}

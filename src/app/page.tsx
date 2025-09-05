@@ -15,7 +15,7 @@ import { AssetLayersControl, type ActiveLayers } from '@/components/asset-layers
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { AssetEdit } from '@/components/asset-edit';
-import { getClaims, getVillages, getCommunityAssets, updateClaim, seedInitialData } from './actions';
+import { getClaims, getVillages, getCommunityAssets, updateClaim, addCommunityAsset, handleClaimUpload } from './actions';
 import { Button } from '@/components/ui/button';
 
 const MapView = dynamic(() => import('@/components/map-view').then(mod => mod.MapView), {
@@ -60,7 +60,6 @@ export default function DashboardPage() {
   useEffect(() => {
     async function fetchData() {
       try {
-        await seedInitialData();
         const [claimsData, villagesData, assetsData] = await Promise.all([
           getClaims(),
           getVillages(),
@@ -85,8 +84,7 @@ export default function DashboardPage() {
 
 
   const handleClaimAdded = (newClaim: Claim) => {
-    const newClaimWithId = { ...newClaim, id: `claim-${Date.now()}` };
-    setClaims((prevClaims) => [newClaimWithId, ...prevClaims]);
+    setClaims((prevClaims) => [newClaim, ...prevClaims]);
     if (newClaim.location) {
         setMapCenter(newClaim.location);
         setMapZoom(12);
@@ -99,7 +97,8 @@ export default function DashboardPage() {
     setEditingClaim(null);
   }
 
-  const handleAssetAdded = (newAsset: CommunityAsset) => {
+  const handleAssetAdded = async (newAssetData: Omit<CommunityAsset, 'id'>) => {
+    const newAsset = await addCommunityAsset(newAssetData);
     setAssets(prev => [...prev, newAsset]);
   };
 
