@@ -3,6 +3,7 @@ import type {Metadata} from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
+import { AppLayout } from '@/components/app-layout';
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -24,7 +25,9 @@ export default function RootLayout({
           crossOrigin=""/>
       </head>
       <body className={inter.className}>
-        {children}
+        <AppLayout>
+          {children}
+        </AppLayout>
         <Toaster />
       </body>
     </html>
