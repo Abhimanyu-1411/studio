@@ -172,76 +172,80 @@ export default function DashboardPage() {
       </div>
     );
   }
-  
-  const MainContent = () => (
-    <div className="grid auto-rows-max items-start gap-4 md:gap-8 lg:col-span-2">
-         <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4">
-            <StatsCard title="Total Claims" value={totalClaims} icon={FileText} color="#3b82f6" />
-            <StatsCard title="Pending Review" value={pendingClaims} icon={Clock} color="#f59e0b" />
-            <StatsCard title="Linked to Map" value={approvedClaims} icon={CheckCircle} color="#10b981" />
-            <StatsCard title="Total Villages" value={totalVillages} icon={MapPin} color="#8b5cf6" />
-         </div>
-         <div className="grid gap-4 lg:grid-cols-1">
-            <RecentClaims claims={claims.slice(0, 5)} onClaimSelect={handleClaimEdit} />
-            <QuickActions 
-              onUpload={() => setUploadOpen(true)} 
-              onViewClaims={() => { router.push('/claims')}} 
-              onUploadShapefile={() => setShapefileUploadOpen(true)}
-              />
-        </div>
-    </div>
-  );
 
-  const renderContent = () => {
-    if (editingClaim) {
-        return (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full">
-            <div className="lg:col-span-2 h-[50vh] lg:h-full">
-              <MapCard />
+  const renderDashboardContent = () => (
+    <div className={cn(
+        "grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8",
+        isMapFullScreen && "hidden" // Hide dashboard content when map is full screen
+    )}>
+       {editingClaim || isShapefileUploadOpen ? (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full">
+             {/* Map will be shown in its own container outside this one */}
+             <div className="lg:col-span-1 h-full">
+                {editingClaim && (
+                     <ClaimEdit
+                        claim={editingClaim}
+                        onClose={() => setEditingClaim(null)}
+                        onClaimUpdate={handleClaimUpdate}
+                        availableVillages={villages.map(v => v.name)}
+                    />
+                )}
+                {isShapefileUploadOpen && (
+                     <ShapefileUpload 
+                        onClose={() => setShapefileUploadOpen(false)}
+                        onPattasAdded={handlePattasAdded}
+                     />
+                )}
+             </div>
+        </div>
+       ) : (
+        <div className="grid auto-rows-max items-start gap-4 md:gap-8 lg:col-span-2">
+            <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4">
+                <StatsCard title="Total Claims" value={totalClaims} icon={FileText} color="#3b82f6" />
+                <StatsCard title="Pending Review" value={pendingClaims} icon={Clock} color="#f59e0b" />
+                <StatsCard title="Linked to Map" value={approvedClaims} icon={CheckCircle} color="#10b981" />
+                <StatsCard title="Total Villages" value={totalVillages} icon={MapPin} color="#8b5cf6" />
             </div>
-            <div className="lg:col-span-1 h-full">
-              <ClaimEdit
-                claim={editingClaim}
-                onClose={() => setEditingClaim(null)}
-                onClaimUpdate={handleClaimUpdate}
-                availableVillages={villages.map(v => v.name)}
-              />
-            </div>
-          </div>
-        );
-    }
-    
-    // Main Dashboard Layout
-    return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-8">
-            <div className="md:col-span-2 lg:col-span-2 xl:col-span-3">
-                 <MapCard className="h-[40vh] md:h-[60vh] xl:h-[calc(100vh-220px)]" />
-            </div>
-            <div className="md:col-span-2 lg:col-span-1 xl:col-span-1">
-                 <MainContent />
+            <div className="grid gap-4 lg:grid-cols-1">
+                <RecentClaims claims={claims.slice(0, 5)} onClaimSelect={handleClaimEdit} />
+                <QuickActions 
+                onUpload={() => setUploadOpen(true)} 
+                onViewClaims={() => { router.push('/claims')}} 
+                onUploadShapefile={() => setShapefileUploadOpen(true)}
+                />
             </div>
         </div>
-    );
-  }
+       )}
+    </div>
+  )
+
+  const mapContainerClass = isMapFullScreen
+    ? "fixed inset-0 z-50"
+    : editingClaim || isShapefileUploadOpen 
+    ? "lg:col-span-2 h-[50vh] lg:h-full"
+    : "md:col-span-2 lg:col-span-2 xl:col-span-3 h-[40vh] md:h-[60vh] xl:h-[calc(100vh-220px)]";
+
+  const mainLayoutClass = isMapFullScreen
+    ? "contents" // Use display: contents to avoid affecting child layout
+    : editingClaim || isShapefileUploadOpen
+    ? "grid flex-1 grid-cols-1 lg:grid-cols-3 gap-6 p-4 sm:px-6 sm:py-0 md:gap-8"
+    : "grid flex-1 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-4 sm:px-6 sm:py-0 md:gap-8";
+
 
   return (
     <>
-      <div className={cn("grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8")}>
-          {renderContent()}
+      <div className={mainLayoutClass}>
+          {/* Map always renders, its position is controlled by CSS */}
+          <div className={mapContainerClass}>
+              <MapCard className="h-full w-full border-none rounded-none" inFullScreen={isMapFullScreen} />
+          </div>
+          
+          {/* Dashboard content renders beside the map or is hidden */}
+          {renderDashboardContent()}
       </div>
-
-       {isMapFullScreen && (
-         <div className="fixed inset-0 z-40 bg-background">
-             <MapCard className="h-full w-full border-none rounded-none" inFullScreen={true} />
-         </div>
-       )}
-
+      
+      {/* Modals are kept outside the main layout grid */}
       <ClaimUpload open={isUploadOpen} onOpenChange={setUploadOpen} onClaimAdded={handleClaimAdded} />
-      <ShapefileUpload 
-          open={isShapefileUploadOpen}
-          onOpenChange={setShapefileUploadOpen}
-          onPattasAdded={handlePattasAdded}
-      />
       <AssetEdit 
         open={isAssetEditOpen} 
         onOpenChange={setAssetEditOpen} 
@@ -251,3 +255,5 @@ export default function DashboardPage() {
     </>
   );
 }
+
+    
