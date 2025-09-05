@@ -1,6 +1,4 @@
 
-
-
 'use client';
 
 import { useState, useMemo } from 'react';
@@ -33,11 +31,12 @@ import { PredictiveAnalysis } from './predictive-analysis';
 import { Input } from './ui/input';
 import { CommunityAssets } from './community-assets';
 import { AssetEdit } from './asset-edit';
+import { cn } from '@/lib/utils';
 
 
 const MapView = dynamic(() => import('@/components/map-view').then(mod => mod.MapView), {
   ssr: false,
-  loading: () => <Skeleton className="h-[50vh] md:h-[500px] w-full" />,
+  loading: () => <Skeleton className="h-full w-full" />,
 });
 
 const StatsCard = ({ title, value, icon: Icon, color }: { title: string, value: number, icon: React.ElementType, color: string }) => (
@@ -270,6 +269,7 @@ export function Dashboard() {
         setMapCenter(claim.location);
         setMapZoom(14);
     }
+    setActiveView('dashboard'); // Switch to dashboard to see map view
   }
 
   const totalClaims = claims.length;
@@ -287,9 +287,9 @@ export function Dashboard() {
     switch(activeView) {
       case 'dashboard':
         return (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-3 xl:col-span-2 space-y-6">
-              <Card>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full">
+            <div className={editingClaim ? 'lg:col-span-2 h-full' : 'lg:col-span-3 h-full'}>
+               <Card className="h-full flex flex-col">
                 <CardHeader className="flex flex-row items-center justify-between p-4 md:p-6">
                   <div>
                     <CardTitle>Interactive Map</CardTitle>
@@ -297,7 +297,7 @@ export function Dashboard() {
                   </div>
                   <AssetLayersControl activeLayers={activeLayers} onActiveLayersChange={setActiveLayers} />
                 </CardHeader>
-                <CardContent className="h-[50vh] md:h-[500px] p-0">
+                <CardContent className="flex-1 p-0">
                   <MapView
                     claims={linkedClaims}
                     villages={VILLAGES}
@@ -310,10 +310,22 @@ export function Dashboard() {
                 </CardContent>
               </Card>
             </div>
-            <div className="lg:col-span-3 xl:col-span-1 space-y-6">
-              <RecentClaims claims={claims.slice(0, 5)} onClaimSelect={handleClaimEdit} />
-              <QuickActions onUpload={() => setUploadOpen(true)} onViewClaims={() => setActiveView('claims-list')} />
-            </div>
+            {editingClaim && (
+                <div className="lg:col-span-1 h-full">
+                    <ClaimEdit
+                        claim={editingClaim}
+                        onClose={() => setEditingClaim(null)}
+                        onClaimUpdate={handleClaimUpdate}
+                        availableVillages={VILLAGES.map(v => v.name)}
+                    />
+                </div>
+            )}
+            {!editingClaim && activeView === 'dashboard' && (
+                <div className="lg:col-span-3 xl:col-span-1 space-y-6">
+                    <RecentClaims claims={claims.slice(0, 5)} onClaimSelect={handleClaimEdit} />
+                    <QuickActions onUpload={() => setUploadOpen(true)} onViewClaims={() => setActiveView('claims-list')} />
+                </div>
+            )}
           </div>
         );
       case 'claims-list':
@@ -365,7 +377,7 @@ export function Dashboard() {
     <>
       <Header onNavClick={setActiveView} onUploadClick={() => setUploadOpen(true)} />
       <main className="flex-1 p-4 md:p-6 space-y-6">
-        {activeView === 'dashboard' && (
+        {activeView === 'dashboard' && !editingClaim && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
             <StatsCard title="Total Claims" value={totalClaims} icon={FileText} color="#3b82f6" />
             <StatsCard title="Pending Review" value={pendingClaims} icon={Clock} color="#f59e0b" />
@@ -373,14 +385,10 @@ export function Dashboard() {
             <StatsCard title="Total Villages" value={totalVillages} icon={MapPin} color="#8b5cf6" />
           </div>
         )}
-        {renderContent()}
+        <div className={cn("h-[calc(100vh-200px)]", { 'h-auto': activeView !== 'dashboard' })}>
+            {renderContent()}
+        </div>
       </main>
-      <ClaimEdit
-        claim={editingClaim}
-        onOpenChange={(isOpen) => !isOpen && setEditingClaim(null)}
-        onClaimUpdate={handleClaimUpdate}
-        availableVillages={VILLAGES.map(v => v.name)}
-      />
       <ClaimUpload open={isUploadOpen} onOpenChange={setUploadOpen} onClaimAdded={handleClaimAdded} />
       <AssetEdit 
         open={isAssetEditOpen} 

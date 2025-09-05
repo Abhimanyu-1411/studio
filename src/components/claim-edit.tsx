@@ -4,30 +4,30 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from '@/components/ui/dialog';
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardFooter,
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import type { Claim } from '@/types';
-import { Loader2, Save, CheckCircle } from 'lucide-react';
+import { Loader2, Save, CheckCircle, X } from 'lucide-react';
 import { ConfidenceBadge } from './confidence-badge';
 
 type ClaimEditProps = {
   claim: Claim | null;
-  onOpenChange: (open: boolean) => void;
+  onClose: () => void;
   onClaimUpdate: (claim: Claim) => void;
   availableVillages: string[];
 };
 
-export function ClaimEdit({ claim, onOpenChange, onClaimUpdate, availableVillages }: ClaimEditProps) {
+export function ClaimEdit({ claim, onClose, onClaimUpdate, availableVillages }: ClaimEditProps) {
   const [formData, setFormData] = useState<Partial<Claim>>({});
   const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
@@ -91,30 +91,34 @@ export function ClaimEdit({ claim, onOpenChange, onClaimUpdate, availableVillage
         title: isReviewAction ? 'Claim Reviewed' : 'Claim Updated',
         description: `Successfully updated claim for ${updatedClaim.claimantName.value}.`
     });
-    onOpenChange(false);
+    onClose();
   };
 
   if (!claim) return null;
 
   const isReviewAction = claim.status === 'needs-review';
-  const isDocumentImage = claim.documentType.startsWith('image/');
+  const isDocumentImage = claim.documentType?.startsWith('image/');
 
   return (
-    <Dialog open={!!claim} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-4xl">
-        <DialogHeader>
-          <DialogTitle>{isReviewAction ? 'Review and Finalize Claim' : 'Correct Claim Data'}</DialogTitle>
-          <DialogDescription>
-            {isReviewAction 
-              ? 'The AI extraction has medium/low confidence. Verify the fields below against the document, correct any data, and finalize the review.'
-              : "Review and correct the extracted data. Click save when you're done."
-            }
-          </DialogDescription>
-        </DialogHeader>
+    <Card className="h-full flex flex-col">
+        <CardHeader className="flex-row items-start justify-between">
+            <div>
+              <CardTitle>{isReviewAction ? 'Review and Finalize Claim' : 'Correct Claim Data'}</CardTitle>
+              <CardDescription>
+                {isReviewAction 
+                  ? 'Verify the fields below against the document.'
+                  : "Review and correct the extracted data."
+                }
+              </CardDescription>
+            </div>
+            <Button variant="ghost" size="icon" onClick={onClose}>
+                <X className="h-4 w-4" />
+            </Button>
+        </CardHeader>
         
-        <div className="grid md:grid-cols-2 gap-8 py-4">
-            {/* Document Preview Column */}
-            <div className="border rounded-lg bg-muted/20 p-2 h-[50vh] md:h-[60vh] flex flex-col">
+        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+            {/* Document Preview */}
+            <div className="border rounded-lg bg-muted/20 p-2 h-[40vh] flex flex-col">
                 <Label className="text-center pb-2">Document Preview</Label>
                 <div className="flex-1 w-full h-full">
                 {claim.documentUrl ? (
@@ -137,7 +141,7 @@ export function ClaimEdit({ claim, onOpenChange, onClaimUpdate, availableVillage
                 </div>
             </div>
 
-            {/* Form Fields Column */}
+            {/* Form Fields */}
             <div className="space-y-4">
                 <div className="grid grid-cols-5 items-center gap-4">
                     <Label htmlFor="claimantName" className="text-right col-span-1">Claimant</Label>
@@ -183,8 +187,8 @@ export function ClaimEdit({ claim, onOpenChange, onClaimUpdate, availableVillage
             </div>
         </div>
 
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isSaving}>Cancel</Button>
+        <CardFooter className="flex justify-end gap-2">
+          <Button variant="outline" onClick={onClose} disabled={isSaving}>Cancel</Button>
           <Button onClick={handleSubmit} disabled={isSaving}>
             {isSaving ? (
               <>
@@ -203,8 +207,7 @@ export function ClaimEdit({ claim, onOpenChange, onClaimUpdate, availableVillage
                </>
             )}
           </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </CardFooter>
+    </Card>
   );
 }
