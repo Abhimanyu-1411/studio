@@ -1,6 +1,37 @@
 
 import type { Claim, Village } from '@/types';
 
+// Generate mock time-series data
+const generateTimeSeries = (startValue: number, length: number, seasonality: number[], trend: number) => {
+  const series = [];
+  const startDate = new Date();
+  startDate.setFullYear(startDate.getFullYear() - (length / 12));
+  
+  for (let i = 0; i < length; i++) {
+    const date = new Date(startDate.getFullYear(), startDate.getMonth() + i, 1);
+    const month = date.getMonth();
+    
+    // Apply seasonality, trend, and some randomness
+    const value = startValue 
+      + (seasonality[month % 12] * startValue) 
+      + (i * trend)
+      + (Math.random() - 0.5) * 0.1 * startValue; // noise
+      
+    series.push({
+      date: date.toISOString().split('T')[0],
+      rainfall: Math.max(0, value), // rainfall can't be negative
+      ndwi: Math.max(0, Math.min(1, startValue / 200 + (seasonality[month % 12]) + (i * trend / 1000) + (Math.random() - 0.5) * 0.1)), // NDWI between 0 and 1
+      ndvi: Math.max(0, Math.min(1, startValue / 150 + (seasonality[month % 12]) + (i * trend / 1000) + (Math.random() - 0.5) * 0.1)), // NDVI between 0 and 1
+    });
+  }
+  return series;
+}
+
+
+const rainfallSeasonality = [-0.8, -0.7, -0.5, -0.2, 0.5, 1.0, 1.2, 1.1, 0.6, -0.1, -0.4, -0.6];
+const vegetationSeasonality = [-0.3, -0.2, -0.1, 0.1, 0.3, 0.5, 0.6, 0.4, 0.2, -0.1, -0.2, -0.3];
+
+
 export const VILLAGES: Village[] = [
   {
     id: 'v1',
@@ -53,7 +84,8 @@ export const VILLAGES: Village[] = [
           { lat: 26.406, lng: 82.563 }, { lat: 26.407, lng: 82.562 }, { lat: 26.408, lng: 82.561 }, { lat: 26.409, lng: 82.560 },
         ]
       ]
-    }
+    },
+    timeSeriesData: generateTimeSeries(100, 36, rainfallSeasonality, -0.5),
   },
   {
     id: 'v2',
@@ -96,7 +128,8 @@ export const VILLAGES: Village[] = [
           { lat: 26.237, lng: 82.065 }, { lat: 26.238, lng: 82.062 },
         ]
       ]
-    }
+    },
+    timeSeriesData: generateTimeSeries(120, 36, rainfallSeasonality, 0.2),
   },
   {
     id: 'v3',
@@ -133,7 +166,8 @@ export const VILLAGES: Village[] = [
         ]
       ],
       agriculture: [],
-    }
+    },
+    timeSeriesData: generateTimeSeries(80, 36, vegetationSeasonality, 0.1),
   },
 ];
 

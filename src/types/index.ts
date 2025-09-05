@@ -21,6 +21,13 @@ export type Claim = {
 
 type LatLng = { lat: number; lng: number };
 
+export type TimeSeriesDataPoint = {
+  date: string; // YYYY-MM-DD
+  rainfall: number; // in mm
+  ndwi: number; // index value
+  ndvi: number; // index value
+}
+
 export type Village = {
   id: string;
   name: string;
@@ -37,6 +44,7 @@ export type Village = {
     forest: LatLng[][];
     agriculture: LatLng[][];
   }
+  timeSeriesData?: TimeSeriesDataPoint[];
 };
 
 export type DssRecommendation = {
