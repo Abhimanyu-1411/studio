@@ -1,5 +1,6 @@
 
 
+
 type FieldWithConfidence<T> = {
   value: T;
   confidence: number;
@@ -54,3 +55,13 @@ export type DssRecommendation = {
   justification: string;
   priority: number;
 };
+
+export type CommunityAsset = {
+  id: string;
+  villageId: string;
+  assetType: 'ndwi' | 'forest' | 'agriculture' | string;
+  description: string;
+  documentUrl: string;
+  documentType: string;
+  geometry?: LatLng[];
+}

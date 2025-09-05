@@ -4,7 +4,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/icons';
-import { LayoutGrid, Upload, List, Map, Menu, Lightbulb, TrendingUp } from 'lucide-react';
+import { LayoutGrid, Upload, List, Map, Menu, Lightbulb, TrendingUp, LandPlot } from 'lucide-react';
 import {
   Sheet,
   SheetContent,
@@ -22,6 +22,7 @@ const navItems = [
   { id: 'villages', label: 'Villages', icon: Map },
   { id: 'village-analysis', label: 'Village Analysis', icon: Lightbulb },
   { id: 'predictive-analysis', label: 'Predictive Analysis', icon: TrendingUp },
+  { id: 'community-assets', label: 'Community Assets', icon: LandPlot },
 ];
 
 export function Header({ onNavClick, onUploadClick }: HeaderProps) {
@@ -68,12 +69,12 @@ export function Header({ onNavClick, onUploadClick }: HeaderProps) {
       <div className="flex items-center gap-2 md:gap-4">
         <Sheet open={isMobileMenuOpen} onOpenChange={setMobileMenuOpen}>
           <SheetTrigger asChild>
-            <Button variant="outline" size="icon" className="md:hidden">
+            <Button variant="outline" size="icon" className="shrink-0 md:hidden">
               <Menu className="h-5 w-5" />
               <span className="sr-only">Toggle navigation menu</span>
             </Button>
           </SheetTrigger>
-          <SheetContent side="left" className="p-0">
+          <SheetContent side="left" className="p-0 sm:max-w-xs">
             <div className="p-4 border-b">
               <Logo />
             </div>

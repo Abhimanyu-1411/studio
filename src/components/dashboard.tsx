@@ -1,11 +1,12 @@
 
 
+
 'use client';
 
 import { useState, useMemo } from 'react';
 import dynamic from 'next/dynamic';
 import { MOCK_CLAIMS, VILLAGES } from '@/lib/mock-data';
-import type { Claim, Village, DssRecommendation } from '@/types';
+import type { Claim, Village, DssRecommendation, CommunityAsset } from '@/types';
 import { ClaimEdit } from './claim-edit';
 import { Skeleton } from './ui/skeleton';
 import { Header } from './header';
@@ -30,6 +31,8 @@ import { Badge } from './ui/badge';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import { PredictiveAnalysis } from './predictive-analysis';
 import { Input } from './ui/input';
+import { CommunityAssets } from './community-assets';
+import { AssetEdit } from './asset-edit';
 
 
 const MapView = dynamic(() => import('@/components/map-view').then(mod => mod.MapView), {
@@ -176,7 +179,7 @@ const VillageAnalysis = ({ villages, claims }: { villages: Village[], claims: Cl
             <CardTitle>DSS Recommendations</CardTitle>
              <CardDescription>AI-powered recommendations based on village data.</CardDescription>
           </CardHeader>
-          <CardContent className="flex flex-col items-center justify-start h-full p-6 space-y-4">
+          <CardContent className="flex flex-col items-center justify-start min-h-[300px] p-6 space-y-4">
             {isLoading && <Loader2 className="h-8 w-8 animate-spin text-primary" />}
             
             {!isLoading && !recommendations && !errorState && (
@@ -221,6 +224,8 @@ export function Dashboard() {
   const [claims, setClaims] = useState<Claim[]>(MOCK_CLAIMS);
   const [editingClaim, setEditingClaim] = useState<Claim | null>(null);
   const [isUploadOpen, setUploadOpen] = useState(false);
+  const [isAssetEditOpen, setAssetEditOpen] = useState(false);
+  const [assets, setAssets] = useState<CommunityAsset[]>([]);
   const [mapCenter, setMapCenter] = useState({ lat: 26.5, lng: 82.4 });
   const [mapZoom, setMapZoom] = useState(9);
   const [activeView, setActiveView] = useState('dashboard');
@@ -254,6 +259,10 @@ export function Dashboard() {
     });
   }
 
+  const handleAssetAdded = (newAsset: CommunityAsset) => {
+    setAssets(prev => [...prev, newAsset]);
+  };
+
 
   const handleClaimEdit = (claim: Claim) => {
     setEditingClaim(claim);
@@ -281,7 +290,7 @@ export function Dashboard() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-3 xl:col-span-2 space-y-6">
               <Card>
-                <CardHeader className="flex flex-row items-center justify-between">
+                <CardHeader className="flex flex-row items-center justify-between p-4 md:p-6">
                   <div>
                     <CardTitle>Interactive Map</CardTitle>
                     <CardDescription>Explore claims and village boundaries</CardDescription>
@@ -313,10 +322,12 @@ export function Dashboard() {
         return <VillageAnalysis villages={VILLAGES} claims={claims} />;
       case 'predictive-analysis':
         return <PredictiveAnalysis villages={VILLAGES} />;
+      case 'community-assets':
+        return <CommunityAssets assets={assets} villages={VILLAGES} onAddAsset={() => setAssetEditOpen(true)} />;
       case 'villages':
         return (
           <Card>
-            <CardHeader className="flex-col md:flex-row md:items-center md:justify-between">
+            <CardHeader className="flex-col md:flex-row md:items-center md:justify-between p-4 md:p-6">
               <div>
                 <CardTitle>Villages</CardTitle>
                 <CardDescription>List of all villages.</CardDescription>
@@ -332,7 +343,7 @@ export function Dashboard() {
                 />
               </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-4 md:p-6">
               {filteredVillages.length > 0 ? (
                 <ul className="space-y-2">
                   {filteredVillages.map(v => <li key={v.id} className="p-2 border rounded-md">{v.name}</li>)}
@@ -371,6 +382,12 @@ export function Dashboard() {
         availableVillages={VILLAGES.map(v => v.name)}
       />
       <ClaimUpload open={isUploadOpen} onOpenChange={setUploadOpen} onClaimAdded={handleClaimAdded} />
+      <AssetEdit 
+        open={isAssetEditOpen} 
+        onOpenChange={setAssetEditOpen} 
+        onAssetAdded={handleAssetAdded} 
+        villages={VILLAGES} 
+      />
     </>
   );
 }
