@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -39,7 +40,7 @@ export function Header({ onNavClick, onUploadClick }: HeaderProps) {
   }
 
   const navLinks = (
-     <>
+     <div className="flex flex-col gap-2">
         {navItems.map((item) => (
             <Button
               key={item.id}
@@ -57,24 +58,43 @@ export function Header({ onNavClick, onUploadClick }: HeaderProps) {
             onClick={handleUpload}
           >
             <Upload className="h-4 w-4" />
-            Upload Claims
+            Upload Claim
           </Button>
-    </>
+    </div>
   )
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
-      <div className="flex items-center gap-4">
-        <Logo />
+      <div className="flex items-center gap-2 md:gap-4">
+        <Sheet open={isMobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+          <SheetTrigger asChild>
+            <Button variant="outline" size="icon" className="md:hidden">
+              <Menu className="h-5 w-5" />
+              <span className="sr-only">Toggle navigation menu</span>
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="left" className="p-0">
+            <div className="p-4 border-b">
+              <Logo />
+            </div>
+            <nav className="grid gap-2 text-base font-medium p-4">
+              {navLinks}
+            </nav>
+          </SheetContent>
+        </Sheet>
+        <div className="hidden md:flex">
+          <Logo />
+        </div>
       </div>
 
-      <nav className="hidden md:flex items-center gap-2 text-sm font-medium ml-6">
+
+      <nav className="hidden md:flex items-center gap-1 text-sm font-medium ml-6">
         {navItems.map((item) => (
           <Button
             key={item.id}
             variant={activeItem === item.id ? 'default' : 'ghost'}
             onClick={() => handleNav(item.id)}
-            className={`transition-colors h-9 px-4 ${activeItem === item.id ? 'bg-primary text-primary-foreground' : ''}`}
+            className={`transition-colors h-9 px-3 ${activeItem === item.id ? 'bg-primary text-primary-foreground' : ''}`}
           >
             <item.icon className="mr-2 h-4 w-4" />
             {item.label}
@@ -87,22 +107,6 @@ export function Header({ onNavClick, onUploadClick }: HeaderProps) {
           <Upload className="mr-2 h-4 w-4" />
           Upload Claim
         </Button>
-        <Sheet open={isMobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-          <SheetTrigger asChild>
-            <Button variant="outline" size="icon" className="md:hidden">
-              <Menu className="h-5 w-5" />
-              <span className="sr-only">Toggle navigation menu</span>
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="left">
-            <div className="p-4">
-              <Logo />
-            </div>
-            <nav className="grid gap-2 text-lg font-medium p-4">
-              {navLinks}
-            </nav>
-          </SheetContent>
-        </Sheet>
       </div>
     </header>
   );

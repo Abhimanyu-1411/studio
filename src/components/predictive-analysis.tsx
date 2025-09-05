@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -81,9 +82,22 @@ export function PredictiveAnalysis({ villages }: PredictiveAnalysisProps) {
   
   const formatDateTick = (tickItem: string) => {
     try {
-        return format(new Date(tickItem), 'MMM yyyy');
+        const date = new Date(tickItem);
+        // Show year only on January tick to avoid clutter
+        if (date.getMonth() === 0) {
+            return format(date, 'MMM yyyy');
+        }
+        return format(date, 'MMM');
     } catch (e) {
         return tickItem;
+    }
+  }
+
+  const formatTooltipLabel = (label: string) => {
+    try {
+        return format(new Date(label), 'MMMM yyyy');
+    } catch (e) {
+        return label;
     }
   }
 
@@ -171,22 +185,22 @@ export function PredictiveAnalysis({ villages }: PredictiveAnalysisProps) {
               </div>
             )}
             {!isLoading && chartData.length === 0 && (
-                 <div className="flex flex-col items-center justify-center h-full text-center">
+                 <div className="flex flex-col items-center justify-center h-full text-center p-4">
                     <BrainCircuit className="h-16 w-16 text-muted-foreground mb-4" />
                     <p className="text-muted-foreground">Select a village and metric, then click "Generate Forecast" to see the prediction.</p>
                  </div>
             )}
             {!isLoading && chartData.length > 0 && (
                 <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 20 }}>
+                    <LineChart data={chartData} margin={{ top: 5, right: 20, left: 0, bottom: 25 }}>
                         <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="date" tickFormatter={formatDateTick} angle={-30} textAnchor="end" height={60} />
+                        <XAxis dataKey="date" tickFormatter={formatDateTick} angle={-45} textAnchor="end" height={60} interval="preserveStartEnd" />
                         <YAxis domain={['auto', 'auto']} />
                         <Tooltip
-                            labelFormatter={formatDateTick}
+                            labelFormatter={formatTooltipLabel}
                             formatter={(value, name) => [typeof value === 'number' ? value.toFixed(2) : value, name === 'historical' ? 'Historical' : 'Predicted']}
                         />
-                        <Legend wrapperStyle={{ bottom: -5 }} />
+                        <Legend wrapperStyle={{ bottom: 0 }} />
                         <Line type="monotone" dataKey="historical" stroke="#16a34a" strokeWidth={2} dot={false} name="Historical" />
                         <Line type="monotone" dataKey="predicted" stroke="#ea580c" strokeWidth={2} strokeDasharray="5 5" name="Predicted" />
                     </LineChart>
@@ -198,4 +212,3 @@ export function PredictiveAnalysis({ villages }: PredictiveAnalysisProps) {
     </div>
   );
 }
-

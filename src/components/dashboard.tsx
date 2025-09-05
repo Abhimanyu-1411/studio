@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useMemo } from 'react';
@@ -31,7 +32,7 @@ import { PredictiveAnalysis } from './predictive-analysis';
 
 const MapView = dynamic(() => import('@/components/map-view').then(mod => mod.MapView), {
   ssr: false,
-  loading: () => <Skeleton className="h-[500px] w-full" />,
+  loading: () => <Skeleton className="h-[50vh] md:h-[500px] w-full" />,
 });
 
 const StatsCard = ({ title, value, icon: Icon, color }: { title: string, value: number, icon: React.ElementType, color: string }) => (
@@ -271,7 +272,7 @@ export function Dashboard() {
       case 'dashboard':
         return (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2 space-y-6">
+            <div className="lg:col-span-3 xl:col-span-2 space-y-6">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between">
                   <div>
@@ -280,7 +281,7 @@ export function Dashboard() {
                   </div>
                   <AssetLayersControl activeLayers={activeLayers} onActiveLayersChange={setActiveLayers} />
                 </CardHeader>
-                <CardContent className="h-[500px] p-0">
+                <CardContent className="h-[50vh] md:h-[500px] p-0">
                   <MapView
                     claims={linkedClaims}
                     villages={VILLAGES}
@@ -293,7 +294,7 @@ export function Dashboard() {
                 </CardContent>
               </Card>
             </div>
-            <div className="space-y-6">
+            <div className="lg:col-span-3 xl:col-span-1 space-y-6">
               <RecentClaims claims={claims.slice(0, 5)} onClaimSelect={handleClaimEdit} />
               <QuickActions onUpload={() => setUploadOpen(true)} onViewClaims={() => setActiveView('claims-list')} />
             </div>
@@ -327,9 +328,9 @@ export function Dashboard() {
   return (
     <>
       <Header onNavClick={setActiveView} onUploadClick={() => setUploadOpen(true)} />
-      <main className="flex-1 p-6 space-y-6">
+      <main className="flex-1 p-4 md:p-6 space-y-6">
         {activeView === 'dashboard' && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
             <StatsCard title="Total Claims" value={totalClaims} icon={FileText} color="#3b82f6" />
             <StatsCard title="Pending Review" value={pendingClaims} icon={Clock} color="#f59e0b" />
             <StatsCard title="Linked to Map" value={approvedClaims} icon={CheckCircle} color="#10b981" />

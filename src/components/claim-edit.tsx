@@ -114,7 +114,7 @@ export function ClaimEdit({ claim, onOpenChange, onClaimUpdate, availableVillage
         
         <div className="grid md:grid-cols-2 gap-8 py-4">
             {/* Document Preview Column */}
-            <div className="border rounded-lg bg-muted/20 p-2 h-[60vh] flex flex-col">
+            <div className="border rounded-lg bg-muted/20 p-2 h-[50vh] md:h-[60vh] flex flex-col">
                 <Label className="text-center pb-2">Document Preview</Label>
                 <div className="flex-1 w-full h-full">
                 {claim.documentUrl ? (
