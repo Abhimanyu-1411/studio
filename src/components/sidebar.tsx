@@ -1,12 +1,12 @@
-
 'use client';
 
 import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/icons';
-import { LayoutGrid, List, Map, Lightbulb, TrendingUp, LandPlot, X } from 'lucide-react';
-import { usePathname, useRouter } from 'next/navigation'; // Using next/navigation for app router
+import { LayoutGrid, List, Map, Lightbulb, TrendingUp, LandPlot, X, ChevronLeft } from 'lucide-react';
+import { usePathname, useRouter } from 'next/navigation'; 
 import { cn } from '@/lib/utils';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle, SheetDescription } from './ui/sheet';
+import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from './ui/tooltip';
 
 
 const navItems = [
@@ -20,64 +20,57 @@ const navItems = [
 
 type SidebarProps = {
     isOpen: boolean;
-    onToggle: () => void;
+    setOpen: (isOpen: boolean) => void;
 }
 
 
-export function Sidebar({ isOpen, onToggle }: SidebarProps) {
+export function Sidebar({ isOpen, setOpen }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const isMobile = useIsMobile();
 
   const handleNav = (href: string) => {
     router.push(href);
-    if(isMobile) {
-      onToggle(); // Close sidebar on mobile after navigation
-    }
   }
 
-  const sidebarClasses = cn(
-    "bg-card text-card-foreground border-r flex flex-col transition-all duration-300 ease-in-out",
-    {
-        'w-64 p-4': !isMobile, // Desktop
-        'fixed inset-y-0 left-0 z-50 w-64 p-4': isMobile, // Mobile
-        'translate-x-0': isMobile && isOpen,
-        '-translate-x-full': isMobile && !isOpen,
-    }
-  )
-
   return (
-    <>
-    {isMobile && isOpen && (
-        <div 
-            className="fixed inset-0 bg-black/60 z-40" 
-            onClick={onToggle}
-        />
-    )}
-    <aside className={sidebarClasses}>
-        <div className="flex items-center justify-between pb-4 border-b mb-4">
-            <Logo />
-            {isMobile && (
-                <Button variant="ghost" size="icon" onClick={onToggle}>
-                    <X className="h-4 w-4"/>
-                </Button>
-            )}
-        </div>
-
-        <nav className="flex-1 space-y-2">
-            {navItems.map((item) => (
-                <Button
-                key={item.id}
-                variant={pathname === item.href ? 'secondary' : 'ghost'}
-                className="w-full justify-start gap-2"
-                onClick={() => handleNav(item.href)}
-                >
-                <item.icon className="h-4 w-4" />
-                {item.label}
-                </Button>
+     <aside className="fixed inset-y-0 left-0 z-10 hidden w-14 flex-col border-r bg-background sm:flex">
+      <nav className="flex flex-col items-center gap-4 px-2 sm:py-5">
+        <a
+          href="#"
+          className="group flex h-9 w-9 shrink-0 items-center justify-center gap-2 rounded-full bg-primary text-lg font-semibold text-primary-foreground md:h-8 md:w-8 md:text-base"
+        >
+          <Leaf className="h-4 w-4 transition-all group-hover:scale-110" />
+          <span className="sr-only">FRA Atlas</span>
+        </a>
+        <TooltipProvider>
+            {navItems.map(item => (
+                <Tooltip key={item.id}>
+                    <TooltipTrigger asChild>
+                         <button
+                            onClick={() => handleNav(item.href)}
+                            className={cn(
+                                "flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8",
+                                pathname === item.href && "bg-accent text-accent-foreground"
+                            )}
+                            >
+                            <item.icon className="h-5 w-5" />
+                            <span className="sr-only">{item.label}</span>
+                        </button>
+                    </TooltipTrigger>
+                    <TooltipContent side="right">{item.label}</TooltipContent>
+                </Tooltip>
             ))}
-        </nav>
+        </TooltipProvider>
+      </nav>
     </aside>
-    </>
   );
+}
+
+function Leaf(props: React.SVGProps<SVGSVGElement>) {
+    return (
+        <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M11 20A7 7 0 0 1 4 13H2a10 10 0 0 0 10 10z"/>
+            <path d="M12 2a7 7 0 0 1 7 7h2a10 10 0 0 0-19 6.22"/>
+        </svg>
+    )
 }
