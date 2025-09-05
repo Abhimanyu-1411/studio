@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useMemo } from 'react';
@@ -11,7 +12,7 @@ import { Header } from './header';
 import { RecentClaims } from './recent-claims';
 import { QuickActions } from './quick-actions';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
-import { FileText, Clock, CheckCircle, MapPin, Lightbulb, ThumbsUp, Loader2, AlertCircle } from 'lucide-react';
+import { FileText, Clock, CheckCircle, MapPin, Lightbulb, ThumbsUp, Loader2, AlertCircle, Search } from 'lucide-react';
 import { ClaimsTable } from './claims-table';
 import { ClaimUpload } from './claim-upload';
 import { AssetLayersControl, type ActiveLayers } from './asset-layers-control';
@@ -28,6 +29,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Badge } from './ui/badge';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import { PredictiveAnalysis } from './predictive-analysis';
+import { Input } from './ui/input';
 
 
 const MapView = dynamic(() => import('@/components/map-view').then(mod => mod.MapView), {
@@ -227,6 +229,7 @@ export function Dashboard() {
     forest: false,
     agriculture: false,
   });
+  const [villageSearchQuery, setVillageSearchQuery] = useState('');
   const { toast } = useToast();
 
 
@@ -267,6 +270,10 @@ export function Dashboard() {
 
   const linkedClaims = useMemo(() => claims.filter(c => c.status === 'linked'), [claims]);
   
+  const filteredVillages = useMemo(() => {
+    return VILLAGES.filter(v => v.name.toLowerCase().includes(villageSearchQuery.toLowerCase()));
+  }, [villageSearchQuery]);
+
   const renderContent = () => {
     switch(activeView) {
       case 'dashboard':
@@ -309,14 +316,32 @@ export function Dashboard() {
       case 'villages':
         return (
           <Card>
-            <CardHeader>
-              <CardTitle>Villages</CardTitle>
-              <CardDescription>List of all villages.</CardDescription>
+            <CardHeader className="flex-col md:flex-row md:items-center md:justify-between">
+              <div>
+                <CardTitle>Villages</CardTitle>
+                <CardDescription>List of all villages.</CardDescription>
+              </div>
+              <div className="relative w-full md:w-auto mt-4 md:mt-0">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  type="search"
+                  placeholder="Search villages..."
+                  className="pl-8 sm:w-[300px]"
+                  value={villageSearchQuery}
+                  onChange={(e) => setVillageSearchQuery(e.target.value)}
+                />
+              </div>
             </CardHeader>
             <CardContent>
-              <ul className="space-y-2">
-                {VILLAGES.map(v => <li key={v.id} className="p-2 border rounded-md">{v.name}</li>)}
-              </ul>
+              {filteredVillages.length > 0 ? (
+                <ul className="space-y-2">
+                  {filteredVillages.map(v => <li key={v.id} className="p-2 border rounded-md">{v.name}</li>)}
+                </ul>
+              ) : (
+                <div className="text-center py-12 text-muted-foreground">
+                  <p>No villages match your search.</p>
+                </div>
+              )}
             </CardContent>
           </Card>
         )

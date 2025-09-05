@@ -1,6 +1,7 @@
 
 'use client';
 
+import { useState } from 'react';
 import {
   Table,
   TableBody,
@@ -12,8 +13,9 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from './ui/button';
-import { Edit, Link } from 'lucide-react';
+import { Edit, Link, Search } from 'lucide-react';
 import type { Claim } from '@/types';
+import { Input } from './ui/input';
 
 type ClaimsTableProps = {
   claims: Claim[];
@@ -37,16 +39,35 @@ const claimStatusText: Record<Claim['status'], string> = {
 
 
 export function ClaimsTable({ claims, onClaimEdit, onClaimLink }: ClaimsTableProps) {
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const filteredClaims = claims.filter(claim => 
+    claim.claimantName.value.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (claim.linkedVillage || claim.village.value).toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <Card>
-        <CardHeader>
+        <CardHeader className="flex-col md:flex-row md:items-center md:justify-between">
+          <div>
             <CardTitle>Claims List</CardTitle>
             <CardDescription>A list of all uploaded claims and their status.</CardDescription>
+          </div>
+          <div className="relative w-full md:w-auto mt-4 md:mt-0">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="search"
+              placeholder="Search claims..."
+              className="pl-8 sm:w-[300px]"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
         </CardHeader>
         <CardContent>
-            {claims.length === 0 ? (
+            {filteredClaims.length === 0 ? (
                 <div className="text-center py-12 text-muted-foreground">
-                    <p>No claims have been uploaded yet.</p>
+                    <p>No claims match your search.</p>
                 </div>
              ) : (
                 <div className="w-full overflow-x-auto">
@@ -62,7 +83,7 @@ export function ClaimsTable({ claims, onClaimEdit, onClaimLink }: ClaimsTablePro
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {claims.map((claim) => (
+                        {filteredClaims.map((claim) => (
                         <TableRow key={claim.id}>
                             <TableCell className="font-medium whitespace-nowrap">{claim.claimantName.value}</TableCell>
                             <TableCell className="whitespace-nowrap">{claim.linkedVillage || claim.village.value}</TableCell>
