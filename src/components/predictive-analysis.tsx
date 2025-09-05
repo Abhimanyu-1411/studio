@@ -79,7 +79,11 @@ export function PredictiveAnalysis({ villages }: PredictiveAnalysisProps) {
   };
   
   const formatDateTick = (tickItem: string) => {
-    return format(new Date(tickItem), 'MMM yyyy');
+    try {
+        return format(new Date(tickItem), 'MMM yyyy');
+    } catch (e) {
+        return tickItem;
+    }
   }
 
   return (
@@ -173,15 +177,15 @@ export function PredictiveAnalysis({ villages }: PredictiveAnalysisProps) {
             )}
             {!isLoading && chartData.length > 0 && (
                 <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                    <LineChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 20 }}>
                         <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="date" tickFormatter={formatDateTick} angle={-30} textAnchor="end" height={50} />
+                        <XAxis dataKey="date" tickFormatter={formatDateTick} angle={-30} textAnchor="end" height={60} />
                         <YAxis domain={['auto', 'auto']} />
                         <Tooltip
                             labelFormatter={formatDateTick}
-                            formatter={(value, name) => [value, name === 'historical' ? 'Historical' : 'Predicted']}
+                            formatter={(value, name) => [typeof value === 'number' ? value.toFixed(2) : value, name === 'historical' ? 'Historical' : 'Predicted']}
                         />
-                        <Legend />
+                        <Legend wrapperStyle={{ bottom: -5 }} />
                         <Line type="monotone" dataKey="historical" stroke="#16a34a" strokeWidth={2} dot={false} name="Historical" />
                         <Line type="monotone" dataKey="predicted" stroke="#ea580c" strokeWidth={2} strokeDasharray="5 5" name="Predicted" />
                     </LineChart>
