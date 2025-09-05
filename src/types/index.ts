@@ -42,7 +42,7 @@ export type Village = {
   center: LatLng;
   bounds: LatLng[];
   assetGeometries?: {
-    water: LatLng[][];
+    ndwi: LatLng[][];
     forest: LatLng[][];
     agriculture: LatLng[][];
   }
@@ -54,4 +54,3 @@ export type DssRecommendation = {
   justification: string;
   priority: number;
 };
-

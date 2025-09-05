@@ -64,7 +64,7 @@ export const VILLAGES: Village[] = [
       { lat: 26.4, lng: 82.52 },
     ],
     assetGeometries: {
-      water: [
+      ndwi: [
         [
           { lat: 26.415, lng: 82.535 }, { lat: 26.416, lng: 82.536 }, { lat: 26.417, lng: 82.537 }, { lat: 26.418, lng: 82.538 },
           { lat: 26.419, lng: 82.539 }, { lat: 26.420, lng: 82.540 }, { lat: 26.419, lng: 82.541 }, { lat: 26.418, lng: 82.542 },
@@ -118,7 +118,7 @@ export const VILLAGES: Village[] = [
       { lat: 26.26, lng: 82.045 },
     ],
     assetGeometries: {
-      water: [
+      ndwi: [
         [
           { lat: 26.26, lng: 82.055 }, { lat: 26.261, lng: 82.056 }, { lat: 26.262, lng: 82.057 }, { lat: 26.263, lng: 82.058 },
           { lat: 26.265, lng: 82.06 }, { lat: 26.266, lng: 82.062 }, { lat: 26.268, lng: 82.065 }, { lat: 26.267, lng: 82.067 },
@@ -162,7 +162,7 @@ export const VILLAGES: Village[] = [
       { lat: 26.80, lng: 82.685 },
     ],
     assetGeometries: {
-      water: [],
+      ndwi: [],
       forest: [
         [
           { lat: 26.78, lng: 82.7 }, { lat: 26.782, lng: 82.702 }, { lat: 26.785, lng: 82.705 }, { lat: 26.79, lng: 82.71 },
@@ -350,4 +350,3 @@ export const MOCK_CLAIMS: Claim[] = [
 ];
 
 export const AVAILABLE_VILLAGE_NAMES = VILLAGES.map(v => v.name);
-

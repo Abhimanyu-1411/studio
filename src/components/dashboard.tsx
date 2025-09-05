@@ -222,7 +222,7 @@ export function Dashboard() {
   const [mapZoom, setMapZoom] = useState(9);
   const [activeView, setActiveView] = useState('dashboard');
   const [activeLayers, setActiveLayers] = useState<ActiveLayers>({
-    water: false,
+    ndwi: false,
     forest: false,
     agriculture: false,
   });

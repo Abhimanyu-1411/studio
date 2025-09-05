@@ -7,7 +7,7 @@ import { Layers } from "lucide-react";
 import { Label } from "./ui/label";
 
 export type ActiveLayers = {
-    water: boolean;
+    ndwi: boolean;
     forest: boolean;
     agriculture: boolean;
 }
@@ -38,8 +38,8 @@ export function AssetLayersControl({ activeLayers, onActiveLayersChange }: Asset
                 <DropdownMenuLabel>Toggle Layers</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                    <Checkbox id="water" checked={activeLayers.water} onCheckedChange={handleCheckedChange('water')} />
-                    <Label htmlFor="water" className="ml-2">Water Bodies</Label>
+                    <Checkbox id="ndwi" checked={activeLayers.ndwi} onCheckedChange={handleCheckedChange('ndwi')} />
+                    <Label htmlFor="ndwi" className="ml-2">NDWI (Water Availability)</Label>
                 </DropdownMenuItem>
                 <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
                     <Checkbox id="forest" checked={activeLayers.forest} onCheckedChange={handleCheckedChange('forest')} />

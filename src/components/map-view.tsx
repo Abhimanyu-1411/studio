@@ -49,7 +49,7 @@ const MapController = ({ center, zoom }: { center: { lat: number, lng: number },
 }
 
 const assetLayerStyles = {
-  water: { color: '#2563eb', fillColor: '#3b82f6', weight: 1 },
+  ndwi: { color: '#2563eb', fillColor: '#3b82f6', weight: 1 },
   forest: { color: '#166534', fillColor: '#22c55e', weight: 1 },
   agriculture: { color: '#ca8a04', fillColor: '#facc15', weight: 1 },
 };
@@ -88,8 +88,8 @@ const MapViewComponent = ({ claims, villages, onVillageClick, onClaimEdit, cente
             }}
             />
             
-            {activeLayers.water && village.assetGeometries?.water.map((poly, i) => 
-                <Polygon key={`${village.id}-water-${i}`} positions={poly} pathOptions={{...assetLayerStyles.water, fillOpacity: 0.5}} />
+            {activeLayers.ndwi && village.assetGeometries?.ndwi.map((poly, i) => 
+                <Polygon key={`${village.id}-ndwi-${i}`} positions={poly} pathOptions={{...assetLayerStyles.ndwi, fillOpacity: 0.5}} />
             )}
             {activeLayers.forest && village.assetGeometries?.forest.map((poly, i) => 
                 <Polygon key={`${village.id}-forest-${i}`} positions={poly} pathOptions={{...assetLayerStyles.forest, fillOpacity: 0.5}} />
