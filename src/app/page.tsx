@@ -1,9 +1,8 @@
 
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import dynamic from 'next/dynamic';
-import { MOCK_CLAIMS, VILLAGES } from '@/lib/mock-data';
 import type { Claim, Village, CommunityAsset } from '@/types';
 import { ClaimEdit } from '@/components/claim-edit';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -16,6 +15,8 @@ import { AssetLayersControl, type ActiveLayers } from '@/components/asset-layers
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { AssetEdit } from '@/components/asset-edit';
+import { getClaims, getVillages, getCommunityAssets, updateClaim, seedInitialData } from './actions';
+import { Button } from '@/components/ui/button';
 
 const MapView = dynamic(() => import('@/components/map-view').then(mod => mod.MapView), {
   ssr: false,
@@ -37,13 +38,15 @@ const StatsCard = ({ title, value, icon: Icon, color }: { title: string, value: 
 );
 
 export default function DashboardPage() {
-  const [claims, setClaims] = useState<Claim[]>(MOCK_CLAIMS);
+  const [claims, setClaims] = useState<Claim[]>([]);
+  const [villages, setVillages] = useState<Village[]>([]);
   const [editingClaim, setEditingClaim] = useState<Claim | null>(null);
   const [isUploadOpen, setUploadOpen] = useState(false);
   const [isAssetEditOpen, setAssetEditOpen] = useState(false);
   const [assets, setAssets] = useState<CommunityAsset[]>([]);
   const [mapCenter, setMapCenter] = useState({ lat: 26.5, lng: 82.4 });
   const [mapZoom, setMapZoom] = useState(9);
+  const [loading, setLoading] = useState(true);
   
   const router = useRouter();
 
@@ -53,6 +56,32 @@ export default function DashboardPage() {
     agriculture: false,
   });
   const { toast } = useToast();
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        await seedInitialData();
+        const [claimsData, villagesData, assetsData] = await Promise.all([
+          getClaims(),
+          getVillages(),
+          getCommunityAssets(),
+        ]);
+        setClaims(claimsData);
+        setVillages(villagesData);
+        setAssets(assetsData);
+      } catch (error) {
+        console.error("Failed to fetch initial data", error);
+        toast({
+          variant: 'destructive',
+          title: 'Error',
+          description: 'Failed to load data from the server.',
+        });
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchData();
+  }, [toast]);
 
 
   const handleClaimAdded = (newClaim: Claim) => {
@@ -64,7 +93,8 @@ export default function DashboardPage() {
     }
   };
   
-  const handleClaimUpdate = (updatedClaim: Claim) => {
+  const handleClaimUpdate = async (updatedClaim: Claim) => {
+    await updateClaim(updatedClaim.id, updatedClaim);
     setClaims(prev => prev.map(c => c.id === updatedClaim.id ? updatedClaim : c));
     setEditingClaim(null);
   }
@@ -84,9 +114,17 @@ export default function DashboardPage() {
   const totalClaims = claims.length;
   const pendingClaims = claims.filter(c => c.status === 'needs-review' || c.status === 'unlinked').length;
   const approvedClaims = claims.filter(c => c.status === 'linked').length;
-  const totalVillages = VILLAGES.length;
+  const totalVillages = villages.length;
 
   const linkedClaims = useMemo(() => claims.filter(c => c.status === 'linked'), [claims]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <Skeleton className="w-64 h-4" />
+      </div>
+    );
+  }
 
   if (editingClaim) {
     return (
@@ -103,7 +141,7 @@ export default function DashboardPage() {
             <CardContent className="flex-1 p-0">
               <MapView
                 claims={linkedClaims}
-                villages={VILLAGES}
+                villages={villages}
                 assets={assets}
                 onVillageClick={() => {}}
                 onClaimEdit={handleClaimEdit}
@@ -119,7 +157,7 @@ export default function DashboardPage() {
             claim={editingClaim}
             onClose={() => setEditingClaim(null)}
             onClaimUpdate={handleClaimUpdate}
-            availableVillages={VILLAGES.map(v => v.name)}
+            availableVillages={villages.map(v => v.name)}
           />
         </div>
       </div>
@@ -147,7 +185,7 @@ export default function DashboardPage() {
                   <CardContent className="h-[calc(100%-4rem)] p-0">
                       <MapView
                           claims={linkedClaims}
-                          villages={VILLAGES}
+                          villages={villages}
                           assets={assets}
                           onVillageClick={() => {}}
                           onClaimEdit={handleClaimEdit}
@@ -168,7 +206,7 @@ export default function DashboardPage() {
         open={isAssetEditOpen} 
         onOpenChange={setAssetEditOpen} 
         onAssetAdded={handleAssetAdded} 
-        villages={VILLAGES} 
+        villages={villages} 
       />
     </>
   );

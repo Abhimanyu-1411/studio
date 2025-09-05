@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useCallback } from 'react';
@@ -11,8 +12,6 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Loader2, UploadCloud, FileCheck2, XCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { handleClaimUpload } from '@/app/actions';
@@ -85,22 +84,21 @@ export function ClaimUpload({ open, onOpenChange, onClaimAdded }: ClaimUploadPro
     setProgress(60);
 
     try {
-      const extractedData = await handleClaimUpload(preview);
+      const newClaim = await handleClaimUpload(preview);
       setProgress(80);
       
-      const newClaim: Claim = {
-        id: `claim-${Date.now()}`,
-        ...extractedData,
+      const claimWithDoc: Claim = {
+        ...newClaim,
         documentUrl: preview,
         documentType: file.type,
       };
 
-      onClaimAdded(newClaim);
+      onClaimAdded(claimWithDoc);
       setStatus('success');
       setProgress(100);
       toast({
         title: 'Claim Processed',
-        description: `Extracted data for ${newClaim.claimantName}.`,
+        description: `Extracted data for ${newClaim.claimantName.value}.`,
       });
       setTimeout(() => handleClose(false), 1000);
     } catch (error) {

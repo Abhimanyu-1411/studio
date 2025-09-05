@@ -31,7 +31,7 @@ import type { Village, CommunityAsset } from '@/types';
 type AssetEditProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onAssetAdded: (asset: CommunityAsset) => void;
+  onAssetAdded: (asset: Omit<CommunityAsset, 'id'>) => void;
   villages: Village[];
 };
 
@@ -110,11 +110,8 @@ export function AssetEdit({ open, onOpenChange, onAssetAdded, villages }: AssetE
 
     const selectedVillage = villages.find(v => v.id === villageId);
 
-    // In a real app, this would upload the file to a storage bucket.
-    // For the prototype, we'll just use the Data URI directly.
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise(resolve => setTimeout(resolve, 500)); // Simulate processing
 
-    // Create some placeholder geometry for now near the village center
     const placeholderGeometry = selectedVillage ? [
         { lat: selectedVillage.center.lat + 0.005, lng: selectedVillage.center.lng + 0.005 },
         { lat: selectedVillage.center.lat + 0.005, lng: selectedVillage.center.lng - 0.005 },
@@ -122,8 +119,7 @@ export function AssetEdit({ open, onOpenChange, onAssetAdded, villages }: AssetE
         { lat: selectedVillage.center.lat - 0.005, lng: selectedVillage.center.lng + 0.005 },
     ] : [];
 
-    const newAsset: CommunityAsset = {
-      id: `asset-${Date.now()}`,
+    const newAsset: Omit<CommunityAsset, 'id'> = {
       villageId,
       assetType,
       description,

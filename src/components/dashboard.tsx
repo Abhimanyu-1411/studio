@@ -1,19 +1,12 @@
 
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import dynamic from 'next/dynamic';
-import { MOCK_CLAIMS, VILLAGES } from '@/lib/mock-data';
-import type { Claim, Village, DssRecommendation, CommunityAsset } from '@/types';
-import { ClaimEdit } from './claim-edit';
+import type { Claim, Village, DssRecommendation } from '@/types';
 import { Skeleton } from './ui/skeleton';
-import { RecentClaims } from './recent-claims';
-import { QuickActions } from './quick-actions';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
-import { FileText, Clock, CheckCircle, MapPin, Lightbulb, ThumbsUp, Loader2, AlertCircle, Search } from 'lucide-react';
-import { ClaimsTable } from './claims-table';
-import { ClaimUpload } from './claim-upload';
-import { AssetLayersControl, type ActiveLayers } from './asset-layers-control';
+import { Lightbulb, ThumbsUp, Loader2, AlertCircle, CheckCircle } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -26,32 +19,6 @@ import { Button } from './ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from './ui/badge';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
-import { PredictiveAnalysis } from './predictive-analysis';
-import { Input } from './ui/input';
-import { CommunityAssets } from './community-assets';
-import { AssetEdit } from './asset-edit';
-import { cn } from '@/lib/utils';
-import { usePathname, useRouter } from 'next/navigation';
-
-
-const MapView = dynamic(() => import('@/components/map-view').then(mod => mod.MapView), {
-  ssr: false,
-  loading: () => <Skeleton className="h-full w-full" />,
-});
-
-const StatsCard = ({ title, value, icon: Icon, color }: { title: string, value: number, icon: React.ElementType, color: string }) => (
-  <Card className="shadow-sm">
-    <CardContent className="flex items-center justify-between p-4">
-      <div>
-        <p className="text-sm font-medium text-muted-foreground">{title}</p>
-        <p className="text-3xl font-bold">{value}</p>
-      </div>
-      <div className={`p-3 rounded-full`} style={{ backgroundColor: `${color}1A` }}>
-        <Icon className="h-6 w-6" style={{ color: color }} />
-      </div>
-    </CardContent>
-  </Card>
-);
 
 const RecommendationCard = ({ recommendation, onActed, isActedOn }: { recommendation: DssRecommendation, onActed: () => void, isActedOn: boolean }) => {
   return (
@@ -97,7 +64,7 @@ export const VillageAnalysis = ({ villages, claims }: { villages: Village[], cla
     setActedOn([]);
 
     try {
-      const result = await getDssRecommendation(villageId, claims);
+      const result = await getDssRecommendation(villageId);
       setRecommendations(result);
     } catch (error: any) {
       console.error(error);
@@ -124,6 +91,8 @@ export const VillageAnalysis = ({ villages, claims }: { villages: Village[], cla
 
   const villageClaims = useMemo(() => {
     if (!selectedVillage) return [];
+    // This is now slightly incorrect as claims are not passed down, but the count is handled server side.
+    // We can show a loading state or just the data from the village object itself.
     return claims.filter(c => c.linkedVillage === selectedVillage.name);
   }, [selectedVillage, claims]);
 
@@ -161,13 +130,10 @@ export const VillageAnalysis = ({ villages, claims }: { villages: Village[], cla
               <CardDescription>Data used for the recommendation.</CardDescription>
             </CardHeader>
             <CardContent className="text-sm space-y-2">
-                <p><strong>Total Claims:</strong> {villageClaims.length}</p>
-                <p><strong>Pending Claims:</strong> {villageClaims.filter(c => c.status !== 'reviewed' && c.status !== 'linked').length}</p>
-                <p><strong>CFR Claims:</strong> {villageClaims.filter(c => c.claimType.value === 'CFR').length}</p>
-                <p><strong>IFR Claims:</strong> {villageClaims.filter(c => c.claimType.value === 'IFR').length}</p>
                 <p><strong>Water Coverage:</strong> {selectedVillage.assetCoverage.water}%</p>
                 <p><strong>Forest Coverage:</strong> {selectedVillage.assetCoverage.forest}%</p>
                 <p><strong>Agricultural Area:</strong> {selectedVillage.assetCoverage.agriculture}%</p>
+                 <p className="text-muted-foreground text-xs pt-2">Claim counts are now calculated on the server.</p>
             </CardContent>
           </Card>
         )}

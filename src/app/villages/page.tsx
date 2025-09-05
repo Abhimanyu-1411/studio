@@ -1,17 +1,44 @@
 
 'use client';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
-import { VILLAGES } from '@/lib/mock-data';
+import type { Village } from '@/types';
+import { getVillages } from '../actions';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function VillagesPage() {
+    const [villages, setVillages] = useState<Village[]>([]);
+    const [loading, setLoading] = useState(true);
     const [villageSearchQuery, setVillageSearchQuery] = useState('');
 
+    useEffect(() => {
+        async function fetchData() {
+            try {
+                const villagesData = await getVillages();
+                setVillages(villagesData);
+            } catch (error) {
+                console.error("Failed to fetch villages", error);
+            } finally {
+                setLoading(false);
+            }
+        }
+        fetchData();
+    }, []);
+
     const filteredVillages = useMemo(() => {
-        return VILLAGES.filter(v => v.name.toLowerCase().includes(villageSearchQuery.toLowerCase()));
-    }, [villageSearchQuery]);
+        return villages.filter(v => v.name.toLowerCase().includes(villageSearchQuery.toLowerCase()));
+    }, [villageSearchQuery, villages]);
+
+    if (loading) {
+        return (
+            <div className="space-y-4">
+                <Skeleton className="h-12 w-full" />
+                <Skeleton className="h-64 w-full" />
+            </div>
+        )
+    }
 
     return (
         <Card>
