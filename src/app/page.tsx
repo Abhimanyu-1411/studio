@@ -3,7 +3,7 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import dynamic from 'next/dynamic';
-import type { Claim, Village, CommunityAsset } from '@/types';
+import type { Claim, Village, CommunityAsset, Patta } from '@/types';
 import { ClaimEdit } from '@/components/claim-edit';
 import { Skeleton } from '@/components/ui/skeleton';
 import { RecentClaims } from '@/components/recent-claims';
@@ -11,6 +11,7 @@ import { QuickActions } from '@/components/quick-actions';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { FileText, Clock, CheckCircle, MapPin, Maximize, Minimize } from 'lucide-react';
 import { ClaimUpload } from '@/components/claim-upload';
+import { ShapefileUpload } from '@/components/shapefile-upload';
 import { AssetLayersControl, type ActiveLayers } from '@/components/asset-layers-control';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
@@ -43,8 +44,10 @@ export default function DashboardPage() {
   const [villages, setVillages] = useState<Village[]>([]);
   const [editingClaim, setEditingClaim] = useState<Claim | null>(null);
   const [isUploadOpen, setUploadOpen] = useState(false);
+  const [isShapefileUploadOpen, setShapefileUploadOpen] = useState(false);
   const [isAssetEditOpen, setAssetEditOpen] = useState(false);
   const [assets, setAssets] = useState<CommunityAsset[]>([]);
+  const [pattas, setPattas] = useState<Patta[]>([]);
   const [mapCenter, setMapCenter] = useState({ lat: 26.5, lng: 82.4 });
   const [mapZoom, setMapZoom] = useState(9);
   const [loading, setLoading] = useState(true);
@@ -93,6 +96,17 @@ export default function DashboardPage() {
     }
   };
   
+  const handlePattasAdded = (newPattas: Patta[]) => {
+    setPattas(prev => [...prev, ...newPattas]);
+    if (newPattas.length > 0 && newPattas[0].geometry.length > 0) {
+      const firstPattaGeometry = newPattas[0].geometry;
+      const centerLat = firstPattaGeometry.reduce((sum, p) => sum + p.lat, 0) / firstPattaGeometry.length;
+      const centerLng = firstPattaGeometry.reduce((sum, p) => sum + p.lng, 0) / firstPattaGeometry.length;
+      setMapCenter({lat: centerLat, lng: centerLng});
+      setMapZoom(14);
+    }
+  };
+
   const handleClaimUpdate = async (updatedClaim: Claim) => {
     await updateClaim(updatedClaim.id, updatedClaim);
     setClaims(prev => prev.map(c => c.id === updatedClaim.id ? updatedClaim : c));
@@ -131,6 +145,7 @@ export default function DashboardPage() {
                 claims={linkedClaims}
                 villages={villages}
                 assets={assets}
+                pattas={pattas}
                 onVillageClick={() => {}}
                 onClaimEdit={handleClaimEdit}
                 center={mapCenter}
@@ -196,11 +211,16 @@ export default function DashboardPage() {
               <MapCard className="h-[40vh] md:h-[60vh]" />
               <div className="space-y-4">
                   <RecentClaims claims={claims.slice(0, 5)} onClaimSelect={handleClaimEdit} />
-                  <QuickActions onUpload={() => setUploadOpen(true)} onViewClaims={() => { router.push('/claims')}} />
+                  <QuickActions 
+                    onUpload={() => setUploadOpen(true)} 
+                    onViewClaims={() => { router.push('/claims')}} 
+                    onUploadShapefile={() => setShapefileUploadOpen(true)}
+                    />
               </div>
           </div>
       </div>
       <ClaimUpload open={isUploadOpen} onOpenChange={setUploadOpen} onClaimAdded={handleClaimAdded} />
+      <ShapefileUpload open={isShapefileUploadOpen} onOpenChange={setShapefileUploadOpen} onPattasAdded={handlePattasAdded} />
       <AssetEdit 
         open={isAssetEditOpen} 
         onOpenChange={setAssetEditOpen} 

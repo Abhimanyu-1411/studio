@@ -5,8 +5,9 @@ import { extractClaimData } from '@/ai/flows/extract-claim-data';
 import { intelligentGeoLinking } from '@/ai/flows/intelligent-geo-linking';
 import { dssRecommendations } from '@/ai/flows/dss-recommendations';
 import { predictiveAnalysis } from '@/ai/flows/predictive-analysis';
+import { processShapefile } from '@/ai/flows/process-shapefile';
 import { MOCK_CLAIMS, VILLAGES, AVAILABLE_VILLAGE_NAMES } from '@/lib/mock-data';
-import type { DssRecommendation, Claim, Village, CommunityAsset, TimeSeriesDataPoint } from '@/types';
+import type { DssRecommendation, Claim, Village, CommunityAsset, TimeSeriesDataPoint, Patta } from '@/types';
 
 
 export async function handleClaimUpload(documentDataUri: string) {
@@ -53,6 +54,18 @@ export async function handleClaimUpload(documentDataUri: string) {
 
   return newClaim;
 }
+
+export async function handleShapefileUpload(shapefileDataUri: string): Promise<Patta[]> {
+  const extractedPattas = await processShapefile({ shapefileDataUri });
+  // In a real app, you would save this to the database.
+  // For now, we just return it to the client to be displayed.
+  // We'll add an ID to each patta for use as a key in React.
+  return extractedPattas.map((patta, index) => ({
+    ...patta,
+    id: `patta-${Date.now()}-${index}`,
+  }));
+}
+
 
 export async function updateClaim(claimId: string, updatedData: Partial<Claim>) {
     // This is a mock implementation. In a real app, you would update the database.

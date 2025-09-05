@@ -1,15 +1,17 @@
+
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from './ui/button';
-import { Upload, List, UserPlus } from 'lucide-react';
+import { Upload, List, UserPlus, FileJson } from 'lucide-react';
 
 type QuickActionsProps = {
     onUpload: () => void;
     onViewClaims: () => void;
+    onUploadShapefile: () => void;
 }
 
-export function QuickActions({ onUpload, onViewClaims }: QuickActionsProps) {
+export function QuickActions({ onUpload, onViewClaims, onUploadShapefile }: QuickActionsProps) {
   return (
     <Card>
       <CardHeader>
@@ -19,6 +21,10 @@ export function QuickActions({ onUpload, onViewClaims }: QuickActionsProps) {
         <Button variant="outline" onClick={onUpload}>
             <Upload className="mr-2 h-4 w-4" />
             Upload a new claim
+        </Button>
+        <Button variant="outline" onClick={onUploadShapefile}>
+            <FileJson className="mr-2 h-4 w-4" />
+            Upload Shapefile
         </Button>
          <Button variant="outline" onClick={onViewClaims}>
             <List className="mr-2 h-4 w-4" />

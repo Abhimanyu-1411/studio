@@ -64,3 +64,10 @@ export type CommunityAsset = {
   documentType: string;
   geometry?: LatLng[];
 }
+
+export type Patta = {
+    id: string;
+    holderName: string;
+    villageName: string;
+    geometry: LatLng[];
+}

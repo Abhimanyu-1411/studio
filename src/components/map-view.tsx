@@ -4,7 +4,7 @@
 import * as React from 'react';
 import { MapContainer, TileLayer, Polygon, Marker, Popup, useMap } from 'react-leaflet';
 import { useEffect, memo, type ReactNode } from 'react';
-import type { Claim, Village, CommunityAsset } from '@/types';
+import type { Claim, Village, CommunityAsset, Patta } from '@/types';
 import { Badge } from './ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from './ui/card';
 import { Button } from './ui/button';
@@ -16,6 +16,7 @@ type MapViewProps = {
   claims: Claim[];
   villages: Village[];
   assets: CommunityAsset[];
+  pattas: Patta[];
   onVillageClick: (village: Village) => void;
   onClaimEdit: (claim: Claim) => void;
   center: { lat: number; lng: number };
@@ -57,7 +58,14 @@ const assetLayerStyles = {
   other: { color: '#a21caf', fillColor: '#c026d3', weight: 1},
 };
 
-const MapViewComponent = ({ claims, villages, assets, onVillageClick, onClaimEdit, center, zoom, activeLayers, children }: MapViewProps) => {
+const pattaStyle = {
+    color: '#be185d',
+    fillColor: '#ec4899',
+    weight: 2,
+    fillOpacity: 0.6,
+}
+
+const MapViewComponent = ({ claims, villages, assets, pattas, onVillageClick, onClaimEdit, center, zoom, activeLayers, children }: MapViewProps) => {
   const getPolygonOptions = (village: Village) => {
     return {
       color: 'hsl(var(--primary))',
@@ -110,6 +118,15 @@ const MapViewComponent = ({ claims, villages, assets, onVillageClick, onClaimEdi
                 <Polygon key={`${village.id}-agri-${i}`} positions={poly} pathOptions={{...assetLayerStyles.agriculture, fillOpacity: 0.5}} />
             )}
         </React.Fragment>
+      ))}
+      
+      {pattas.map((patta) => (
+        <Polygon key={patta.id} positions={patta.geometry} pathOptions={pattaStyle}>
+            <Popup>
+                <div className="font-bold text-base">{patta.holderName}</div>
+                <p className="text-sm">{patta.villageName}</p>
+            </Popup>
+        </Polygon>
       ))}
 
       {assets.map((asset) => (
