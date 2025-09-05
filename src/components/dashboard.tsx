@@ -229,6 +229,7 @@ export function Dashboard() {
   const [mapZoom, setMapZoom] = useState(9);
   
   const pathname = usePathname();
+  const router = useRouter();
   const activeView = pathname.substring(1) || 'dashboard';
 
   const [activeLayers, setActiveLayers] = useState<ActiveLayers>({
@@ -284,7 +285,6 @@ export function Dashboard() {
   const filteredVillages = useMemo(() => {
     return VILLAGES.filter(v => v.name.toLowerCase().includes(villageSearchQuery.toLowerCase()));
   }, [villageSearchQuery]);
-  const router = useRouter();
 
   const renderContent = () => {
     if (editingClaim) {
