@@ -8,6 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { ClaimEdit } from '@/components/claim-edit';
 import { getClaims, getVillages, updateClaim } from '../actions';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useRouter } from 'next/navigation';
 
 export default function ClaimsPage() {
   const [claims, setClaims] = useState<Claim[]>([]);
@@ -15,6 +16,7 @@ export default function ClaimsPage() {
   const [editingClaim, setEditingClaim] = useState<Claim | null>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const router = useRouter();
 
   useEffect(() => {
     async function fetchData() {
@@ -56,34 +58,42 @@ export default function ClaimsPage() {
   };
 
   const handleClaimEdit = (claim: Claim) => {
+    // Instead of opening a modal, navigate to the main page with a query param
+    // The main page will handle showing the side-by-side view.
+    // For simplicity here, we'll use the existing state logic which works within this page
+    // but a global state (like Zustand or Context) or URL state would be better for multi-page editing.
     setEditingClaim(claim);
   };
+  
+  const handleCloseEdit = () => {
+    setEditingClaim(null);
+  }
 
   if (loading) {
     return (
-       <div className="space-y-4">
+       <div className="space-y-4 p-4 md:p-6">
         <Skeleton className="h-12 w-full" />
         <Skeleton className="h-64 w-full" />
       </div>
     )
   }
 
-  if (editingClaim) {
-    return (
-        <ClaimEdit
-          claim={editingClaim}
-          onClose={() => setEditingClaim(null)}
-          onClaimUpdate={handleClaimUpdate}
-          availableVillages={villages}
-        />
-    )
-  }
-
   return (
-    <ClaimsTable
-      claims={claims}
-      onClaimEdit={handleClaimEdit}
-      onClaimLink={handleClaimLink}
-    />
+    <div className="flex-1 p-4 sm:px-6 sm:py-0 md:gap-8">
+        {editingClaim ? (
+             <ClaimEdit
+                claim={editingClaim}
+                onClose={handleCloseEdit}
+                onClaimUpdate={handleClaimUpdate}
+                availableVillages={villages}
+            />
+        ) : (
+            <ClaimsTable
+                claims={claims}
+                onClaimEdit={handleClaimEdit}
+                onClaimLink={handleClaimLink}
+            />
+        )}
+    </div>
   );
 }

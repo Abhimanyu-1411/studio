@@ -40,9 +40,10 @@ export function ClaimEdit({ claim, onClose, onClaimUpdate, availableVillages }: 
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+    const fieldData = formData[name as keyof Claim] as { value: string; confidence: number };
     setFormData(prev => ({ 
         ...prev, 
-        [name]: { ...prev[name as keyof Claim], value: value } 
+        [name]: { ...fieldData, value: value } 
     }));
   };
 
@@ -50,9 +51,10 @@ export function ClaimEdit({ claim, onClose, onClaimUpdate, availableVillages }: 
     if (name === 'linkedVillage') {
         setFormData(prev => ({ ...prev, [name]: value, geoLinkConfidence: 1.0 }));
     } else {
+        const fieldData = formData[name as keyof Claim] as { value: string; confidence: number };
         setFormData(prev => ({ 
             ...prev, 
-            [name]: { ...prev[name as keyof Claim], value: value, confidence: 1.0 } 
+            [name]: { ...fieldData, value: value, confidence: 1.0 } 
         }));
     }
   }
@@ -69,6 +71,12 @@ export function ClaimEdit({ claim, onClose, onClaimUpdate, availableVillages }: 
     let updatedClaim: Claim = {
         ...claim,
         ...formData,
+        // Ensure formData properties which are objects are deeply merged
+        claimantName: { ...claim.claimantName, ...formData.claimantName },
+        village: { ...claim.village, ...formData.village },
+        claimType: { ...claim.claimType, ...formData.claimType },
+        area: { ...claim.area, ...formData.area },
+        date: { ...claim.date, ...formData.date },
         status: claim.status, // Keep original status unless changed by action
     };
 

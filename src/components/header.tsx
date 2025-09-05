@@ -10,10 +10,6 @@ import { usePathname, useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { LayoutGrid, List, Map, Lightbulb, TrendingUp, LandPlot } from 'lucide-react';
 
-type HeaderProps = {
-  onMenuClick: () => void;
-};
-
 const navItems = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutGrid, href: '/' },
   { id: 'claims-list', label: 'Claims List', icon: List, href: '/claims' },
@@ -23,7 +19,7 @@ const navItems = [
   { id: 'community-assets', label: 'Community Assets', icon: LandPlot, href: '/assets' },
 ];
 
-export function Header({ onMenuClick }: HeaderProps) {
+export function Header() {
   const [isUploadOpen, setUploadOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
@@ -69,7 +65,9 @@ export function Header({ onMenuClick }: HeaderProps) {
       </div>
     </header>
     <ClaimUpload open={isUploadOpen} onOpenChange={setUploadOpen} onClaimAdded={() => {
-        // This needs to be connected to the main state in dashboard
+        // This needs to be connected to the main state in dashboard/claims page
+        // For now, a page refresh might be the simplest way to see the new claim
+        router.refresh();
     }}/>
     </>
   );

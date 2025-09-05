@@ -13,7 +13,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from './ui/button';
-import { Edit, Link, Search } from 'lucide-react';
+import { Edit, Link as LinkIcon, Search } from 'lucide-react';
 import type { Claim } from '@/types';
 import { Input } from './ui/input';
 
@@ -99,12 +99,13 @@ export function ClaimsTable({ claims, onClaimEdit, onClaimLink }: ClaimsTablePro
                             <TableCell className="text-right space-x-2 whitespace-nowrap">
                                 {claim.status === 'reviewed' && (
                                     <Button variant="outline" size="sm" onClick={() => onClaimLink(claim)}>
-                                        <Link className="mr-2 h-4 w-4" />
+                                        <LinkIcon className="mr-2 h-4 w-4" />
                                         Link to Map
                                     </Button>
                                 )}
                                 <Button variant="ghost" size="icon" onClick={() => onClaimEdit(claim)}>
                                     <Edit className="h-4 w-4" />
+                                    <span className="sr-only">Edit Claim</span>
                                 </Button>
                             </TableCell>
                         </TableRow>

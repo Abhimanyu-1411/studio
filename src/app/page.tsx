@@ -172,61 +172,10 @@ export default function DashboardPage() {
       </div>
     );
   }
-
-  if (isMapFullScreen) {
-    return (
-      <>
-        <div className="fixed inset-0 z-50 bg-background">
-            <MapCard className="h-full w-full border-none rounded-none" inFullScreen={true} />
-        </div>
-        <ClaimUpload open={isUploadOpen} onOpenChange={setUploadOpen} onClaimAdded={handleClaimAdded} />
-        <AssetEdit 
-          open={isAssetEditOpen} 
-          onOpenChange={setAssetEditOpen} 
-          onAssetAdded={handleAssetAdded} 
-          villages={villages} 
-        />
-      </>
-    );
-  }
-
-  if (editingClaim) {
-    return (
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full">
-        <div className="lg:col-span-2 h-[50vh] lg:h-full">
-          <MapCard />
-        </div>
-        <div className="lg:col-span-1 h-full">
-          <ClaimEdit
-            claim={editingClaim}
-            onClose={() => setEditingClaim(null)}
-            onClaimUpdate={handleClaimUpdate}
-            availableVillages={villages.map(v => v.name)}
-          />
-        </div>
-      </div>
-    );
-  }
-
-  if (isShapefileUploadOpen) {
-    return (
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full">
-        <div className="lg:col-span-2 h-[50vh] lg:h-full">
-          <MapCard />
-        </div>
-        <div className="lg:col-span-1 h-full">
-          <ShapefileUpload 
-            onClose={() => setShapefileUploadOpen(false)}
-            onPattasAdded={handlePattasAdded}
-          />
-        </div>
-      </div>
-    );
-  }
-
-  return (
+  
+  const MainContent = () => (
     <>
-      <div className="grid auto-rows-max items-start gap-4 md:gap-8 lg:col-span-2">
+      <div className="grid auto-rows-max items-start gap-4 md:gap-8 lg:col-span-2 xl:col-span-3">
            <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4">
               <StatsCard title="Total Claims" value={totalClaims} icon={FileText} color="#3b82f6" />
               <StatsCard title="Pending Review" value={pendingClaims} icon={Clock} color="#f59e0b" />
@@ -234,7 +183,7 @@ export default function DashboardPage() {
               <StatsCard title="Total Villages" value={totalVillages} icon={MapPin} color="#8b5cf6" />
            </div>
            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
-              <MapCard className="h-[40vh] md:h-[60vh]" />
+              <MapCard className="h-[40vh] md:h-[60vh] xl:h-[calc(100vh-220px)]" />
               <div className="space-y-4">
                   <RecentClaims claims={claims.slice(0, 5)} onClaimSelect={handleClaimEdit} />
                   <QuickActions 
@@ -245,7 +194,63 @@ export default function DashboardPage() {
               </div>
           </div>
       </div>
+    </>
+  );
+
+  const renderContent = () => {
+    if (editingClaim) {
+        return (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full">
+            <div className="lg:col-span-2 h-[50vh] lg:h-full">
+              <MapCard />
+            </div>
+            <div className="lg:col-span-1 h-full">
+              <ClaimEdit
+                claim={editingClaim}
+                onClose={() => setEditingClaim(null)}
+                onClaimUpdate={handleClaimUpdate}
+                availableVillages={villages.map(v => v.name)}
+              />
+            </div>
+          </div>
+        );
+    }
+
+    if (isShapefileUploadOpen) {
+        return (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full">
+            <div className="lg:col-span-2 h-[50vh] lg:h-full">
+              <MapCard />
+            </div>
+            <div className="lg:col-span-1 h-full">
+              <ShapefileUpload 
+                onClose={() => setShapefileUploadOpen(false)}
+                onPattasAdded={handlePattasAdded}
+              />
+            </div>
+          </div>
+        );
+    }
+    
+    return <MainContent />;
+  }
+
+  return (
+    <>
+      <div className={cn("grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8", 
+        !editingClaim && !isShapefileUploadOpen && "lg:grid-cols-3 xl:grid-cols-4")}>
+          {renderContent()}
+      </div>
+
+       {/* Modals and Fullscreen overlays */}
+       {isMapFullScreen && (
+         <div className="fixed inset-0 z-50 bg-background">
+             <MapCard className="h-full w-full border-none rounded-none" inFullScreen={true} />
+         </div>
+       )}
+
       <ClaimUpload open={isUploadOpen} onOpenChange={setUploadOpen} onClaimAdded={handleClaimAdded} />
+      <ShapefileUpload open={isShapefileUploadOpen && !editingClaim} onClose={() => setShapefileUploadOpen(false)} onPattasAdded={handlePattasAdded} />
       <AssetEdit 
         open={isAssetEditOpen} 
         onOpenChange={setAssetEditOpen} 
