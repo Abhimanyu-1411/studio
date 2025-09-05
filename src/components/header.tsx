@@ -93,9 +93,9 @@ export function Header({ onNavClick, onUploadClick }: HeaderProps) {
         {navItems.map((item) => (
           <Button
             key={item.id}
-            variant={activeItem === item.id ? 'default' : 'ghost'}
+            variant={activeItem === item.id ? 'secondary' : 'ghost'}
             onClick={() => handleNav(item.id)}
-            className={`transition-colors h-9 px-3 ${activeItem === item.id ? 'bg-primary text-primary-foreground' : ''}`}
+            className={`transition-colors h-9 px-3`}
           >
             <item.icon className="mr-2 h-4 w-4" />
             {item.label}

@@ -103,11 +103,11 @@ export function ClaimEdit({ claim, onClose, onClaimUpdate, availableVillages }: 
     <Card className="h-full flex flex-col">
         <CardHeader className="flex-row items-start justify-between">
             <div>
-              <CardTitle>{isReviewAction ? 'Review and Finalize Claim' : 'Correct Claim Data'}</CardTitle>
+              <CardTitle>{isReviewAction ? 'Review Claim' : 'Correct Claim Data'}</CardTitle>
               <CardDescription>
                 {isReviewAction 
-                  ? 'Verify the fields below against the document.'
-                  : "Review and correct the extracted data."
+                  ? 'Verify the extracted fields and finalize.'
+                  : "Correct any inaccuracies in the data."
                 }
               </CardDescription>
             </div>
@@ -118,17 +118,16 @@ export function ClaimEdit({ claim, onClose, onClaimUpdate, availableVillages }: 
         
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
             {/* Document Preview */}
-            <div className="border rounded-lg bg-muted/20 p-2 h-[40vh] flex flex-col">
+            <div className="border rounded-lg bg-muted/20 p-2 h-[35vh] flex flex-col">
                 <Label className="text-center pb-2">Document Preview</Label>
-                <div className="flex-1 w-full h-full">
+                <div className="relative flex-1 w-full h-full">
                 {claim.documentUrl ? (
                   isDocumentImage ? (
                       <Image 
                           src={claim.documentUrl} 
                           alt="Claim document" 
-                          width={500} 
-                          height={700}
-                          className="object-contain w-full h-full"
+                          fill
+                          className="object-contain"
                       />
                   ) : (
                       <iframe src={claim.documentUrl} className="w-full h-full" title="Claim Document" />

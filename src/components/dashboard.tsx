@@ -269,7 +269,6 @@ export function Dashboard() {
         setMapCenter(claim.location);
         setMapZoom(14);
     }
-    setActiveView('dashboard'); // Switch to dashboard to see map view
   }
 
   const totalClaims = claims.length;
@@ -284,33 +283,31 @@ export function Dashboard() {
   }, [villageSearchQuery]);
 
   const renderContent = () => {
-    switch(activeView) {
-      case 'dashboard':
+    if (editingClaim) {
         return (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full">
-            <div className={editingClaim ? 'lg:col-span-2 h-full' : 'lg:col-span-3 h-full'}>
-               <Card className="h-full flex flex-col">
-                <CardHeader className="flex flex-row items-center justify-between p-4 md:p-6">
-                  <div>
-                    <CardTitle>Interactive Map</CardTitle>
-                    <CardDescription>Explore claims and village boundaries</CardDescription>
-                  </div>
-                  <AssetLayersControl activeLayers={activeLayers} onActiveLayersChange={setActiveLayers} />
-                </CardHeader>
-                <CardContent className="flex-1 p-0">
-                  <MapView
-                    claims={linkedClaims}
-                    villages={VILLAGES}
-                    onVillageClick={() => {}}
-                    onClaimEdit={handleClaimEdit}
-                    center={mapCenter}
-                    zoom={mapZoom}
-                    activeLayers={activeLayers}
-                  />
-                </CardContent>
-              </Card>
-            </div>
-            {editingClaim && (
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full">
+                <div className="lg:col-span-2 h-full">
+                    <Card className="h-full flex flex-col">
+                         <CardHeader className="flex flex-row items-center justify-between p-4 md:p-6">
+                            <div>
+                                <CardTitle>Interactive Map</CardTitle>
+                                <CardDescription>Reference the map to correct claim data</CardDescription>
+                            </div>
+                            <AssetLayersControl activeLayers={activeLayers} onActiveLayersChange={setActiveLayers} />
+                        </CardHeader>
+                        <CardContent className="flex-1 p-0">
+                            <MapView
+                                claims={linkedClaims}
+                                villages={VILLAGES}
+                                onVillageClick={() => {}}
+                                onClaimEdit={handleClaimEdit}
+                                center={mapCenter}
+                                zoom={mapZoom}
+                                activeLayers={activeLayers}
+                            />
+                        </CardContent>
+                    </Card>
+                </div>
                 <div className="lg:col-span-1 h-full">
                     <ClaimEdit
                         claim={editingClaim}
@@ -319,14 +316,42 @@ export function Dashboard() {
                         availableVillages={VILLAGES.map(v => v.name)}
                     />
                 </div>
-            )}
-            {!editingClaim && activeView === 'dashboard' && (
-                <div className="lg:col-span-3 xl:col-span-1 space-y-6">
+            </div>
+        )
+    }
+
+
+    switch(activeView) {
+      case 'dashboard':
+        return (
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 h-full">
+                <div className="xl:col-span-2 h-full">
+                    <Card className="h-full flex flex-col">
+                        <CardHeader className="flex flex-row items-center justify-between p-4 md:p-6">
+                        <div>
+                            <CardTitle>Interactive Map</CardTitle>
+                            <CardDescription>Explore claims and village boundaries</CardDescription>
+                        </div>
+                        <AssetLayersControl activeLayers={activeLayers} onActiveLayersChange={setActiveLayers} />
+                        </CardHeader>
+                        <CardContent className="flex-1 p-0">
+                        <MapView
+                            claims={linkedClaims}
+                            villages={VILLAGES}
+                            onVillageClick={() => {}}
+                            onClaimEdit={handleClaimEdit}
+                            center={mapCenter}
+                            zoom={mapZoom}
+                            activeLayers={activeLayers}
+                        />
+                        </CardContent>
+                    </Card>
+                </div>
+                <div className="space-y-6">
                     <RecentClaims claims={claims.slice(0, 5)} onClaimSelect={handleClaimEdit} />
                     <QuickActions onUpload={() => setUploadOpen(true)} onViewClaims={() => setActiveView('claims-list')} />
                 </div>
-            )}
-          </div>
+            </div>
         );
       case 'claims-list':
         return <ClaimsTable claims={claims} onClaimEdit={handleClaimEdit} onClaimLink={handleClaimLink} />;
@@ -372,12 +397,21 @@ export function Dashboard() {
         return null;
     }
   }
+  
+  const showStats = activeView === 'dashboard' && !editingClaim;
+
 
   return (
     <>
-      <Header onNavClick={setActiveView} onUploadClick={() => setUploadOpen(true)} />
+      <Header 
+        onNavClick={(view) => {
+            setActiveView(view);
+            setEditingClaim(null); // Close claim edit when navigating
+        }} 
+        onUploadClick={() => setUploadOpen(true)} 
+      />
       <main className="flex-1 p-4 md:p-6 space-y-6">
-        {activeView === 'dashboard' && !editingClaim && (
+        {showStats && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
             <StatsCard title="Total Claims" value={totalClaims} icon={FileText} color="#3b82f6" />
             <StatsCard title="Pending Review" value={pendingClaims} icon={Clock} color="#f59e0b" />
@@ -385,7 +419,7 @@ export function Dashboard() {
             <StatsCard title="Total Villages" value={totalVillages} icon={MapPin} color="#8b5cf6" />
           </div>
         )}
-        <div className={cn("h-[calc(100vh-200px)]", { 'h-auto': activeView !== 'dashboard' })}>
+        <div className={cn(activeView === 'dashboard' || editingClaim ? "h-[calc(100vh-200px)]" : "h-auto")}>
             {renderContent()}
         </div>
       </main>
