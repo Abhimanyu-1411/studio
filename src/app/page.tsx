@@ -174,9 +174,19 @@ export default function DashboardPage() {
 
   if (isMapFullScreen) {
     return (
+      <>
         <div className="fixed inset-0 z-50 bg-background">
             <MapCard className="h-full w-full border-none rounded-none" inFullScreen={true} />
         </div>
+        <ClaimUpload open={isUploadOpen} onOpenChange={setUploadOpen} onClaimAdded={handleClaimAdded} />
+        <ShapefileUpload open={isShapefileUploadOpen} onOpenChange={setShapefileUploadOpen} onPattasAdded={handlePattasAdded} />
+        <AssetEdit 
+          open={isAssetEditOpen} 
+          onOpenChange={setAssetEditOpen} 
+          onAssetAdded={handleAssetAdded} 
+          villages={villages} 
+        />
+      </>
     );
   }
 
