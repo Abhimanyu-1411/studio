@@ -42,20 +42,20 @@ export function Header({ onMenuClick }: HeaderProps) {
                 </Button>
             </SheetTrigger>
             <SheetContent side="left" className="sm:max-w-xs">
-                 <SheetHeader>
+                 <SheetHeader className="p-4">
                     <SheetTitle>FRA Atlas</SheetTitle>
                     <SheetDescription>
                         Forest Rights Act Decision Support System
                     </SheetDescription>
                 </SheetHeader>
-                <nav className="grid gap-6 text-lg font-medium mt-8">
+                <nav className="grid gap-6 text-lg font-medium mt-4">
                     {navItems.map(item => (
                         <button
                             key={item.id}
                             onClick={() => handleNav(item.href)}
                             className={cn(
-                                "flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground",
-                                pathname === item.href && "text-foreground"
+                                "flex items-center gap-4 px-4 py-2 text-muted-foreground hover:text-foreground rounded-lg",
+                                pathname === item.href && "bg-accent text-accent-foreground"
                             )}
                             >
                             <item.icon className="h-5 w-5" />
