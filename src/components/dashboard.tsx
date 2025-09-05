@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useMemo } from 'react';
@@ -7,7 +8,6 @@ import { MOCK_CLAIMS, VILLAGES } from '@/lib/mock-data';
 import type { Claim, Village, DssRecommendation, CommunityAsset } from '@/types';
 import { ClaimEdit } from './claim-edit';
 import { Skeleton } from './ui/skeleton';
-import { Header } from './header';
 import { RecentClaims } from './recent-claims';
 import { QuickActions } from './quick-actions';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
@@ -403,14 +403,7 @@ export function Dashboard() {
 
   return (
     <>
-      <Header 
-        onNavClick={(view) => {
-            setActiveView(view);
-            setEditingClaim(null); // Close claim edit when navigating
-        }} 
-        onUploadClick={() => setUploadOpen(true)} 
-      />
-      <main className="flex-1 p-4 md:p-6 space-y-6 bg-muted/40">
+      <div className="space-y-6">
         {showStats && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
             <StatsCard title="Total Claims" value={totalClaims} icon={FileText} color="#3b82f6" />
@@ -422,7 +415,7 @@ export function Dashboard() {
         <div className={cn(activeView === 'dashboard' || editingClaim ? "h-auto" : "h-auto")}>
             {renderContent()}
         </div>
-      </main>
+      </div>
       <ClaimUpload open={isUploadOpen} onOpenChange={setUploadOpen} onClaimAdded={handleClaimAdded} />
       <AssetEdit 
         open={isAssetEditOpen} 
