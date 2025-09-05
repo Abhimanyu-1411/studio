@@ -42,9 +42,9 @@ export type Village = {
   center: LatLng;
   bounds: LatLng[];
   assetGeometries?: {
-    ndwi: LatLng[][];
-    forest: LatLng[][];
-    agriculture: LatLng[][];
+    ndwi: any[];
+    forest: any[];
+    agriculture: any[];
   }
   timeSeriesData?: TimeSeriesDataPoint[];
 };
