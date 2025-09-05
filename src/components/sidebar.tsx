@@ -3,10 +3,9 @@
 
 import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/icons';
-import { LayoutGrid, List, Map, Lightbulb, TrendingUp, LandPlot, X, ChevronLeft } from 'lucide-react';
+import { LayoutGrid, List, Map, Lightbulb, TrendingUp, LandPlot } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation'; 
 import { cn } from '@/lib/utils';
-import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle, SheetDescription } from './ui/sheet';
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from './ui/tooltip';
 
 
@@ -34,7 +33,7 @@ export function Sidebar({ isOpen, setOpen }: SidebarProps) {
   }
 
   return (
-     <aside className="relative z-10 hidden w-14 flex-col border-r bg-background sm:flex">
+     <aside className="fixed inset-y-0 left-0 z-10 hidden w-14 flex-col border-r bg-background sm:flex">
       <nav className="flex flex-col items-center gap-4 px-2 sm:py-5">
         <a
           href="#"
