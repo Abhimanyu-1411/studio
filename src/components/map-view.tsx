@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -86,7 +87,16 @@ const MapViewComponent = ({ claims, villages, onVillageClick, onClaimEdit, cente
             eventHandlers={{
                 click: () => onVillageClick(village),
             }}
-            />
+            >
+              <Popup>
+                <div className="font-bold text-base">{village.name}</div>
+                <div className="text-sm">
+                  <p>Water Coverage: {village.assetCoverage.water}%</p>
+                  <p>Forest Coverage: {village.assetCoverage.forest}%</p>
+                  <p>Agriculture: {village.assetCoverage.agriculture}%</p>
+                </div>
+              </Popup>
+            </Polygon>
             
             {activeLayers.ndwi && village.assetGeometries?.ndwi.map((poly, i) => 
                 <Polygon key={`${village.id}-ndwi-${i}`} positions={poly} pathOptions={{...assetLayerStyles.ndwi, fillOpacity: 0.5}} />
@@ -142,3 +152,4 @@ const MapViewComponent = ({ claims, villages, onVillageClick, onClaimEdit, cente
 }
 
 export const MapView = memo(MapViewComponent);
+
