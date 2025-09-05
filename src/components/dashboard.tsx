@@ -284,48 +284,48 @@ export function Dashboard() {
 
   const renderContent = () => {
     if (editingClaim) {
-        return (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full">
-                <div className="lg:col-span-2 h-full">
-                    <Card className="h-full flex flex-col">
-                         <CardHeader className="flex flex-row items-center justify-between p-4 md:p-6">
-                            <div>
-                                <CardTitle>Interactive Map</CardTitle>
-                                <CardDescription>Reference the map to correct claim data</CardDescription>
-                            </div>
-                            <AssetLayersControl activeLayers={activeLayers} onActiveLayersChange={setActiveLayers} />
-                        </CardHeader>
-                        <CardContent className="flex-1 p-0">
-                            <MapView
-                                claims={linkedClaims}
-                                villages={VILLAGES}
-                                onVillageClick={() => {}}
-                                onClaimEdit={handleClaimEdit}
-                                center={mapCenter}
-                                zoom={mapZoom}
-                                activeLayers={activeLayers}
-                            />
-                        </CardContent>
-                    </Card>
+      return (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full">
+          <div className="lg:col-span-2 h-[50vh] lg:h-full">
+            <Card className="h-full flex flex-col">
+              <CardHeader className="flex flex-row items-center justify-between p-4 md:p-6">
+                <div>
+                  <CardTitle>Interactive Map</CardTitle>
+                  <CardDescription>Reference the map to correct claim data</CardDescription>
                 </div>
-                <div className="lg:col-span-1 h-full">
-                    <ClaimEdit
-                        claim={editingClaim}
-                        onClose={() => setEditingClaim(null)}
-                        onClaimUpdate={handleClaimUpdate}
-                        availableVillages={VILLAGES.map(v => v.name)}
-                    />
-                </div>
-            </div>
-        )
+                <AssetLayersControl activeLayers={activeLayers} onActiveLayersChange={setActiveLayers} />
+              </CardHeader>
+              <CardContent className="flex-1 p-0">
+                <MapView
+                  claims={linkedClaims}
+                  villages={VILLAGES}
+                  onVillageClick={() => {}}
+                  onClaimEdit={handleClaimEdit}
+                  center={mapCenter}
+                  zoom={mapZoom}
+                  activeLayers={activeLayers}
+                />
+              </CardContent>
+            </Card>
+          </div>
+          <div className="lg:col-span-1 h-full">
+            <ClaimEdit
+              claim={editingClaim}
+              onClose={() => setEditingClaim(null)}
+              onClaimUpdate={handleClaimUpdate}
+              availableVillages={VILLAGES.map(v => v.name)}
+            />
+          </div>
+        </div>
+      );
     }
 
 
     switch(activeView) {
       case 'dashboard':
         return (
-            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 h-full">
-                <div className="xl:col-span-2 h-full">
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                <div className="xl:col-span-2 h-[60vh] xl:h-auto">
                     <Card className="h-full flex flex-col">
                         <CardHeader className="flex flex-row items-center justify-between p-4 md:p-6">
                         <div>
@@ -419,7 +419,7 @@ export function Dashboard() {
             <StatsCard title="Total Villages" value={totalVillages} icon={MapPin} color="#8b5cf6" />
           </div>
         )}
-        <div className={cn(activeView === 'dashboard' || editingClaim ? "h-[calc(100vh-200px)]" : "h-auto")}>
+        <div className={cn(activeView === 'dashboard' || editingClaim ? "h-auto" : "h-auto")}>
             {renderContent()}
         </div>
       </main>
