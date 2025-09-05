@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Upload, Menu } from 'lucide-react';
 import { ClaimUpload } from './claim-upload';
 import { useState } from 'react';
-import { Sheet, SheetContent, SheetTrigger } from './ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetTrigger } from './ui/sheet';
 import { usePathname, useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { LayoutGrid, List, Map, Lightbulb, TrendingUp, LandPlot } from 'lucide-react';
@@ -40,6 +40,10 @@ export function Header() {
                 </Button>
             </SheetTrigger>
             <SheetContent side="left" className="sm:max-w-xs">
+                <SheetHeader className="sr-only">
+                  <SheetTitle>Navigation Menu</SheetTitle>
+                  <SheetDescription>Main navigation links for the application.</SheetDescription>
+                </SheetHeader>
                 <nav className="grid gap-6 text-lg font-medium mt-4">
                      <button onClick={() => handleNav('/')} className="flex items-center gap-4 px-4 py-2 text-muted-foreground hover:text-foreground rounded-lg">
                         <Logo />
