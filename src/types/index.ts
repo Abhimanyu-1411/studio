@@ -1,6 +1,5 @@
 
 
-
 type FieldWithConfidence<T> = {
   value: T;
   confidence: number;

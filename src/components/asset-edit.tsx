@@ -108,9 +108,19 @@ export function AssetEdit({ open, onOpenChange, onAssetAdded, villages }: AssetE
     setStatus('processing');
     setProgress(80);
 
+    const selectedVillage = villages.find(v => v.id === villageId);
+
     // In a real app, this would upload the file to a storage bucket.
     // For the prototype, we'll just use the Data URI directly.
     await new Promise(resolve => setTimeout(resolve, 1000));
+
+    // Create some placeholder geometry for now near the village center
+    const placeholderGeometry = selectedVillage ? [
+        { lat: selectedVillage.center.lat + 0.005, lng: selectedVillage.center.lng + 0.005 },
+        { lat: selectedVillage.center.lat + 0.005, lng: selectedVillage.center.lng - 0.005 },
+        { lat: selectedVillage.center.lat - 0.005, lng: selectedVillage.center.lng - 0.005 },
+        { lat: selectedVillage.center.lat - 0.005, lng: selectedVillage.center.lng + 0.005 },
+    ] : [];
 
     const newAsset: CommunityAsset = {
       id: `asset-${Date.now()}`,
@@ -119,6 +129,7 @@ export function AssetEdit({ open, onOpenChange, onAssetAdded, villages }: AssetE
       description,
       documentUrl: preview,
       documentType: file.type,
+      geometry: placeholderGeometry
     };
 
     onAssetAdded(newAsset);

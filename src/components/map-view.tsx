@@ -4,7 +4,7 @@
 import * as React from 'react';
 import { MapContainer, TileLayer, Polygon, Marker, Popup, useMap } from 'react-leaflet';
 import { useEffect, memo, type ReactNode } from 'react';
-import type { Claim, Village } from '@/types';
+import type { Claim, Village, CommunityAsset } from '@/types';
 import { Badge } from './ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from './ui/card';
 import { Button } from './ui/button';
@@ -15,6 +15,7 @@ import { type ActiveLayers } from './asset-layers-control';
 type MapViewProps = {
   claims: Claim[];
   villages: Village[];
+  assets: CommunityAsset[];
   onVillageClick: (village: Village) => void;
   onClaimEdit: (claim: Claim) => void;
   center: { lat: number; lng: number };
@@ -53,9 +54,10 @@ const assetLayerStyles = {
   ndwi: { color: '#2563eb', fillColor: '#3b82f6', weight: 1 },
   forest: { color: '#166534', fillColor: '#22c55e', weight: 1 },
   agriculture: { color: '#ca8a04', fillColor: '#facc15', weight: 1 },
+  other: { color: '#a21caf', fillColor: '#c026d3', weight: 1},
 };
 
-const MapViewComponent = ({ claims, villages, onVillageClick, onClaimEdit, center, zoom, activeLayers, children }: MapViewProps) => {
+const MapViewComponent = ({ claims, villages, assets, onVillageClick, onClaimEdit, center, zoom, activeLayers, children }: MapViewProps) => {
   const getPolygonOptions = (village: Village) => {
     return {
       color: 'hsl(var(--primary))',
@@ -110,6 +112,15 @@ const MapViewComponent = ({ claims, villages, onVillageClick, onClaimEdit, cente
         </React.Fragment>
       ))}
 
+      {assets.map((asset) => (
+         asset.geometry && <Polygon key={asset.id} positions={asset.geometry} pathOptions={{...assetLayerStyles[asset.assetType as keyof typeof assetLayerStyles] || assetLayerStyles.other, fillOpacity: 0.7}}>
+            <Popup>
+                <div className="font-bold text-base capitalize">{asset.assetType.replace('_', ' ')}</div>
+                <p className="text-sm">{asset.description}</p>
+            </Popup>
+         </Polygon>
+      ))}
+
       {claims.map((claim) => (
         <Marker
           key={claim.id}
@@ -152,4 +163,3 @@ const MapViewComponent = ({ claims, villages, onVillageClick, onClaimEdit, cente
 }
 
 export const MapView = memo(MapViewComponent);
-

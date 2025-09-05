@@ -56,7 +56,8 @@ export default function DashboardPage() {
 
 
   const handleClaimAdded = (newClaim: Claim) => {
-    setClaims((prevClaims) => [newClaim, ...prevClaims]);
+    const newClaimWithId = { ...newClaim, id: `claim-${Date.now()}` };
+    setClaims((prevClaims) => [newClaimWithId, ...prevClaims]);
     if (newClaim.location) {
         setMapCenter(newClaim.location);
         setMapZoom(12);
@@ -103,6 +104,7 @@ export default function DashboardPage() {
               <MapView
                 claims={linkedClaims}
                 villages={VILLAGES}
+                assets={assets}
                 onVillageClick={() => {}}
                 onClaimEdit={handleClaimEdit}
                 center={mapCenter}
@@ -146,6 +148,7 @@ export default function DashboardPage() {
                       <MapView
                           claims={linkedClaims}
                           villages={VILLAGES}
+                          assets={assets}
                           onVillageClick={() => {}}
                           onClaimEdit={handleClaimEdit}
                           center={mapCenter}
