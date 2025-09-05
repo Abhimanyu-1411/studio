@@ -105,6 +105,7 @@ export default function DashboardPage() {
       setMapCenter({lat: centerLat, lng: centerLng});
       setMapZoom(14);
     }
+    setShapefileUploadOpen(false);
   };
 
   const handleClaimUpdate = async (updatedClaim: Claim) => {
@@ -179,7 +180,6 @@ export default function DashboardPage() {
             <MapCard className="h-full w-full border-none rounded-none" inFullScreen={true} />
         </div>
         <ClaimUpload open={isUploadOpen} onOpenChange={setUploadOpen} onClaimAdded={handleClaimAdded} />
-        <ShapefileUpload open={isShapefileUploadOpen} onOpenChange={setShapefileUploadOpen} onPattasAdded={handlePattasAdded} />
         <AssetEdit 
           open={isAssetEditOpen} 
           onOpenChange={setAssetEditOpen} 
@@ -208,6 +208,22 @@ export default function DashboardPage() {
     );
   }
 
+  if (isShapefileUploadOpen) {
+    return (
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full">
+        <div className="lg:col-span-2 h-[50vh] lg:h-full">
+          <MapCard />
+        </div>
+        <div className="lg:col-span-1 h-full">
+          <ShapefileUpload 
+            onClose={() => setShapefileUploadOpen(false)}
+            onPattasAdded={handlePattasAdded}
+          />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <>
       <div className="grid auto-rows-max items-start gap-4 md:gap-8 lg:col-span-2">
@@ -230,7 +246,6 @@ export default function DashboardPage() {
           </div>
       </div>
       <ClaimUpload open={isUploadOpen} onOpenChange={setUploadOpen} onClaimAdded={handleClaimAdded} />
-      <ShapefileUpload open={isShapefileUploadOpen} onOpenChange={setShapefileUploadOpen} onPattasAdded={handlePattasAdded} />
       <AssetEdit 
         open={isAssetEditOpen} 
         onOpenChange={setAssetEditOpen} 
