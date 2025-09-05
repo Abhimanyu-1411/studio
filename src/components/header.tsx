@@ -9,6 +9,7 @@ import { Sheet, SheetContent, SheetTrigger } from './ui/sheet';
 import { usePathname, useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { LayoutGrid, List, Map, Lightbulb, TrendingUp, LandPlot } from 'lucide-react';
+import { Logo } from './icons';
 
 const navItems = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutGrid, href: '/' },
@@ -40,6 +41,9 @@ export function Header() {
             </SheetTrigger>
             <SheetContent side="left" className="sm:max-w-xs">
                 <nav className="grid gap-6 text-lg font-medium mt-4">
+                     <button onClick={() => handleNav('/')} className="flex items-center gap-4 px-4 py-2 text-muted-foreground hover:text-foreground rounded-lg">
+                        <Logo />
+                    </button>
                     {navItems.map(item => (
                         <button
                             key={item.id}
