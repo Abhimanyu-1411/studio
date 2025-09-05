@@ -13,14 +13,21 @@ export async function handleClaimUpload(documentDataUri: string) {
     claimVillageName: extractedData.village.value,
     availableVillageNames: AVAILABLE_VILLAGE_NAMES,
   });
+  
+  const allConfidences = [
+      extractedData.claimantName.confidence,
+      extractedData.village.confidence,
+      extractedData.claimType.confidence,
+      extractedData.area.confidence,
+      extractedData.date.confidence,
+      geoLinkResult.confidenceScore
+  ];
+  
+  const lowestConfidence = Math.min(...allConfidences);
 
-  let status: Claim['status'] = 'unlinked';
-  if (geoLinkResult.linkedVillageName) {
-    if (geoLinkResult.confidenceScore < 0.8) {
-        status = 'needs-review';
-    } else {
-        status = 'linked';
-    }
+  let status: Claim['status'] = 'linked';
+  if (!geoLinkResult.linkedVillage || lowestConfidence < 0.8) {
+      status = 'needs-review';
   }
 
 
