@@ -16,7 +16,7 @@ export type Claim = {
   documentType: string;
   linkedVillage: string | null;
   geoLinkConfidence: number | null;
-  status: 'unlinked' | 'linked' | 'reviewed' | 'needs-review';
+  status: 'unlinked' | 'linked' | 'reviewed' | 'needs-review' | 'rejected';
   location: { lat: number; lng: number };
 };
 
@@ -71,3 +71,5 @@ export type Patta = {
     villageName: string;
     geometry: LatLng[];
 }
+
+    
