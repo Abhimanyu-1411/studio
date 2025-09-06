@@ -3,15 +3,15 @@
 
 import { useState, useCallback } from 'react';
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from '@/components/ui/dialog';
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardFooter,
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2, UploadCloud, FileCheck2, XCircle, FileJson } from 'lucide-react';
+import { Loader2, UploadCloud, FileCheck2, XCircle, FileJson, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { handleShapefileUpload } from '@/app/actions';
 import type { Patta } from '@/types';
@@ -20,12 +20,11 @@ import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
 
 type ShapefileUploadProps = {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+  onClose: () => void;
   onPattasAdded: (pattas: Patta[]) => void;
 };
 
-export function ShapefileUpload({ open, onOpenChange, onPattasAdded }: ShapefileUploadProps) {
+export function ShapefileUpload({ onClose, onPattasAdded }: ShapefileUploadProps) {
   const [file, setFile] = useState<File | null>(null);
   const [dataUri, setDataUri] = useState<string | null>(null);
   const [status, setStatus] = useState<'idle' | 'reading' | 'uploading' | 'success' | 'error'>('idle');
@@ -69,13 +68,6 @@ export function ShapefileUpload({ open, onOpenChange, onPattasAdded }: Shapefile
     setProgress(0);
   }
 
-  const handleClose = (isOpen: boolean) => {
-    if (!isOpen) {
-      resetState();
-    }
-    onOpenChange(isOpen);
-  }
-
   const handleSubmit = async () => {
     if (!file || !dataUri) return;
 
@@ -93,7 +85,7 @@ export function ShapefileUpload({ open, onOpenChange, onPattasAdded }: Shapefile
         title: 'Shapefile Processed',
         description: `Successfully extracted ${newPattas.length} patta records.`,
       });
-      setTimeout(() => handleClose(false), 1000);
+      setTimeout(() => onClose(), 1000);
     } catch (error) {
       console.error('Upload failed:', error);
       setStatus('error');
@@ -108,16 +100,20 @@ export function ShapefileUpload({ open, onOpenChange, onPattasAdded }: Shapefile
   const isProcessing = status === 'reading' || status === 'uploading';
 
   return (
-    <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Upload Patta Shapefile</DialogTitle>
-          <DialogDescription>
-            Upload a .zip file containing the .shp, .shx, and .dbf files.
-          </DialogDescription>
-        </DialogHeader>
-        <div className="py-4">
-            {!file && (
+    <Card className="h-full flex flex-col">
+      <CardHeader className="flex-row items-start justify-between">
+        <div>
+          <CardTitle>Upload Patta Shapefile</CardTitle>
+          <CardDescription>
+            Upload a .zip file containing patta data.
+          </CardDescription>
+        </div>
+        <Button variant="ghost" size="icon" onClick={onClose}>
+            <X className="h-4 w-4" />
+        </Button>
+      </CardHeader>
+      <CardContent className="flex-1 overflow-y-auto p-6 space-y-6">
+          {!file && (
             <div
                 {...getRootProps()}
                 className={cn(
@@ -132,10 +128,10 @@ export function ShapefileUpload({ open, onOpenChange, onPattasAdded }: Shapefile
                 </p>
                 <p className="text-xs text-muted-foreground">Zipped Shapefile (max 10MB)</p>
             </div>
-            )}
+          )}
 
-            {file && (
-            <div className="mt-4 space-y-4">
+          {file && (
+            <div className="space-y-4">
                 <div className="flex items-center gap-4 p-2 border rounded-md">
                     <FileJson className="h-10 w-10 text-muted-foreground" />
                     <div className="flex-1">
@@ -152,25 +148,25 @@ export function ShapefileUpload({ open, onOpenChange, onPattasAdded }: Shapefile
                 {status === 'success' && <p className="text-sm text-green-600 flex items-center gap-2"><FileCheck2/> Success! Data extracted.</p>}
                 {status === 'error' && <p className="text-sm text-destructive flex items-center gap-2"><XCircle/> Error processing file.</p>}
             </div>
-            )}
-        </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => handleClose(false)} disabled={isProcessing}>Cancel</Button>
-          <Button onClick={handleSubmit} disabled={!file || isProcessing || status === 'success'}>
-            {status === 'uploading' ? (
-                <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Processing...
-                </>
-            ) : status === 'success' ? 'Done' : (
-                <>
-                <UploadCloud className="mr-2 h-4 w-4" />
-                Upload & Process
-                </>
-            )}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+          )}
+      </CardContent>
+      <CardFooter className="flex justify-end gap-2">
+        <Button variant="outline" onClick={onClose} disabled={isProcessing}>Cancel</Button>
+        <Button onClick={handleSubmit} disabled={!file || isProcessing || status === 'success'}>
+          {status === 'uploading' ? (
+              <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Processing...
+              </>
+          ) : status === 'success' ? 'Done' : (
+              <>
+              <UploadCloud className="mr-2 h-4 w-4" />
+              Upload & Process
+              </>
+          )}
+        </Button>
+      </CardFooter>
+    </Card>
   );
 }
+

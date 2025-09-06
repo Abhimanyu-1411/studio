@@ -122,10 +122,16 @@ export default function DashboardPage() {
 
   const handleClaimEdit = (claim: Claim) => {
     setEditingClaim(claim);
+    setShapefileUploadOpen(false); // Close shapefile upload if open
     if(claim.location) {
         setMapCenter(claim.location);
         setMapZoom(14);
     }
+  }
+
+  const handleShapefileUploadClick = () => {
+    setShapefileUploadOpen(true);
+    setEditingClaim(null); // Close claim edit if open
   }
   
   const MapCard = ({ className }: { className?: string }) => (
@@ -166,7 +172,7 @@ export default function DashboardPage() {
 
   const linkedClaims = useMemo(() => claims.filter(c => c.status === 'linked'), [claims]);
   
-  const editingComponent = useMemo(() => {
+  const sidePanelComponent = useMemo(() => {
     if (editingClaim) {
       return (
         <ClaimEdit
@@ -177,8 +183,16 @@ export default function DashboardPage() {
         />
       );
     }
+    if (isShapefileUploadOpen) {
+      return (
+        <ShapefileUpload
+          onClose={() => setShapefileUploadOpen(false)}
+          onPattasAdded={handlePattasAdded}
+        />
+      );
+    }
     return null;
-  }, [editingClaim, villages, handleClaimUpdate]);
+  }, [editingClaim, isShapefileUploadOpen, villages, handleClaimUpdate, handlePattasAdded]);
 
 
   if (loading) {
@@ -202,7 +216,7 @@ export default function DashboardPage() {
     );
   }
   
-  const showSidePanel = !!editingClaim;
+  const showSidePanel = !!sidePanelComponent;
 
   return (
     <>
@@ -232,7 +246,7 @@ export default function DashboardPage() {
 
             {!isMapFullScreen && (
               <div className={cn("lg:col-span-1 space-y-6", !showSidePanel && 'hidden')}>
-                 {editingComponent}
+                 {sidePanelComponent}
               </div>
             )}
             
@@ -242,7 +256,7 @@ export default function DashboardPage() {
                  <QuickActions 
                     onUpload={() => setUploadOpen(true)} 
                     onViewClaims={() => router.push('/claims')} 
-                    onUploadShapefile={() => setShapefileUploadOpen(true)}
+                    onUploadShapefile={handleShapefileUploadClick}
                  />
               </div>
             )}
@@ -251,7 +265,6 @@ export default function DashboardPage() {
       
       {/* Modals are kept outside the main layout grid */}
       <ClaimUpload open={isUploadOpen} onOpenChange={setUploadOpen} onClaimAdded={handleClaimAdded} />
-       <ShapefileUpload open={isShapefileUploadOpen} onOpenChange={setShapefileUploadOpen} onPattasAdded={handlePattasAdded} />
       <AssetEdit 
         open={isAssetEditOpen} 
         onOpenChange={setAssetEditOpen} 
