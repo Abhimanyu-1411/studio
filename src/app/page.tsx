@@ -20,7 +20,6 @@ import { getClaims, getVillages, getCommunityAssets, updateClaim, addCommunityAs
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Logo } from '@/components/icons';
-import { AppLayout } from '@/components/app-layout';
 
 const MapView = dynamic(() => import('@/components/map-view').then(mod => mod.MapView), {
   ssr: false,
@@ -223,50 +222,52 @@ export default function DashboardPage() {
 
   return (
     <>
-      <div className={cn(
-        "flex-1 space-y-6 p-4 sm:p-6 md:p-8",
-        isMapFullScreen && "p-0"
-      )}>
-        {!isMapFullScreen && (
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                <StatsCard title="Total Claims" value={totalClaims} icon={FileText} color="bg-blue-500" borderColor="border-blue-500"/>
-                <StatsCard title="Pending Review" value={pendingClaims} icon={Clock} color="bg-yellow-500" borderColor="border-yellow-500"/>
-                <StatsCard title="Map-Linked" value={approvedClaims} icon={CheckCircle} color="bg-green-500" borderColor="border-green-500"/>
-                <StatsCard title="Total Villages" value={totalVillages} icon={MapPin} color="bg-purple-500" borderColor="border-purple-500"/>
-            </div>
-        )}
-        
+      {!isUploadOpen && (
         <div className={cn(
-            "grid gap-6",
-            !isMapFullScreen && (showSidePanel ? "grid-cols-1 lg:grid-cols-3" : "grid-cols-1"),
+          "flex-1 space-y-6 p-4 sm:p-6 md:p-8",
+          isMapFullScreen && "p-0"
         )}>
-            <div className={cn(
-                "transition-all duration-300",
-                 isMapFullScreen ? "fixed inset-0 z-10" : (showSidePanel ? "lg:col-span-2 h-[calc(100vh-300px)]" : "lg:col-span-3 h-[calc(100vh-250px)]")
-            )}>
-              <MapCard className="h-full w-full"/>
-            </div>
+          {!isMapFullScreen && (
+              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                  <StatsCard title="Total Claims" value={totalClaims} icon={FileText} color="bg-blue-500" borderColor="border-blue-500"/>
+                  <StatsCard title="Pending Review" value={pendingClaims} icon={Clock} color="bg-yellow-500" borderColor="border-yellow-500"/>
+                  <StatsCard title="Map-Linked" value={approvedClaims} icon={CheckCircle} color="bg-green-500" borderColor="border-green-500"/>
+                  <StatsCard title="Total Villages" value={totalVillages} icon={MapPin} color="bg-purple-500" borderColor="border-purple-500"/>
+              </div>
+          )}
+          
+          <div className={cn(
+              "grid gap-6",
+              !isMapFullScreen && (showSidePanel ? "grid-cols-1 lg:grid-cols-3" : "grid-cols-1"),
+          )}>
+              <div className={cn(
+                  "transition-all duration-300",
+                   isMapFullScreen ? "fixed inset-0 z-10" : (showSidePanel ? "lg:col-span-2 h-[calc(100vh-300px)]" : "lg:col-span-3 h-[calc(100vh-250px)]")
+              )}>
+                <MapCard className="h-full w-full"/>
+              </div>
 
-            {!isMapFullScreen && (
-              <>
-                <div className={cn("lg:col-span-1 space-y-6", !showSidePanel && 'hidden')}>
-                   {sidePanelComponent}
-                </div>
-                
-                {!showSidePanel && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                     <RecentClaims claims={claims.slice(0, 5)} onClaimSelect={handleClaimEdit} />
-                     <QuickActions 
-                        onUpload={() => setUploadOpen(true)} 
-                        onViewClaims={() => router.push('/claims')} 
-                        onUploadShapefile={handleShapefileUploadClick}
-                     />
+              {!isMapFullScreen && (
+                <>
+                  <div className={cn("lg:col-span-1 space-y-6", !showSidePanel && 'hidden')}>
+                     {sidePanelComponent}
                   </div>
-                )}
-              </>
-            )}
+                  
+                  {!showSidePanel && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                       <RecentClaims claims={claims.slice(0, 5)} onClaimSelect={handleClaimEdit} />
+                       <QuickActions 
+                          onUpload={() => setUploadOpen(true)} 
+                          onViewClaims={() => router.push('/claims')} 
+                          onUploadShapefile={handleShapefileUploadClick}
+                       />
+                    </div>
+                  )}
+                </>
+              )}
+          </div>
         </div>
-      </div>
+      )}
       
       {/* Modals are kept outside the main layout grid */}
       <ClaimUpload open={isUploadOpen} onOpenChange={setUploadOpen} onClaimAdded={handleClaimAdded} />
