@@ -177,16 +177,8 @@ export default function DashboardPage() {
         />
       );
     }
-    if (isShapefileUploadOpen) {
-      return (
-        <ShapefileUpload
-          onClose={() => setShapefileUploadOpen(false)}
-          onPattasAdded={handlePattasAdded}
-        />
-      );
-    }
-    return <MapCard className="h-full w-full" />;
-  }, [editingClaim, isShapefileUploadOpen, claims, villages, pattas, activeLayers, mapCenter, mapZoom]);
+    return null;
+  }, [editingClaim, villages, handleClaimUpdate]);
 
 
   if (loading) {
@@ -210,7 +202,7 @@ export default function DashboardPage() {
     );
   }
   
-  const showSidePanel = editingClaim || isShapefileUploadOpen;
+  const showSidePanel = !!editingClaim;
 
   return (
     <>
@@ -235,7 +227,7 @@ export default function DashboardPage() {
                 "transition-all duration-300",
                  isMapFullScreen ? "h-full" : (showSidePanel ? "lg:col-span-2 h-[calc(100vh-300px)]" : "lg:col-span-3 h-[calc(100vh-250px)]")
             )}>
-              {showSidePanel ? <MapCard className="h-full w-full"/> : <MapCard className="h-full w-full" />}
+              <MapCard className="h-full w-full"/>
             </div>
 
             {!isMapFullScreen && (
@@ -259,6 +251,7 @@ export default function DashboardPage() {
       
       {/* Modals are kept outside the main layout grid */}
       <ClaimUpload open={isUploadOpen} onOpenChange={setUploadOpen} onClaimAdded={handleClaimAdded} />
+       <ShapefileUpload open={isShapefileUploadOpen} onOpenChange={setShapefileUploadOpen} onPattasAdded={handlePattasAdded} />
       <AssetEdit 
         open={isAssetEditOpen} 
         onOpenChange={setAssetEditOpen} 

@@ -3,15 +3,15 @@
 
 import { useState, useCallback } from 'react';
 import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardFooter,
-} from '@/components/ui/card';
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Loader2, UploadCloud, FileCheck2, XCircle, FileJson, X } from 'lucide-react';
+import { Loader2, UploadCloud, FileCheck2, XCircle, FileJson } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { handleShapefileUpload } from '@/app/actions';
 import type { Patta } from '@/types';
@@ -20,11 +20,12 @@ import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
 
 type ShapefileUploadProps = {
-  onClose: () => void;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
   onPattasAdded: (pattas: Patta[]) => void;
 };
 
-export function ShapefileUpload({ onClose, onPattasAdded }: ShapefileUploadProps) {
+export function ShapefileUpload({ open, onOpenChange, onPattasAdded }: ShapefileUploadProps) {
   const [file, setFile] = useState<File | null>(null);
   const [dataUri, setDataUri] = useState<string | null>(null);
   const [status, setStatus] = useState<'idle' | 'reading' | 'uploading' | 'success' | 'error'>('idle');
@@ -68,6 +69,13 @@ export function ShapefileUpload({ onClose, onPattasAdded }: ShapefileUploadProps
     setProgress(0);
   }
 
+  const handleClose = (isOpen: boolean) => {
+    if (!isOpen) {
+      resetState();
+    }
+    onOpenChange(isOpen);
+  }
+
   const handleSubmit = async () => {
     if (!file || !dataUri) return;
 
@@ -85,7 +93,7 @@ export function ShapefileUpload({ onClose, onPattasAdded }: ShapefileUploadProps
         title: 'Shapefile Processed',
         description: `Successfully extracted ${newPattas.length} patta records.`,
       });
-      setTimeout(() => onClose(), 1000);
+      setTimeout(() => handleClose(false), 1000);
     } catch (error) {
       console.error('Upload failed:', error);
       setStatus('error');
@@ -100,24 +108,20 @@ export function ShapefileUpload({ onClose, onPattasAdded }: ShapefileUploadProps
   const isProcessing = status === 'reading' || status === 'uploading';
 
   return (
-    <Card className="h-full flex flex-col">
-        <CardHeader className="flex-row items-start justify-between">
-            <div>
-                <CardTitle>Upload Patta Shapefile</CardTitle>
-                <CardDescription>
-                Upload a .zip file with .shp, .shx, .dbf files.
-                </CardDescription>
-            </div>
-             <Button variant="ghost" size="icon" onClick={onClose}>
-                <X className="h-4 w-4" />
-            </Button>
-        </CardHeader>
-        <CardContent className="flex-1 py-4">
+    <Dialog open={open} onOpenChange={handleClose}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Upload Patta Shapefile</DialogTitle>
+          <DialogDescription>
+            Upload a .zip file containing the .shp, .shx, and .dbf files.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="py-4">
             {!file && (
             <div
                 {...getRootProps()}
                 className={cn(
-                'flex flex-col items-center justify-center w-full h-full border-2 border-dashed rounded-lg cursor-pointer hover:bg-muted',
+                'flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer hover:bg-muted',
                 isDragActive ? 'border-primary bg-muted' : 'border-input'
                 )}
             >
@@ -149,10 +153,10 @@ export function ShapefileUpload({ onClose, onPattasAdded }: ShapefileUploadProps
                 {status === 'error' && <p className="text-sm text-destructive flex items-center gap-2"><XCircle/> Error processing file.</p>}
             </div>
             )}
-        </CardContent>
-        <CardFooter className="flex justify-end gap-2">
-            <Button variant="outline" onClick={onClose} disabled={isProcessing}>Cancel</Button>
-            <Button onClick={handleSubmit} disabled={!file || isProcessing || status === 'success'}>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => handleClose(false)} disabled={isProcessing}>Cancel</Button>
+          <Button onClick={handleSubmit} disabled={!file || isProcessing || status === 'success'}>
             {status === 'uploading' ? (
                 <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -164,8 +168,9 @@ export function ShapefileUpload({ onClose, onPattasAdded }: ShapefileUploadProps
                 Upload & Process
                 </>
             )}
-            </Button>
-        </CardFooter>
-    </Card>
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
