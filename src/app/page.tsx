@@ -25,18 +25,16 @@ const MapView = dynamic(() => import('@/components/map-view').then(mod => mod.Ma
   loading: () => <Skeleton className="h-full w-full" />,
 });
 
-const StatsCard = ({ title, value, icon: Icon, color }: { title: string, value: number, icon: React.ElementType, color: string }) => (
-  <Card className="shadow-sm">
-    <CardContent className="flex items-center justify-between p-4">
-      <div>
-        <p className="text-sm font-medium text-muted-foreground">{title}</p>
-        <p className="text-3xl font-bold">{value}</p>
-      </div>
-      <div className={`p-3 rounded-full`} style={{ backgroundColor: `${color}1A` }}>
-        <Icon className="h-6 w-6" style={{ color: color }} />
-      </div>
-    </CardContent>
-  </Card>
+const StatsCard = ({ title, value, icon: Icon, color }: { title: string, value: string | number, icon: React.ElementType, color: string }) => (
+    <Card className="shadow-md rounded-2xl">
+      <CardContent className="p-4 flex flex-col items-center justify-center h-28 gap-2">
+        <div className="flex items-center gap-2">
+          <Icon className="h-5 w-5" style={{ color }} />
+          <p className="text-sm font-medium text-muted-foreground">{title}</p>
+        </div>
+        <p className="text-4xl font-bold">{value}</p>
+      </CardContent>
+    </Card>
 );
 
 export default function DashboardPage() {
@@ -191,7 +189,7 @@ export default function DashboardPage() {
                     />
                 )}
                 {isShapefileUploadOpen && (
-                     <ShapefileUpload 
+                     <ShapefileUpload
                         onClose={() => setShapefileUploadOpen(false)}
                         onPattasAdded={handlePattasAdded}
                      />
@@ -200,7 +198,7 @@ export default function DashboardPage() {
         </div>
        ) : (
         <div className="grid auto-rows-max items-start gap-4 md:gap-8 lg:col-span-2">
-            <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4">
+            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 xl:grid-cols-4">
                 <StatsCard title="Total Claims" value={totalClaims} icon={FileText} color="#3b82f6" />
                 <StatsCard title="Pending Review" value={pendingClaims} icon={Clock} color="#f59e0b" />
                 <StatsCard title="Linked to Map" value={approvedClaims} icon={CheckCircle} color="#10b981" />
@@ -220,16 +218,16 @@ export default function DashboardPage() {
   )
 
   const mapContainerClass = isMapFullScreen
-    ? "fixed inset-0 z-50"
+    ? "fixed inset-0 z-40"
     : editingClaim || isShapefileUploadOpen 
     ? "lg:col-span-2 h-[50vh] lg:h-full"
-    : "md:col-span-2 lg:col-span-2 xl:col-span-3 h-[40vh] md:h-[60vh] xl:h-[calc(100vh-220px)]";
+    : "lg:col-span-2 xl:col-span-3 h-[50vh] lg:h-[calc(100vh-220px)]";
 
   const mainLayoutClass = isMapFullScreen
     ? "contents" // Use display: contents to avoid affecting child layout
     : editingClaim || isShapefileUploadOpen
     ? "grid flex-1 grid-cols-1 lg:grid-cols-3 gap-6 p-4 sm:px-6 sm:py-0 md:gap-8"
-    : "grid flex-1 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-4 sm:px-6 sm:py-0 md:gap-8";
+    : "grid flex-1 grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-4 sm:px-6 sm:py-0 md:gap-8";
 
 
   return (
