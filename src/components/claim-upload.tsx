@@ -84,16 +84,10 @@ export function ClaimUpload({ open, onOpenChange, onClaimAdded }: ClaimUploadPro
     setProgress(60);
 
     try {
-      const newClaim = await handleClaimUpload(preview);
+      const newClaim = await handleClaimUpload(preview, file.type);
       setProgress(80);
       
-      const claimWithDoc: Claim = {
-        ...newClaim,
-        documentUrl: preview,
-        documentType: file.type,
-      };
-
-      onClaimAdded(claimWithDoc);
+      onClaimAdded(newClaim);
       setStatus('success');
       setProgress(100);
       toast({

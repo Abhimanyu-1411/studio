@@ -10,7 +10,7 @@ import type { DssRecommendation, Claim, Village, CommunityAsset, TimeSeriesDataP
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 
-export async function handleClaimUpload(documentDataUri: string) {
+export async function handleClaimUpload(documentDataUri: string, documentType: string) {
   const supabase = createClient();
 
   const villagesResult = await supabase.from('villages').select('name');
@@ -55,8 +55,8 @@ export async function handleClaimUpload(documentDataUri: string) {
     geoLinkConfidence: geoLinkResult.confidenceScore,
     status,
     location: randomLocation,
-    documentUrl: '', 
-    documentType: '',
+    documentUrl: documentDataUri,
+    documentType: documentType,
   };
   
   const { data, error } = await supabase.from('claims').insert(newClaimData as any).select().single();
