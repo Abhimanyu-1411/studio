@@ -204,7 +204,7 @@ export default function DashboardPage() {
                 <StatsCard title="Linked to Map" value={approvedClaims} icon={CheckCircle} color="#10b981" />
                 <StatsCard title="Total Villages" value={totalVillages} icon={MapPin} color="#8b5cf6" />
             </div>
-            <div className="grid gap-4 lg:grid-cols-1">
+            <div className="grid gap-4 lg:grid-cols-2">
                 <RecentClaims claims={claims.slice(0, 5)} onClaimSelect={handleClaimEdit} />
                 <QuickActions 
                 onUpload={() => setUploadOpen(true)} 
@@ -253,5 +253,7 @@ export default function DashboardPage() {
     </>
   );
 }
+
+    
 
     

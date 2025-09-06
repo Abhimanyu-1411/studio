@@ -1,7 +1,7 @@
 'use client';
 
 import type { Claim } from '@/types';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { FileText } from 'lucide-react';
 import { Button } from './ui/button';
 
@@ -15,6 +15,7 @@ export function RecentClaims({ claims, onClaimSelect }: RecentClaimsProps) {
     <Card>
       <CardHeader>
         <CardTitle>Recent Claims</CardTitle>
+        <CardDescription>The last 5 claims that were uploaded.</CardDescription>
       </CardHeader>
       <CardContent>
         {claims.length === 0 ? (
@@ -42,3 +43,5 @@ export function RecentClaims({ claims, onClaimSelect }: RecentClaimsProps) {
     </Card>
   );
 }
+
+    
