@@ -7,6 +7,7 @@ type FieldWithConfidence<T> = {
 
 export type Claim = {
   id: string;
+  created_at: string;
   claimantName: FieldWithConfidence<string>;
   village: FieldWithConfidence<string>;
   claimType: FieldWithConfidence<'IFR' | 'CFR' | 'CR' | string>;
@@ -71,5 +72,3 @@ export type Patta = {
     villageName: string;
     geometry: LatLng[];
 }
-
-    

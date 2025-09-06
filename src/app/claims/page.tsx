@@ -8,7 +8,6 @@ import { useToast } from '@/hooks/use-toast';
 import { ClaimEdit } from '@/components/claim-edit';
 import { getClaims, getVillages, updateClaim } from '../actions';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { FileDown, Upload, FileText, CheckCircle2, Clock, XCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -39,7 +38,6 @@ export default function ClaimsPage() {
   const [loading, setLoading] = useState(true);
   const [isUploadOpen, setUploadOpen] = useState(false);
   const { toast } = useToast();
-  const router = useRouter();
 
   // Filtering states
   const [searchQuery, setSearchQuery] = useState('');
@@ -67,8 +65,10 @@ export default function ClaimsPage() {
 
   const filteredClaims = useMemo(() => {
     return allClaims.filter(claim => {
-      const searchMatch = claim.claimantName.value.toLowerCase().includes(searchQuery.toLowerCase());
-      const typeMatch = typeFilter === 'all' || claim.claimType.value === typeFilter;
+      const claimantName = (claim.claimantName as any)?.value || '';
+      const claimType = (claim.claimType as any)?.value || '';
+      const searchMatch = claimantName.toLowerCase().includes(searchQuery.toLowerCase());
+      const typeMatch = typeFilter === 'all' || claimType === typeFilter;
       const statusMatch = statusFilter === 'all' || claim.status === statusFilter;
       return searchMatch && typeMatch && statusMatch;
     });
@@ -239,5 +239,3 @@ export default function ClaimsPage() {
     </>
   );
 }
-
-    
