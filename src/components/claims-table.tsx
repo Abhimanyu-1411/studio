@@ -9,16 +9,16 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from './ui/button';
-import { Edit, Link as LinkIcon } from 'lucide-react';
+import { Edit, Link as LinkIcon, XCircle } from 'lucide-react';
 import type { Claim } from '@/types';
 
 type ClaimsTableProps = {
   claims: Claim[];
   onClaimEdit: (claim: Claim) => void;
   onClaimLink: (claim: Claim) => void;
+  onClaimReject: (claim: Claim) => void;
 };
 
 const claimStatusBadges: Record<Claim['status'], 'default' | 'destructive' | 'secondary' | 'outline'> = {
@@ -38,7 +38,7 @@ const claimStatusText: Record<Claim['status'], string> = {
 }
 
 
-export function ClaimsTable({ claims, onClaimEdit, onClaimLink }: ClaimsTableProps) {
+export function ClaimsTable({ claims, onClaimEdit, onClaimLink, onClaimReject }: ClaimsTableProps) {
   
   return (
     <>
@@ -78,6 +78,12 @@ export function ClaimsTable({ claims, onClaimEdit, onClaimLink }: ClaimsTablePro
                                 <Button variant="outline" size="sm" onClick={() => onClaimLink(claim)}>
                                     <LinkIcon className="mr-2 h-4 w-4" />
                                     Link to Map
+                                </Button>
+                            )}
+                             {claim.status !== 'rejected' && (
+                                <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => onClaimReject(claim)}>
+                                    <XCircle />
+                                    <span className="sr-only">Reject Claim</span>
                                 </Button>
                             )}
                             <Button variant="ghost" size="icon" onClick={() => onClaimEdit(claim)}>

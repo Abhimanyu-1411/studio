@@ -105,6 +105,17 @@ export default function ClaimsPage() {
         description: `Claim for ${claimToLink.claimantName.value} is now visible on the map.`
     });
   };
+  
+  const handleClaimReject = async (claimToReject: Claim) => {
+    const updatedClaim = { ...claimToReject, status: 'rejected' as const };
+    await updateClaim(claimToReject.id, { status: 'rejected' });
+    setAllClaims(prev => prev.map(c => c.id === claimToReject.id ? updatedClaim : c));
+    toast({
+        variant: 'destructive',
+        title: 'Claim Rejected',
+        description: `Claim for ${claimToReject.claimantName.value} has been rejected.`
+    });
+  };
 
   const handleClaimEdit = (claim: Claim) => {
     setEditingClaim(claim);
@@ -214,6 +225,7 @@ export default function ClaimsPage() {
                         claims={filteredClaims}
                         onClaimEdit={handleClaimEdit}
                         onClaimLink={handleClaimLink}
+                        onClaimReject={handleClaimReject}
                     />
                 </CardContent>
             </Card>
