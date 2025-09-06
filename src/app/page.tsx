@@ -234,30 +234,32 @@ export default function DashboardPage() {
         
         <div className={cn(
             "grid gap-6",
-            isMapFullScreen ? "fixed inset-0 z-10 bg-background" : (showSidePanel ? "grid-cols-1 lg:grid-cols-3" : "grid-cols-1"),
+            !isMapFullScreen && (showSidePanel ? "grid-cols-1 lg:grid-cols-3" : "grid-cols-1"),
         )}>
             <div className={cn(
                 "transition-all duration-300",
-                 isMapFullScreen ? "h-full" : (showSidePanel ? "lg:col-span-2 h-[calc(100vh-300px)]" : "lg:col-span-3 h-[calc(100vh-250px)]")
+                 isMapFullScreen ? "fixed inset-0 z-10 bg-background" : (showSidePanel ? "lg:col-span-2 h-[calc(100vh-300px)]" : "lg:col-span-3 h-[calc(100vh-250px)]")
             )}>
               <MapCard className="h-full w-full"/>
             </div>
 
             {!isMapFullScreen && (
-              <div className={cn("lg:col-span-1 space-y-6", !showSidePanel && 'hidden')}>
-                 {sidePanelComponent}
-              </div>
-            )}
-            
-            {!isMapFullScreen && !showSidePanel && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                 <RecentClaims claims={claims.slice(0, 5)} onClaimSelect={handleClaimEdit} />
-                 <QuickActions 
-                    onUpload={() => setUploadOpen(true)} 
-                    onViewClaims={() => router.push('/claims')} 
-                    onUploadShapefile={handleShapefileUploadClick}
-                 />
-              </div>
+              <>
+                <div className={cn("lg:col-span-1 space-y-6", !showSidePanel && 'hidden')}>
+                   {sidePanelComponent}
+                </div>
+                
+                {!showSidePanel && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                     <RecentClaims claims={claims.slice(0, 5)} onClaimSelect={handleClaimEdit} />
+                     <QuickActions 
+                        onUpload={() => setUploadOpen(true)} 
+                        onViewClaims={() => router.push('/claims')} 
+                        onUploadShapefile={handleShapefileUploadClick}
+                     />
+                  </div>
+                )}
+              </>
             )}
         </div>
       </div>
@@ -273,3 +275,5 @@ export default function DashboardPage() {
     </>
   );
 }
+
+    
