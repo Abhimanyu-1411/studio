@@ -9,6 +9,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetTr
 import { usePathname, useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Logo } from './icons';
+import type { Claim } from '@/types';
 
 const navItems = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutGrid, href: '/' },
@@ -19,7 +20,7 @@ const navItems = [
   { id: 'community-assets', label: 'Community Assets', icon: LandPlot, href: '/assets' },
 ];
 
-export function Header() {
+export function Header({ onClaimAdded }: { onClaimAdded?: (claim: Claim) => void }) {
   const [isUploadOpen, setUploadOpen] = useState(false);
   const [isSheetOpen, setSheetOpen] = useState(false);
   const pathname = usePathname();
@@ -30,6 +31,14 @@ export function Header() {
     setSheetOpen(false);
   };
   
+  const handleClaimAdded = (claim: Claim) => {
+    if (onClaimAdded) {
+      onClaimAdded(claim);
+    } else {
+      router.refresh();
+    }
+  }
+
   return (
     <>
       <header className="sticky top-0 z-20 flex h-20 items-center gap-4 border-b bg-primary px-4 text-primary-foreground sm:px-6">
@@ -97,9 +106,7 @@ export function Header() {
             </Button>
         </div>
       </header>
-      <ClaimUpload open={isUploadOpen} onOpenChange={setUploadOpen} onClaimAdded={() => {
-          router.refresh();
-      }}/>
+      <ClaimUpload open={isUploadOpen} onOpenChange={setUploadOpen} onClaimAdded={handleClaimAdded}/>
     </>
   );
 }

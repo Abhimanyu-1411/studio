@@ -20,6 +20,7 @@ import { getClaims, getVillages, getCommunityAssets, updateClaim, addCommunityAs
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Logo } from '@/components/icons';
+import { AppLayout } from '@/components/app-layout';
 
 const MapView = dynamic(() => import('@/components/map-view').then(mod => mod.MapView), {
   ssr: false,
@@ -221,7 +222,7 @@ export default function DashboardPage() {
   const showSidePanel = !!sidePanelComponent;
 
   return (
-    <>
+    <AppLayout onClaimAdded={handleClaimAdded}>
       <div className={cn(
         "flex-1 space-y-6 p-4 sm:p-6 md:p-8",
         isMapFullScreen && "p-0"
@@ -275,6 +276,6 @@ export default function DashboardPage() {
         onAssetAdded={handleAssetAdded} 
         villages={villages} 
       />
-    </>
+    </AppLayout>
   );
 }
