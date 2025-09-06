@@ -28,14 +28,14 @@ const MapView = dynamic(() => import('@/components/map-view').then(mod => mod.Ma
 
 const StatsCard = ({ title, value, icon: Icon, color, borderColor }: { title: string, value: string | number, icon: React.ElementType, color: string, borderColor: string }) => (
     <Card className={cn("shadow-sm border-t-4", borderColor)}>
-      <CardContent className="p-4 flex items-center justify-between">
-        <div>
-          <p className="text-sm font-medium text-muted-foreground">{title}</p>
+      <CardHeader className='pb-2'>
+        <div className={cn("p-2 rounded-full self-start", color)}>
+          <Icon className="h-5 w-5 text-white" />
+        </div>
+      </CardHeader>
+      <CardContent>
           <p className="text-3xl font-bold">{value}</p>
-        </div>
-        <div className={cn("p-2 rounded-full", color)}>
-          <Icon className="h-6 w-6 text-white" />
-        </div>
+          <p className="text-sm font-medium text-muted-foreground">{title}</p>
       </CardContent>
     </Card>
 );
@@ -165,6 +165,29 @@ export default function DashboardPage() {
   const totalVillages = villages.length;
 
   const linkedClaims = useMemo(() => claims.filter(c => c.status === 'linked'), [claims]);
+  
+  const editingComponent = useMemo(() => {
+    if (editingClaim) {
+      return (
+        <ClaimEdit
+          claim={editingClaim}
+          onClose={() => setEditingClaim(null)}
+          onClaimUpdate={handleClaimUpdate}
+          availableVillages={villages.map(v => v.name)}
+        />
+      );
+    }
+    if (isShapefileUploadOpen) {
+      return (
+        <ShapefileUpload
+          onClose={() => setShapefileUploadOpen(false)}
+          onPattasAdded={handlePattasAdded}
+        />
+      );
+    }
+    return <MapCard className="h-full w-full" />;
+  }, [editingClaim, isShapefileUploadOpen, claims, villages, pattas, activeLayers, mapCenter, mapZoom]);
+
 
   if (loading) {
     return (
@@ -187,6 +210,8 @@ export default function DashboardPage() {
     );
   }
   
+  const showSidePanel = editingClaim || isShapefileUploadOpen;
+
   return (
     <>
       <div className={cn(
@@ -194,49 +219,46 @@ export default function DashboardPage() {
         isMapFullScreen && "fixed inset-0 z-40 bg-background p-4"
       )}>
         {!isMapFullScreen && (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
                 <StatsCard title="Total Claims" value={totalClaims} icon={FileText} color="bg-blue-500" borderColor="border-blue-500"/>
-                <StatsCard title="Pending Claims" value={pendingClaims} icon={Clock} color="bg-yellow-500" borderColor="border-yellow-500"/>
-                <StatsCard title="Approved Claims" value={approvedClaims} icon={CheckCircle} color="bg-green-500" borderColor="border-green-500"/>
+                <StatsCard title="Pending Review" value={pendingClaims} icon={Clock} color="bg-yellow-500" borderColor="border-yellow-500"/>
+                <StatsCard title="Map-Linked" value={approvedClaims} icon={CheckCircle} color="bg-green-500" borderColor="border-green-500"/>
                 <StatsCard title="Total Villages" value={totalVillages} icon={MapPin} color="bg-purple-500" borderColor="border-purple-500"/>
             </div>
         )}
         
         <div className={cn(
             "grid gap-6",
-            isMapFullScreen ? "h-full" : "grid-cols-1 lg:grid-cols-3",
+            isMapFullScreen ? "h-full" : (showSidePanel ? "grid-cols-1 lg:grid-cols-3" : "grid-cols-1"),
         )}>
             <div className={cn(
-                isMapFullScreen ? "h-full" : "lg:col-span-2 h-[calc(100vh-300px)]"
+                "transition-all duration-300",
+                 isMapFullScreen ? "h-full" : (showSidePanel ? "lg:col-span-2 h-[calc(100vh-300px)]" : "lg:col-span-3 h-[calc(100vh-250px)]")
             )}>
-                {editingClaim && !isMapFullScreen ? (
-                    <ClaimEdit
-                        claim={editingClaim}
-                        onClose={() => setEditingClaim(null)}
-                        onClaimUpdate={handleClaimUpdate}
-                        availableVillages={villages.map(v => v.name)}
-                    />
-                ) : (
-                    <MapCard className="h-full w-full" />
-                )}
+              {showSidePanel ? <MapCard className="h-full w-full"/> : <MapCard className="h-full w-full" />}
             </div>
 
             {!isMapFullScreen && (
-                <div className="lg:col-span-1 space-y-6">
-                    <RecentClaims claims={claims.slice(0, 5)} onClaimSelect={handleClaimEdit} />
-                    <QuickActions 
-                        onUpload={() => setUploadOpen(true)} 
-                        onViewClaims={() => router.push('/claims')} 
-                        onUploadShapefile={() => setShapefileUploadOpen(true)}
-                    />
-                </div>
+              <div className={cn("lg:col-span-1 space-y-6", !showSidePanel && 'hidden')}>
+                 {editingComponent}
+              </div>
+            )}
+            
+            {!isMapFullScreen && !showSidePanel && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                 <RecentClaims claims={claims.slice(0, 5)} onClaimSelect={handleClaimEdit} />
+                 <QuickActions 
+                    onUpload={() => setUploadOpen(true)} 
+                    onViewClaims={() => router.push('/claims')} 
+                    onUploadShapefile={() => setShapefileUploadOpen(true)}
+                 />
+              </div>
             )}
         </div>
       </div>
       
       {/* Modals are kept outside the main layout grid */}
       <ClaimUpload open={isUploadOpen} onOpenChange={setUploadOpen} onClaimAdded={handleClaimAdded} />
-      <ShapefileUpload open={isShapefileUploadOpen} onOpenChange={setShapefileUploadOpen} onPattasAdded={handlePattasAdded} />
       <AssetEdit 
         open={isAssetEditOpen} 
         onOpenChange={setAssetEditOpen} 
