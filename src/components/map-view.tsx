@@ -33,7 +33,7 @@ const claimStatusColors = {
 };
 
 const getClaimIcon = (claim: Claim) => {
-  const color = claimStatusColors[claim.status] || 'hsl(var(--muted-foreground))';
+  const color = claimStatusColors[claim.status as keyof typeof claimStatusColors] || 'hsl(var(--muted-foreground))';
   const markerHtml = `<div style="background-color: ${color}; width: 24px; height: 24px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; color: white; font-weight: bold;">${claim.status === 'unlinked' ? '?' : ''}</div>`;
   return L.divIcon({
     html: markerHtml,
@@ -92,7 +92,7 @@ const MapViewComponent = ({ claims, villages, assets, pattas, onVillageClick, on
       {villages.map((village) => (
         <React.Fragment key={village.id}>
             <Polygon
-            positions={village.bounds}
+            positions={village.bounds as L.LatLngExpression[]}
             pathOptions={getPolygonOptions(village)}
             eventHandlers={{
                 click: () => onVillageClick(village),
@@ -101,27 +101,27 @@ const MapViewComponent = ({ claims, villages, assets, pattas, onVillageClick, on
               <Popup>
                 <div className="font-bold text-base">{village.name}</div>
                 <div className="text-sm">
-                  <p>Water Coverage: {village.assetCoverage.water}%</p>
-                  <p>Forest Coverage: {village.assetCoverage.forest}%</p>
-                  <p>Agriculture: {village.assetCoverage.agriculture}%</p>
+                  <p>Water Coverage: {(village.assetCoverage as any).water}%</p>
+                  <p>Forest Coverage: {(village.assetCoverage as any).forest}%</p>
+                  <p>Agriculture: {(village.assetCoverage as any).agriculture}%</p>
                 </div>
               </Popup>
             </Polygon>
             
-            {activeLayers.ndwi && village.assetGeometries?.ndwi.map((poly, i) => 
+            {activeLayers.ndwi && (village.assetGeometries as any)?.ndwi.map((poly: any, i: number) => 
                 <Polygon key={`${village.id}-ndwi-${i}`} positions={poly} pathOptions={{...assetLayerStyles.ndwi, fillOpacity: 0.5}} />
             )}
-            {activeLayers.forest && village.assetGeometries?.forest.map((poly, i) => 
+            {activeLayers.forest && (village.assetGeometries as any)?.forest.map((poly: any, i: number) => 
                 <Polygon key={`${village.id}-forest-${i}`} positions={poly} pathOptions={{...assetLayerStyles.forest, fillOpacity: 0.5}} />
             )}
-            {activeLayers.agriculture && village.assetGeometries?.agriculture.map((poly, i) => 
+            {activeLayers.agriculture && (village.assetGeometries as any)?.agriculture.map((poly: any, i: number) => 
                 <Polygon key={`${village.id}-agri-${i}`} positions={poly} pathOptions={{...assetLayerStyles.agriculture, fillOpacity: 0.5}} />
             )}
         </React.Fragment>
       ))}
       
       {pattas.map((patta) => (
-        <Polygon key={patta.id} positions={patta.geometry} pathOptions={pattaStyle}>
+        <Polygon key={patta.id} positions={patta.geometry as L.LatLngExpression[]} pathOptions={pattaStyle}>
             <Popup>
                 <div className="font-bold text-base">{patta.holderName}</div>
                 <p className="text-sm">{patta.villageName}</p>
@@ -130,7 +130,7 @@ const MapViewComponent = ({ claims, villages, assets, pattas, onVillageClick, on
       ))}
 
       {assets.map((asset) => (
-         asset.geometry && <Polygon key={asset.id} positions={asset.geometry} pathOptions={{...assetLayerStyles[asset.assetType as keyof typeof assetLayerStyles] || assetLayerStyles.other, fillOpacity: 0.7}}>
+         asset.geometry && <Polygon key={asset.id} positions={asset.geometry as L.LatLngExpression[]} pathOptions={{...assetLayerStyles[asset.assetType as keyof typeof assetLayerStyles] || assetLayerStyles.other, fillOpacity: 0.7}}>
             <Popup>
                 <div className="font-bold text-base capitalize">{asset.assetType.replace('_', ' ')}</div>
                 <p className="text-sm">{asset.description}</p>
@@ -141,18 +141,18 @@ const MapViewComponent = ({ claims, villages, assets, pattas, onVillageClick, on
       {claims.map((claim) => (
         <Marker
           key={claim.id}
-          position={claim.location}
+          position={claim.location as L.LatLngExpression}
           icon={getClaimIcon(claim)}
         >
           <Popup>
             <Card className="border-0 shadow-none max-w-sm">
               <CardHeader className="p-2">
-                <CardTitle className="text-base">{claim.claimantName.value}</CardTitle>
-                <CardDescription>{claim.claimType.value} - {claim.area.value}</CardDescription>
+                <CardTitle className="text-base">{(claim.claimantName as any).value}</CardTitle>
+                <CardDescription>{(claim.claimType as any).value} - {(claim.area as any).value}</CardDescription>
               </CardHeader>
               <CardContent className="p-2 space-y-2 text-sm">
-                <p>Village: {claim.village.value}</p>
-                <p>Date: {claim.date.value}</p>
+                <p>Village: {(claim.village as any).value}</p>
+                <p>Date: {(claim.date as any).value}</p>
                 <div>
                   {claim.linkedVillage ? (
                     <Badge variant="secondary">Linked to: {claim.linkedVillage} ({(claim.geoLinkConfidence! * 100).toFixed(0)}%)</Badge>

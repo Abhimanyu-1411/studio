@@ -63,33 +63,26 @@ export function ClaimEdit({ claim, onClose, onClaimUpdate, availableVillages }: 
     if (!claim) return;
     setIsSaving(true);
     
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
     const isReviewAction = claim.status === 'needs-review';
 
     let updatedClaim: Claim = {
         ...claim,
         ...formData,
-        // Ensure formData properties which are objects are deeply merged
-        claimantName: { ...claim.claimantName, ...formData.claimantName },
-        village: { ...claim.village, ...formData.village },
-        claimType: { ...claim.claimType, ...formData.claimType },
-        area: { ...claim.area, ...formData.area },
-        date: { ...claim.date, ...formData.date },
-        status: claim.status, // Keep original status unless changed by action
+        claimantName: { ...claim.claimantName, ...(formData.claimantName as any) },
+        village: { ...claim.village, ...(formData.village as any) },
+        claimType: { ...claim.claimType, ...(formData.claimType as any) },
+        area: { ...claim.area, ...(formData.area as any) },
+        date: { ...claim.date, ...(formData.date as any) },
+        status: claim.status,
     };
 
-    // When a user manually reviews and saves, we can assume the confidence is now 100%
     if (isReviewAction) {
-        updatedClaim.status = 'reviewed'; // Move to next state in workflow
-        
-        // Update all fields to 100% confidence since they've been manually reviewed
-        updatedClaim.claimantName = { ...updatedClaim.claimantName, confidence: 1.0 };
-        updatedClaim.village = { ...updatedClaim.village, value: updatedClaim.linkedVillage || updatedClaim.village.value, confidence: 1.0 };
-        updatedClaim.claimType = { ...updatedClaim.claimType, confidence: 1.0 };
-        updatedClaim.area = { ...updatedClaim.area, confidence: 1.0 };
-        updatedClaim.date = { ...updatedClaim.date, confidence: 1.0 };
+        updatedClaim.status = 'reviewed';
+        (updatedClaim.claimantName as any).confidence = 1.0;
+        (updatedClaim.village as any).confidence = 1.0;
+        (updatedClaim.claimType as any).confidence = 1.0;
+        (updatedClaim.area as any).confidence = 1.0;
+        (updatedClaim.date as any).confidence = 1.0;
         updatedClaim.geoLinkConfidence = 1.0;
     }
     
@@ -97,7 +90,7 @@ export function ClaimEdit({ claim, onClose, onClaimUpdate, availableVillages }: 
     setIsSaving(false);
     toast({
         title: isReviewAction ? 'Claim Reviewed' : 'Claim Updated',
-        description: `Successfully updated claim for ${updatedClaim.claimantName.value}.`
+        description: `Successfully updated claim for ${(updatedClaim.claimantName as any).value}.`
     });
     onClose();
   };
@@ -125,7 +118,6 @@ export function ClaimEdit({ claim, onClose, onClaimUpdate, availableVillages }: 
         </CardHeader>
         
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
-            {/* Document Preview */}
             <div className="border rounded-lg bg-muted/20 p-2 h-[35vh] flex flex-col">
                 <Label className="text-center pb-2">Document Preview</Label>
                 <div className="relative flex-1 w-full h-full">
@@ -148,12 +140,11 @@ export function ClaimEdit({ claim, onClose, onClaimUpdate, availableVillages }: 
                 </div>
             </div>
 
-            {/* Form Fields */}
             <div className="space-y-4">
                 <div className="grid grid-cols-5 items-center gap-4">
                     <Label htmlFor="claimantName" className="text-right col-span-1">Claimant</Label>
-                    <Input id="claimantName" name="claimantName" value={formData.claimantName?.value || ''} onChange={handleInputChange} className="col-span-3" />
-                    <ConfidenceBadge score={claim.claimantName.confidence} />
+                    <Input id="claimantName" name="claimantName" value={(formData.claimantName as any)?.value || ''} onChange={handleInputChange} className="col-span-3" />
+                    <ConfidenceBadge score={(claim.claimantName as any).confidence} />
                 </div>
                 <div className="grid grid-cols-5 items-center gap-4">
                     <Label htmlFor="village" className="text-right col-span-1">Village</Label>
@@ -169,7 +160,7 @@ export function ClaimEdit({ claim, onClose, onClaimUpdate, availableVillages }: 
                 </div>
                 <div className="grid grid-cols-5 items-center gap-4">
                     <Label htmlFor="claimType" className="text-right col-span-1">Claim Type</Label>
-                    <Select name="claimType" value={formData.claimType?.value || ''} onValueChange={handleSelectChange('claimType')}>
+                    <Select name="claimType" value={(formData.claimType as any)?.value || ''} onValueChange={handleSelectChange('claimType')}>
                         <SelectTrigger className="col-span-3">
                             <SelectValue placeholder="Select a type" />
                         </SelectTrigger>
@@ -179,17 +170,17 @@ export function ClaimEdit({ claim, onClose, onClaimUpdate, availableVillages }: 
                             <SelectItem value="CR">CR</SelectItem>
                         </SelectContent>
                     </Select>
-                    <ConfidenceBadge score={claim.claimType.confidence} />
+                    <ConfidenceBadge score={(claim.claimType as any).confidence} />
                 </div>
                 <div className="grid grid-cols-5 items-center gap-4">
                     <Label htmlFor="area" className="text-right col-span-1">Area</Label>
-                    <Input id="area" name="area" value={formData.area?.value || ''} onChange={handleInputChange} className="col-span-3" />
-                    <ConfidenceBadge score={claim.area.confidence} />
+                    <Input id="area" name="area" value={(formData.area as any)?.value || ''} onChange={handleInputChange} className="col-span-3" />
+                    <ConfidenceBadge score={(claim.area as any).confidence} />
                 </div>
                 <div className="grid grid-cols-5 items-center gap-4">
                     <Label htmlFor="date" className="text-right col-span-1">Date</Label>
-                    <Input id="date" name="date" value={formData.date?.value || ''} onChange={handleInputChange} className="col-span-3" />
-                    <ConfidenceBadge score={claim.date.confidence} />
+                    <Input id="date" name="date" value={(formData.date as any)?.value || ''} onChange={handleInputChange} className="col-span-3" />
+                    <ConfidenceBadge score={(claim.date as any).confidence} />
                 </div>
             </div>
         </div>

@@ -62,12 +62,12 @@ export function ClaimsTable({ claims, onClaimEdit, onClaimLink, onClaimReject }:
                 <TableBody>
                     {claims.map((claim) => (
                     <TableRow key={claim.id}>
-                        <TableCell className="font-medium whitespace-nowrap">{claim.claimantName.value}</TableCell>
-                        <TableCell className="whitespace-nowrap">{claim.linkedVillage || claim.village.value}</TableCell>
+                        <TableCell className="font-medium whitespace-nowrap">{(claim.claimantName as any).value}</TableCell>
+                        <TableCell className="whitespace-nowrap">{claim.linkedVillage || (claim.village as any).value}</TableCell>
                         <TableCell>
-                            <Badge variant="outline">{claim.claimType.value}</Badge>
+                            <Badge variant="outline">{(claim.claimType as any).value}</Badge>
                         </TableCell>
-                        <TableCell className="whitespace-nowrap">{claim.area.value}</TableCell>
+                        <TableCell className="whitespace-nowrap">{(claim.area as any).value}</TableCell>
                         <TableCell>
                             <Badge variant={claimStatusBadges[claim.status]} className="whitespace-nowrap">
                                 {claimStatusText[claim.status]}
@@ -100,5 +100,3 @@ export function ClaimsTable({ claims, onClaimEdit, onClaimLink, onClaimReject }:
     </>
   );
 }
-
-    

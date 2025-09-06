@@ -16,7 +16,7 @@ import { AssetLayersControl, type ActiveLayers } from '@/components/asset-layers
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { AssetEdit } from '@/components/asset-edit';
-import { getClaims, getVillages, getCommunityAssets, updateClaim, addCommunityAsset, handleClaimUpload } from './actions';
+import { getClaims, getVillages, getCommunityAssets, updateClaim, addCommunityAsset, getPattas } from './actions';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Logo } from '@/components/icons';
@@ -66,14 +66,16 @@ export default function DashboardPage() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const [claimsData, villagesData, assetsData] = await Promise.all([
+        const [claimsData, villagesData, assetsData, pattasData] = await Promise.all([
           getClaims(),
           getVillages(),
           getCommunityAssets(),
+          getPattas(),
         ]);
         setClaims(claimsData);
         setVillages(villagesData);
         setAssets(assetsData);
+        setPattas(pattasData);
       } catch (error) {
         console.error("Failed to fetch initial data", error);
         toast({
@@ -92,7 +94,7 @@ export default function DashboardPage() {
   const handleClaimAdded = (newClaim: Claim) => {
     setClaims((prevClaims) => [newClaim, ...prevClaims]);
     if (newClaim.location) {
-        setMapCenter(newClaim.location);
+        setMapCenter(newClaim.location as {lat: number, lng: number});
         setMapZoom(12);
     }
   };
@@ -124,7 +126,7 @@ export default function DashboardPage() {
     setEditingClaim(claim);
     setShapefileUploadOpen(false); // Close shapefile upload if open
     if(claim.location) {
-        setMapCenter(claim.location);
+        setMapCenter(claim.location as {lat: number, lng: number});
         setMapZoom(14);
     }
   }
@@ -239,7 +241,7 @@ export default function DashboardPage() {
         )}>
             <div className={cn(
                 "transition-all duration-300",
-                 isMapFullScreen ? "fixed inset-0 z-30" : (showSidePanel ? "lg:col-span-2 h-[calc(100vh-300px)]" : "lg:col-span-3 h-[calc(100vh-250px)]")
+                 isMapFullScreen ? "fixed inset-0 z-10" : (showSidePanel ? "lg:col-span-2 h-[calc(100vh-300px)]" : "lg:col-span-3 h-[calc(100vh-250px)]")
             )}>
               <MapCard className="h-full w-full"/>
             </div>
