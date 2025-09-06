@@ -1,13 +1,12 @@
 
 'use client';
 
-import { Logo } from '@/components/icons';
-import { LayoutGrid, List, Map, Lightbulb, TrendingUp, LandPlot } from 'lucide-react';
-import { usePathname } from 'next/navigation'; 
-import { cn } from '@/lib/utils';
-import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from './ui/tooltip';
 import Link from 'next/link';
-
+import { usePathname } from 'next/navigation';
+import { Logo } from '@/components/icons';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
+import { LayoutGrid, List, Map, Lightbulb, TrendingUp, LandPlot } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 const navItems = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutGrid, href: '/' },
@@ -22,8 +21,14 @@ const navItems = [
 export function Sidebar() {
   const pathname = usePathname();
 
+  // The sidebar is now only for icon tooltips on desktop, main nav is in Header.
+  // This could be removed if we don't want the icon-only sidebar anymore.
+  // For now, let's keep it but hide it, as the Header component handles all navigation.
+  return null;
+  
+  /*
   return (
-     <aside className="fixed inset-y-0 left-0 z-10 hidden w-14 flex-col border-r bg-background sm:flex">
+     <aside className="fixed inset-y-0 left-0 z-40 hidden w-14 flex-col border-r bg-background sm:flex">
         <Link href="/" className="flex h-14 items-center justify-center">
             <Logo />
             <span className="sr-only">FRA Atlas</span>
@@ -51,4 +56,5 @@ export function Sidebar() {
       </nav>
     </aside>
   );
+  */
 }

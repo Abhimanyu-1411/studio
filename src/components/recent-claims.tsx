@@ -12,7 +12,7 @@ type RecentClaimsProps = {
 
 export function RecentClaims({ claims, onClaimSelect }: RecentClaimsProps) {
   return (
-    <Card>
+    <Card className="shadow-lg">
       <CardHeader>
         <CardTitle>Recent Claims</CardTitle>
         <CardDescription>The last 5 claims that were uploaded.</CardDescription>
@@ -20,8 +20,11 @@ export function RecentClaims({ claims, onClaimSelect }: RecentClaimsProps) {
       <CardContent>
         {claims.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
-            <FileText className="mx-auto h-12 w-12" />
-            <p className="mt-4">No recent claims</p>
+            <div className="flex justify-center items-center h-24 w-24 rounded-full bg-gray-100 mx-auto">
+                <FileText className="h-12 w-12 text-gray-400" />
+            </div>
+            <p className="mt-4 font-medium">No recent claims</p>
+            <p className="text-sm">Upload a new claim to see it here.</p>
           </div>
         ) : (
           <ul className="space-y-4">
@@ -43,5 +46,3 @@ export function RecentClaims({ claims, onClaimSelect }: RecentClaimsProps) {
     </Card>
   );
 }
-
-    

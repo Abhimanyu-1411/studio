@@ -25,7 +25,7 @@ export default function RootLayout({
           crossOrigin=""/>
       </head>
       <body className={inter.className}>
-        <div className="flex min-h-screen w-full flex-col bg-muted/40">
+        <div className="flex min-h-screen w-full flex-col">
             <AppLayout>
               {children}
             </AppLayout>

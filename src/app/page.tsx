@@ -19,20 +19,23 @@ import { AssetEdit } from '@/components/asset-edit';
 import { getClaims, getVillages, getCommunityAssets, updateClaim, addCommunityAsset, handleClaimUpload } from './actions';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { Logo } from '@/components/icons';
 
 const MapView = dynamic(() => import('@/components/map-view').then(mod => mod.MapView), {
   ssr: false,
   loading: () => <Skeleton className="h-full w-full" />,
 });
 
-const StatsCard = ({ title, value, icon: Icon, color }: { title: string, value: string | number, icon: React.ElementType, color: string }) => (
-    <Card className="shadow-md rounded-2xl">
-      <CardContent className="p-4 flex flex-col items-center justify-center h-28 gap-2">
-        <div className="flex items-center gap-2">
-          <Icon className="h-5 w-5" style={{ color }} />
+const StatsCard = ({ title, value, icon: Icon, color, borderColor }: { title: string, value: string | number, icon: React.ElementType, color: string, borderColor: string }) => (
+    <Card className={cn("shadow-sm border-t-4", borderColor)}>
+      <CardContent className="p-4 flex items-center justify-between">
+        <div>
           <p className="text-sm font-medium text-muted-foreground">{title}</p>
+          <p className="text-3xl font-bold">{value}</p>
         </div>
-        <p className="text-4xl font-bold">{value}</p>
+        <div className={cn("p-2 rounded-full", color)}>
+          <Icon className="h-6 w-6 text-white" />
+        </div>
       </CardContent>
     </Card>
 );
@@ -125,9 +128,9 @@ export default function DashboardPage() {
     }
   }
   
-  const MapCard = ({ className, inFullScreen = false }: { className?: string, inFullScreen?: boolean }) => (
-    <Card className={cn("h-full flex flex-col", className)}>
-        <CardHeader className="flex flex-row items-center justify-between p-4 md:p-6">
+  const MapCard = ({ className }: { className?: string }) => (
+    <Card className={cn("h-full flex flex-col shadow-lg", className)}>
+        <CardHeader className="flex flex-row items-center justify-between p-4">
             <div>
                 <CardTitle>Interactive Map</CardTitle>
                 <CardDescription>Explore claims and village boundaries</CardDescription>
@@ -135,7 +138,7 @@ export default function DashboardPage() {
             <div className="flex items-center gap-2">
                 <AssetLayersControl activeLayers={activeLayers} onActiveLayersChange={setActiveLayers} />
                 <Button variant="outline" size="icon" onClick={() => setMapFullScreen(!isMapFullScreen)}>
-                    {inFullScreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
+                    {isMapFullScreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
                 </Button>
             </div>
         </CardHeader>
@@ -165,82 +168,77 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-full">
-        <Skeleton className="w-64 h-4" />
+      <div className="flex-1 p-8 pt-6 space-y-4">
+        <Skeleton className="h-8 w-48" />
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <Skeleton className="h-24" />
+            <Skeleton className="h-24" />
+            <Skeleton className="h-24" />
+            <Skeleton className="h-24" />
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <Skeleton className="lg:col-span-2 h-[60vh]" />
+            <div className="space-y-6">
+                <Skeleton className="h-64" />
+                <Skeleton className="h-48" />
+            </div>
+        </div>
       </div>
     );
   }
 
-  const renderDashboardContent = () => (
-    <div className={cn(
-        "grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8",
-        isMapFullScreen && "hidden" // Hide dashboard content when map is full screen
-    )}>
-       {editingClaim || isShapefileUploadOpen ? (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full">
-             {/* Map will be shown in its own container outside this one */}
-             <div className="lg:col-span-1 h-full">
-                {editingClaim && (
+  const renderMainDashboard = () => (
+    <div className="flex-1 space-y-6 p-4 sm:p-6 md:p-8">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <StatsCard title="Total Claims" value={totalClaims} icon={FileText} color="bg-blue-500" borderColor="border-blue-500"/>
+            <StatsCard title="Pending Claims" value={pendingClaims} icon={Clock} color="bg-yellow-500" borderColor="border-yellow-500"/>
+            <StatsCard title="Approved Claims" value={approvedClaims} icon={CheckCircle} color="bg-green-500" borderColor="border-green-500"/>
+            <StatsCard title="Total Villages" value={totalVillages} icon={MapPin} color="bg-purple-500" borderColor="border-purple-500"/>
+        </div>
+        
+        <div className={cn("grid gap-6", editingClaim || isShapefileUploadOpen ? "grid-cols-1" : "lg:grid-cols-3")}>
+            <div className="lg:col-span-2">
+                 {editingClaim ? (
                      <ClaimEdit
                         claim={editingClaim}
                         onClose={() => setEditingClaim(null)}
                         onClaimUpdate={handleClaimUpdate}
                         availableVillages={villages.map(v => v.name)}
                     />
-                )}
-                {isShapefileUploadOpen && (
+                 ) : isShapefileUploadOpen ? (
                      <ShapefileUpload
                         onClose={() => setShapefileUploadOpen(false)}
                         onPattasAdded={handlePattasAdded}
                      />
-                )}
-             </div>
-        </div>
-       ) : (
-        <div className="grid auto-rows-max items-start gap-4 md:gap-8 lg:col-span-2">
-            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 xl:grid-cols-4">
-                <StatsCard title="Total Claims" value={totalClaims} icon={FileText} color="#3b82f6" />
-                <StatsCard title="Pending Review" value={pendingClaims} icon={Clock} color="#f59e0b" />
-                <StatsCard title="Linked to Map" value={approvedClaims} icon={CheckCircle} color="#10b981" />
-                <StatsCard title="Total Villages" value={totalVillages} icon={MapPin} color="#8b5cf6" />
+                 ) : (
+                    <div className="h-[calc(100vh-300px)]">
+                        <MapCard className="h-full" />
+                    </div>
+                 )}
             </div>
-            <div className="grid gap-4 lg:grid-cols-2">
+            <div className="lg:col-span-1 space-y-6">
                 <RecentClaims claims={claims.slice(0, 5)} onClaimSelect={handleClaimEdit} />
                 <QuickActions 
-                onUpload={() => setUploadOpen(true)} 
-                onViewClaims={() => { router.push('/claims')}} 
-                onUploadShapefile={() => setShapefileUploadOpen(true)}
+                    onUpload={() => setUploadOpen(true)} 
+                    onViewClaims={() => router.push('/claims')} 
+                    onUploadShapefile={() => setShapefileUploadOpen(true)}
                 />
             </div>
         </div>
-       )}
     </div>
-  )
-
-  const mapContainerClass = isMapFullScreen
-    ? "fixed inset-0 z-40"
-    : editingClaim || isShapefileUploadOpen 
-    ? "lg:col-span-2 h-[50vh] lg:h-full"
-    : "lg:col-span-2 xl:col-span-3 h-[50vh] lg:h-[calc(100vh-220px)]";
-
-  const mainLayoutClass = isMapFullScreen
-    ? "contents" // Use display: contents to avoid affecting child layout
-    : editingClaim || isShapefileUploadOpen
-    ? "grid flex-1 grid-cols-1 lg:grid-cols-3 gap-6 p-4 sm:px-6 sm:py-0 md:gap-8"
-    : "grid flex-1 grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-4 sm:px-6 sm:py-0 md:gap-8";
-
+  );
 
   return (
     <>
-      <div className={mainLayoutClass}>
-          {/* Map always renders, its position is controlled by CSS */}
-          <div className={mapContainerClass}>
-              <MapCard className="h-full w-full border-none rounded-none" inFullScreen={isMapFullScreen} />
-          </div>
-          
-          {/* Dashboard content renders beside the map or is hidden */}
-          {renderDashboardContent()}
+      <div className={cn(isMapFullScreen ? 'hidden' : 'block')}>
+          {renderMainDashboard()}
       </div>
+
+      {isMapFullScreen && (
+          <div className="fixed inset-0 z-50 bg-background p-4">
+              <MapCard className="h-full w-full" />
+          </div>
+      )}
       
       {/* Modals are kept outside the main layout grid */}
       <ClaimUpload open={isUploadOpen} onOpenChange={setUploadOpen} onClaimAdded={handleClaimAdded} />
@@ -253,7 +251,3 @@ export default function DashboardPage() {
     </>
   );
 }
-
-    
-
-    
