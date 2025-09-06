@@ -20,7 +20,7 @@ const navItems = [
   { id: 'community-assets', label: 'Community Assets', icon: LandPlot, href: '/assets' },
 ];
 
-export function Header({ onClaimAdded }: { onClaimAdded?: (claim: Claim) => void }) {
+export function Header({ onClaimAdded: onClaimAddedFromPage }: { onClaimAdded?: (claim: Claim) => void }) {
   const [isUploadOpen, setUploadOpen] = useState(false);
   const [isSheetOpen, setSheetOpen] = useState(false);
   const pathname = usePathname();
@@ -32,16 +32,18 @@ export function Header({ onClaimAdded }: { onClaimAdded?: (claim: Claim) => void
   };
   
   const handleClaimAdded = (claim: Claim) => {
-    if (onClaimAdded) {
-      onClaimAdded(claim);
+    // If the page (like the dashboard) provides a specific function to handle claim additions, use it.
+    if (onClaimAddedFromPage) {
+      onClaimAddedFromPage(claim);
     } else {
+      // Otherwise, just refresh the page data. This is useful for pages like /claims.
       router.refresh();
     }
   }
 
   return (
     <>
-      <header className="sticky top-0 z-20 flex h-20 items-center gap-4 border-b bg-primary px-4 text-primary-foreground sm:px-6">
+      <header className="sticky top-0 z-20 flex h-24 items-center gap-4 border-b bg-primary px-4 text-primary-foreground sm:px-6">
         {/* Mobile Nav */}
         <div className="sm:hidden">
             <Sheet open={isSheetOpen} onOpenChange={setSheetOpen}>

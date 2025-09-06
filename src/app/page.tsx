@@ -222,7 +222,7 @@ export default function DashboardPage() {
   const showSidePanel = !!sidePanelComponent;
 
   return (
-    <AppLayout onClaimAdded={handleClaimAdded}>
+    <>
       <div className={cn(
         "flex-1 space-y-6 p-4 sm:p-6 md:p-8",
         isMapFullScreen && "p-0"
@@ -276,6 +276,6 @@ export default function DashboardPage() {
         onAssetAdded={handleAssetAdded} 
         villages={villages} 
       />
-    </AppLayout>
+    </>
   );
 }
