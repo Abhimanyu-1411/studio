@@ -135,8 +135,8 @@ export default function DashboardPage() {
   }
   
   const MapCard = ({ className }: { className?: string }) => (
-    <Card className={cn("h-full flex flex-col shadow-lg", className)}>
-        <CardHeader className="flex flex-row items-center justify-between p-4">
+    <Card className={cn("h-full flex flex-col shadow-lg relative", className)}>
+        <CardHeader className="relative z-10 flex flex-row items-center justify-between p-4 bg-background/80 backdrop-blur-sm">
             <div>
                 <CardTitle>Interactive Map</CardTitle>
                 <CardDescription>Explore claims and village boundaries</CardDescription>
@@ -192,7 +192,7 @@ export default function DashboardPage() {
       );
     }
     return null;
-  }, [editingClaim, isShapefileUploadOpen, villages, handleClaimUpdate, handlePattasAdded]);
+  }, [editingClaim, isShapefileUploadOpen, villages, handleClaimUpdate]);
 
 
   if (loading) {
@@ -221,7 +221,8 @@ export default function DashboardPage() {
   return (
     <>
       <div className={cn(
-        "flex-1 space-y-6 p-4 sm:p-6 md:p-8"
+        "flex-1 space-y-6 p-4 sm:p-6 md:p-8",
+        isMapFullScreen && "p-0"
       )}>
         {!isMapFullScreen && (
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -238,7 +239,7 @@ export default function DashboardPage() {
         )}>
             <div className={cn(
                 "transition-all duration-300",
-                 isMapFullScreen ? "fixed inset-0 z-10 bg-background" : (showSidePanel ? "lg:col-span-2 h-[calc(100vh-300px)]" : "lg:col-span-3 h-[calc(100vh-250px)]")
+                 isMapFullScreen ? "fixed inset-0 z-30" : (showSidePanel ? "lg:col-span-2 h-[calc(100vh-300px)]" : "lg:col-span-3 h-[calc(100vh-250px)]")
             )}>
               <MapCard className="h-full w-full"/>
             </div>
@@ -275,5 +276,3 @@ export default function DashboardPage() {
     </>
   );
 }
-
-    
