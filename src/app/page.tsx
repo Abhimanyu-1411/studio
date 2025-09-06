@@ -234,7 +234,7 @@ export default function DashboardPage() {
         
         <div className={cn(
             "grid gap-6",
-            isMapFullScreen ? "fixed inset-0 z-30 bg-background" : (showSidePanel ? "grid-cols-1 lg:grid-cols-3" : "grid-cols-1"),
+            isMapFullScreen ? "fixed inset-0 z-10 bg-background" : (showSidePanel ? "grid-cols-1 lg:grid-cols-3" : "grid-cols-1"),
         )}>
             <div className={cn(
                 "transition-all duration-300",

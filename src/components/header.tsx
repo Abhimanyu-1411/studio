@@ -32,7 +32,7 @@ export function Header() {
   
   return (
     <>
-      <header className="sticky top-0 z-50 flex h-16 items-center gap-4 border-b bg-primary px-4 text-primary-foreground sm:px-6">
+      <header className="sticky top-0 z-20 flex h-16 items-center gap-4 border-b bg-primary px-4 text-primary-foreground sm:px-6">
         {/* Mobile Nav */}
         <div className="sm:hidden">
             <Sheet open={isSheetOpen} onOpenChange={setSheetOpen}>
