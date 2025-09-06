@@ -2,10 +2,10 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Upload, Menu, LayoutGrid, List, MapPin as Map } from 'lucide-react';
+import { Upload, Menu, LayoutGrid, List, MapPin as Map, Lightbulb, TrendingUp, LandPlot } from 'lucide-react';
 import { ClaimUpload } from './claim-upload';
 import { useState } from 'react';
-import { Sheet, SheetContent, SheetTrigger } from './ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetTrigger } from './ui/sheet';
 import { usePathname, useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Logo } from './icons';
@@ -14,15 +14,20 @@ const navItems = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutGrid, href: '/' },
   { id: 'claims-list', label: 'Claims List', icon: List, href: '/claims' },
   { id: 'villages', label: 'Villages', icon: Map, href: '/villages' },
+  { id: 'village-analysis', label: 'Village Analysis', icon: Lightbulb, href: '/analysis' },
+  { id: 'predictive-analysis', label: 'Predictive Analysis', icon: TrendingUp, href: '/predictive' },
+  { id: 'community-assets', label: 'Community Assets', icon: LandPlot, href: '/assets' },
 ];
 
 export function Header() {
   const [isUploadOpen, setUploadOpen] = useState(false);
+  const [isSheetOpen, setSheetOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
 
   const handleNav = (href: string) => {
     router.push(href);
+    setSheetOpen(false);
   };
   
   return (
@@ -30,7 +35,7 @@ export function Header() {
       <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-primary px-4 text-primary-foreground sm:px-6">
         {/* Mobile Nav */}
         <div className="sm:hidden">
-            <Sheet>
+            <Sheet open={isSheetOpen} onOpenChange={setSheetOpen}>
                 <SheetTrigger asChild>
                     <Button size="icon" variant="outline" className="text-primary-foreground bg-primary hover:bg-primary/90">
                         <Menu className="h-5 w-5" />
@@ -38,6 +43,12 @@ export function Header() {
                     </Button>
                 </SheetTrigger>
                 <SheetContent side="left" className="sm:max-w-xs">
+                    <SheetHeader>
+                        <SheetTitle>Navigation Menu</SheetTitle>
+                        <SheetDescription>
+                            Select a page to navigate to.
+                        </SheetDescription>
+                    </SheetHeader>
                     <nav className="grid gap-6 text-lg font-medium mt-4">
                         <button onClick={() => handleNav('/')} className="flex items-center gap-4 px-4 py-2 text-muted-foreground hover:text-foreground rounded-lg">
                             <Logo />
