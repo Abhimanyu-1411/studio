@@ -48,18 +48,21 @@ export async function handleClaimUpload(documentDataUri: string, documentType: s
       lng: 82.4 + (Math.random() - 0.5) * 0.8
   };
   
-  const newClaimData: Omit<Claim, 'id' | 'created_at'> = {
-    ...extractedData,
+  const newClaimData = {
+    claimantName: extractedData.claimantName,
     village: extractedData.village,
+    claimType: extractedData.claimType,
+    area: extractedData.area,
+    date: extractedData.date,
     linkedVillage: geoLinkResult.linkedVillageName,
     geoLinkConfidence: geoLinkResult.confidenceScore,
     status,
     location: randomLocation,
-    documentUrl: documentDataUri,
-    documentType: documentType,
+    documentUrl: documentDataUri, // Ensure this is saved
+    documentType: documentType,   // Ensure this is saved
   };
   
-  const { data, error } = await supabase.from('claims').insert(newClaimData as any).select().single();
+  const { data, error } = await supabase.from('claims').insert(newClaimData).select().single();
 
   if (error) {
     console.error("Supabase insert error:", error);
