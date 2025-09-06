@@ -186,62 +186,57 @@ export default function DashboardPage() {
       </div>
     );
   }
-
-  const renderMainDashboard = () => (
-    <div className="flex-1 space-y-6 p-4 sm:p-6 md:p-8">
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <StatsCard title="Total Claims" value={totalClaims} icon={FileText} color="bg-blue-500" borderColor="border-blue-500"/>
-            <StatsCard title="Pending Claims" value={pendingClaims} icon={Clock} color="bg-yellow-500" borderColor="border-yellow-500"/>
-            <StatsCard title="Approved Claims" value={approvedClaims} icon={CheckCircle} color="bg-green-500" borderColor="border-green-500"/>
-            <StatsCard title="Total Villages" value={totalVillages} icon={MapPin} color="bg-purple-500" borderColor="border-purple-500"/>
-        </div>
+  
+  return (
+    <>
+      <div className={cn(
+        "flex-1 space-y-6 p-4 sm:p-6 md:p-8 transition-all duration-300",
+        isMapFullScreen && "fixed inset-0 z-40 bg-background p-4"
+      )}>
+        {!isMapFullScreen && (
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                <StatsCard title="Total Claims" value={totalClaims} icon={FileText} color="bg-blue-500" borderColor="border-blue-500"/>
+                <StatsCard title="Pending Claims" value={pendingClaims} icon={Clock} color="bg-yellow-500" borderColor="border-yellow-500"/>
+                <StatsCard title="Approved Claims" value={approvedClaims} icon={CheckCircle} color="bg-green-500" borderColor="border-green-500"/>
+                <StatsCard title="Total Villages" value={totalVillages} icon={MapPin} color="bg-purple-500" borderColor="border-purple-500"/>
+            </div>
+        )}
         
-        <div className={cn("grid gap-6", editingClaim || isShapefileUploadOpen ? "grid-cols-1" : "lg:grid-cols-3")}>
-            <div className="lg:col-span-2">
-                 {editingClaim ? (
-                     <ClaimEdit
+        <div className={cn(
+            "grid gap-6",
+            isMapFullScreen ? "h-full" : "grid-cols-1 lg:grid-cols-3",
+        )}>
+            <div className={cn(
+                isMapFullScreen ? "h-full" : "lg:col-span-2 h-[calc(100vh-300px)]"
+            )}>
+                {editingClaim && !isMapFullScreen ? (
+                    <ClaimEdit
                         claim={editingClaim}
                         onClose={() => setEditingClaim(null)}
                         onClaimUpdate={handleClaimUpdate}
                         availableVillages={villages.map(v => v.name)}
                     />
-                 ) : isShapefileUploadOpen ? (
-                     <ShapefileUpload
-                        onClose={() => setShapefileUploadOpen(false)}
-                        onPattasAdded={handlePattasAdded}
-                     />
-                 ) : (
-                    <div className="h-[calc(100vh-300px)]">
-                        <MapCard className="h-full" />
-                    </div>
-                 )}
+                ) : (
+                    <MapCard className="h-full w-full" />
+                )}
             </div>
-            <div className="lg:col-span-1 space-y-6">
-                <RecentClaims claims={claims.slice(0, 5)} onClaimSelect={handleClaimEdit} />
-                <QuickActions 
-                    onUpload={() => setUploadOpen(true)} 
-                    onViewClaims={() => router.push('/claims')} 
-                    onUploadShapefile={() => setShapefileUploadOpen(true)}
-                />
-            </div>
+
+            {!isMapFullScreen && (
+                <div className="lg:col-span-1 space-y-6">
+                    <RecentClaims claims={claims.slice(0, 5)} onClaimSelect={handleClaimEdit} />
+                    <QuickActions 
+                        onUpload={() => setUploadOpen(true)} 
+                        onViewClaims={() => router.push('/claims')} 
+                        onUploadShapefile={() => setShapefileUploadOpen(true)}
+                    />
+                </div>
+            )}
         </div>
-    </div>
-  );
-
-  return (
-    <>
-      <div className={cn(isMapFullScreen ? 'hidden' : 'block')}>
-          {renderMainDashboard()}
       </div>
-
-      {isMapFullScreen && (
-          <div className="fixed inset-0 z-50 bg-background p-4">
-              <MapCard className="h-full w-full" />
-          </div>
-      )}
       
       {/* Modals are kept outside the main layout grid */}
       <ClaimUpload open={isUploadOpen} onOpenChange={setUploadOpen} onClaimAdded={handleClaimAdded} />
+      <ShapefileUpload open={isShapefileUploadOpen} onOpenChange={setShapefileUploadOpen} onPattasAdded={handlePattasAdded} />
       <AssetEdit 
         open={isAssetEditOpen} 
         onOpenChange={setAssetEditOpen} 
