@@ -221,8 +221,7 @@ export default function DashboardPage() {
   return (
     <>
       <div className={cn(
-        "flex-1 space-y-6 p-4 sm:p-6 md:p-8 transition-all duration-300",
-        isMapFullScreen && "fixed inset-0 z-40 bg-background p-4"
+        "flex-1 space-y-6 p-4 sm:p-6 md:p-8"
       )}>
         {!isMapFullScreen && (
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -235,7 +234,7 @@ export default function DashboardPage() {
         
         <div className={cn(
             "grid gap-6",
-            isMapFullScreen ? "h-full" : (showSidePanel ? "grid-cols-1 lg:grid-cols-3" : "grid-cols-1"),
+            isMapFullScreen ? "fixed inset-0 z-30 bg-background" : (showSidePanel ? "grid-cols-1 lg:grid-cols-3" : "grid-cols-1"),
         )}>
             <div className={cn(
                 "transition-all duration-300",
