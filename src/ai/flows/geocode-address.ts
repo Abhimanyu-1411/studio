@@ -37,7 +37,7 @@ export async function geocodeAddress(
   // If confidence is low, fall back to village center
   if (geocodeResult.confidenceScore < 0.5) {
       const supabase = createClient();
-      const { data: village, error } = await supabase
+      const { data: village } = await supabase
         .from('villages')
         .select('center')
         .eq('name', input.village)
@@ -46,7 +46,8 @@ export async function geocodeAddress(
       if (village && village.center) {
         const center = village.center as {lat: number, lng: number};
         return {
-            ...center,
+            lat: center.lat,
+            lng: center.lng,
             confidenceScore: 0.2 // Low confidence, as it's a fallback
         };
       }
