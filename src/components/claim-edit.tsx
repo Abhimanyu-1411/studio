@@ -99,6 +99,9 @@ export function ClaimEdit({ claim, onClose, onClaimUpdate, availableVillages }: 
   const isReviewAction = claim.status === 'needs-review';
   const isDocumentImage = claim.documentType?.startsWith('image/');
 
+  const getFieldValue = (field: any) => field?.value ?? '';
+  const getFieldConfidence = (field: any) => field?.confidence;
+
   return (
     <Card className="h-full flex flex-col">
         <CardHeader className="flex-row items-start justify-between">
@@ -140,68 +143,82 @@ export function ClaimEdit({ claim, onClose, onClaimUpdate, availableVillages }: 
             </div>
 
             <div className="space-y-4">
-                 {Object.keys(formData).map(key => {
-                    const field = (formData as any)[key];
-                    if (typeof field !== 'object' || field === null || !('value' in field)) {
-                        return null;
-                    }
-
-                    const fieldKey = key as keyof Claim;
-                    
-                    // Don't render an input for these fields
-                    if (['id', 'created_at', 'documentUrl', 'documentType', 'status', 'location', 'geoLinkConfidence'].includes(fieldKey)) {
-                         return null;
-                    }
-                    
-                    if (fieldKey === 'linkedVillage') {
-                        return (
-                            <div key={fieldKey} className="grid grid-cols-5 items-center gap-4">
-                                <Label htmlFor="linkedVillage" className="text-right col-span-1 capitalize">Linked Village</Label>
-                                <Select name="linkedVillage" value={formData.linkedVillage || ''} onValueChange={handleSelectChange('linkedVillage')}>
-                                    <SelectTrigger className="col-span-3">
-                                        <SelectValue placeholder="Select a village" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {availableVillages.map(v => <SelectItem key={v} value={v}>{v}</SelectItem>)}
-                                    </SelectContent>
-                                </Select>
-                                <ConfidenceBadge score={claim.geoLinkConfidence} />
-                            </div>
-                        )
-                    }
-                    if (fieldKey === 'claimType') {
-                        return (
-                           <div key={fieldKey} className="grid grid-cols-5 items-center gap-4">
-                               <Label htmlFor="claimType" className="text-right col-span-1">Claim Type</Label>
-                               <Select name="claimType" value={(formData.claimType as any)?.value || ''} onValueChange={handleSelectChange('claimType')}>
-                                   <SelectTrigger className="col-span-3">
-                                       <SelectValue placeholder="Select a type" />
-                                   </SelectTrigger>
-                                   <SelectContent>
-                                       <SelectItem value="IFR">IFR</SelectItem>
-                                       <SelectItem value="CFR">CFR</SelectItem>
-                                       <SelectItem value="CR">CR</SelectItem>
-                                   </SelectContent>
-                               </Select>
-                               <ConfidenceBadge score={(claim.claimType as any).confidence} />
-                           </div>
-                        )
-                    }
-
-                    const label = key.replace(/([A-Z])/g, ' $1').replace(/^./, (str) => str.toUpperCase());
-                    
-                    return (
-                        <div key={fieldKey} className="grid grid-cols-5 items-center gap-4">
-                            <Label htmlFor={fieldKey} className="text-right col-span-1">{label}</Label>
-                            {fieldKey === 'address' ? (
-                                <Textarea id={fieldKey} name={fieldKey} value={field.value} onChange={handleInputChange} className="col-span-3" />
-                            ) : (
-                                <Input id={fieldKey} name={fieldKey} value={field.value} onChange={handleInputChange} className="col-span-3" />
-                            )}
-                            <ConfidenceBadge score={field.confidence} />
-                        </div>
-                    );
-                })}
+                 <div className="grid grid-cols-5 items-center gap-4">
+                    <Label htmlFor="claimantName" className="text-right col-span-1">Claimant Name</Label>
+                    <Input id="claimantName" name="claimantName" value={getFieldValue(formData.claimantName)} onChange={handleInputChange} className="col-span-3" />
+                    <ConfidenceBadge score={getFieldConfidence(formData.claimantName)} />
+                </div>
+                <div className="grid grid-cols-5 items-center gap-4">
+                    <Label htmlFor="pattaNumber" className="text-right col-span-1">Patta Number</Label>
+                    <Input id="pattaNumber" name="pattaNumber" value={getFieldValue(formData.pattaNumber)} onChange={handleInputChange} className="col-span-3" />
+                    <ConfidenceBadge score={getFieldConfidence(formData.pattaNumber)} />
+                </div>
+                <div className="grid grid-cols-5 items-center gap-4">
+                    <Label htmlFor="extentOfForestLandOccupied" className="text-right col-span-1">Extent Of Forest Land Occupied</Label>
+                    <Input id="extentOfForestLandOccupied" name="extentOfForestLandOccupied" value={getFieldValue(formData.extentOfForestLandOccupied)} onChange={handleInputChange} className="col-span-3" />
+                    <ConfidenceBadge score={getFieldConfidence(formData.extentOfForestLandOccupied)} />
+                </div>
+                <div className="grid grid-cols-5 items-center gap-4">
+                    <Label htmlFor="village" className="text-right col-span-1">Village</Label>
+                    <Input id="village" name="village" value={getFieldValue(formData.village)} onChange={handleInputChange} className="col-span-3" />
+                    <ConfidenceBadge score={getFieldConfidence(formData.village)} />
+                </div>
+                <div className="grid grid-cols-5 items-center gap-4">
+                    <Label htmlFor="gramPanchayat" className="text-right col-span-1">Gram Panchayat</Label>
+                    <Input id="gramPanchayat" name="gramPanchayat" value={getFieldValue(formData.gramPanchayat)} onChange={handleInputChange} className="col-span-3" />
+                    <ConfidenceBadge score={getFieldConfidence(formData.gramPanchayat)} />
+                </div>
+                <div className="grid grid-cols-5 items-center gap-4">
+                    <Label htmlFor="tehsilTaluka" className="text-right col-span-1">Tehsil Taluka</Label>
+                    <Input id="tehsilTaluka" name="tehsilTaluka" value={getFieldValue(formData.tehsilTaluka)} onChange={handleInputChange} className="col-span-3" />
+                    <ConfidenceBadge score={getFieldConfidence(formData.tehsilTaluka)} />
+                </div>
+                <div className="grid grid-cols-5 items-center gap-4">
+                    <Label htmlFor="district" className="text-right col-span-1">District</Label>
+                    <Input id="district" name="district" value={getFieldValue(formData.district)} onChange={handleInputChange} className="col-span-3" />
+                    <ConfidenceBadge score={getFieldConfidence(formData.district)} />
+                </div>
+                <div className="grid grid-cols-5 items-center gap-4">
+                    <Label htmlFor="state" className="text-right col-span-1">State</Label>
+                    <Input id="state" name="state" value={getFieldValue(formData.state)} onChange={handleInputChange} className="col-span-3" />
+                    <ConfidenceBadge score={getFieldConfidence(formData.state)} />
+                </div>
+                <div className="grid grid-cols-5 items-center gap-4">
+                    <Label htmlFor="date" className="text-right col-span-1">Date</Label>
+                    <Input id="date" name="date" value={getFieldValue(formData.date)} onChange={handleInputChange} className="col-span-3" />
+                    <ConfidenceBadge score={getFieldConfidence(formData.date)} />
+                </div>
+                <div key="claimType" className="grid grid-cols-5 items-center gap-4">
+                    <Label htmlFor="claimType" className="text-right col-span-1">Claim Type</Label>
+                    <Select name="claimType" value={getFieldValue(formData.claimType)} onValueChange={handleSelectChange('claimType')}>
+                        <SelectTrigger className="col-span-3">
+                            <SelectValue placeholder="Select a type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="IFR">IFR</SelectItem>
+                            <SelectItem value="CFR">CFR</SelectItem>
+                            <SelectItem value="CR">CR</SelectItem>
+                        </SelectContent>
+                    </Select>
+                    <ConfidenceBadge score={getFieldConfidence(formData.claimType)} />
+                </div>
+                 <div className="grid grid-cols-5 items-center gap-4">
+                    <Label htmlFor="address" className="text-right col-span-1">Address</Label>
+                    <Textarea id="address" name="address" value={getFieldValue(formData.address)} onChange={handleInputChange} className="col-span-3" />
+                    <ConfidenceBadge score={getFieldConfidence(formData.address)} />
+                </div>
+                 <div key="linkedVillage" className="grid grid-cols-5 items-center gap-4">
+                    <Label htmlFor="linkedVillage" className="text-right col-span-1 capitalize">Linked Village</Label>
+                    <Select name="linkedVillage" value={formData.linkedVillage || ''} onValueChange={handleSelectChange('linkedVillage')}>
+                        <SelectTrigger className="col-span-3">
+                            <SelectValue placeholder="Select a village" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {availableVillages.map(v => <SelectItem key={v} value={v}>{v}</SelectItem>)}
+                        </SelectContent>
+                    </Select>
+                    <ConfidenceBadge score={claim.geoLinkConfidence} />
+                </div>
             </div>
         </div>
 
@@ -229,3 +246,5 @@ export function ClaimEdit({ claim, onClose, onClaimUpdate, availableVillages }: 
     </Card>
   );
 }
+
+    
