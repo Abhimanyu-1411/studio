@@ -11,14 +11,21 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from './ui/button';
-import { Edit, Link as LinkIcon, XCircle } from 'lucide-react';
+import { Edit, Link as LinkIcon, XCircle, Trash2 } from 'lucide-react';
 import type { Claim } from '@/types';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 type ClaimsTableProps = {
   claims: Claim[];
   onClaimEdit: (claim: Claim) => void;
   onClaimLink: (claim: Claim) => void;
   onClaimReject: (claim: Claim) => void;
+  onClaimDelete: (claim: Claim) => void;
 };
 
 const claimStatusBadges: Record<Claim['status'], 'default' | 'destructive' | 'secondary' | 'outline'> = {
@@ -38,7 +45,7 @@ const claimStatusText: Record<Claim['status'], string> = {
 }
 
 
-export function ClaimsTable({ claims, onClaimEdit, onClaimLink, onClaimReject }: ClaimsTableProps) {
+export function ClaimsTable({ claims, onClaimEdit, onClaimLink, onClaimReject, onClaimDelete }: ClaimsTableProps) {
   
   const getFieldValue = (field: any) => field?.value ?? 'N/A';
 
@@ -50,6 +57,7 @@ export function ClaimsTable({ claims, onClaimEdit, onClaimLink, onClaimReject }:
             </div>
          ) : (
             <div className="w-full overflow-x-auto border rounded-lg">
+                <TooltipProvider>
                 <Table>
                 <TableHeader>
                     <TableRow>
@@ -69,34 +77,67 @@ export function ClaimsTable({ claims, onClaimEdit, onClaimLink, onClaimReject }:
                         <TableCell>
                             <Badge variant="outline">{getFieldValue(claim.claimType)}</Badge>
                         </TableCell>
-                        <TableCell className="whitespace-nowrap">{getFieldValue(claim.extentOfForestLandOccupied)}</TableCell>
+                        <TableCell className="whitespace-nowrap">{getFieldValue(claim.extentOfForestLandOccupied) || 'N/A'}</TableCell>
                         <TableCell>
                             <Badge variant={claimStatusBadges[claim.status]} className="whitespace-nowrap">
                                 {claimStatusText[claim.status]}
                             </Badge>
                         </TableCell>
-                        <TableCell className="text-right space-x-2 whitespace-nowrap">
+                        <TableCell className="text-right space-x-1 whitespace-nowrap">
                             {claim.status === 'reviewed' && (
-                                <Button variant="outline" size="sm" onClick={() => onClaimLink(claim)}>
-                                    <LinkIcon className="mr-2 h-4 w-4" />
-                                    Link to Map
-                                </Button>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Button variant="outline" size="sm" onClick={() => onClaimLink(claim)}>
+                                            <LinkIcon className="mr-2 h-4 w-4" />
+                                            Link
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        <p>Link to Map</p>
+                                    </TooltipContent>
+                                </Tooltip>
                             )}
                              {claim.status !== 'rejected' && (
-                                <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => onClaimReject(claim)}>
-                                    <XCircle />
-                                    <span className="sr-only">Reject Claim</span>
-                                </Button>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Button variant="ghost" size="icon" className="text-yellow-600 hover:text-yellow-700" onClick={() => onClaimReject(claim)}>
+                                            <XCircle />
+                                            <span className="sr-only">Reject Claim</span>
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        <p>Reject Claim</p>
+                                    </TooltipContent>
+                                </Tooltip>
                             )}
-                            <Button variant="ghost" size="icon" onClick={() => onClaimEdit(claim)}>
-                                <Edit className="h-4 w-4" />
-                                <span className="sr-only">Edit Claim</span>
-                            </Button>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <Button variant="ghost" size="icon" onClick={() => onClaimEdit(claim)}>
+                                        <Edit className="h-4 w-4" />
+                                        <span className="sr-only">Edit Claim</span>
+                                    </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    <p>Edit / Review Claim</p>
+                                </TooltipContent>
+                            </Tooltip>
+                             <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => onClaimDelete(claim)}>
+                                        <Trash2 className="h-4 w-4" />
+                                        <span className="sr-only">Delete Claim</span>
+                                    </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    <p>Delete Claim Permanently</p>
+                                </TooltipContent>
+                            </Tooltip>
                         </TableCell>
                     </TableRow>
                     ))}
                 </TableBody>
                 </Table>
+                </TooltipProvider>
             </div>
          )}
     </>

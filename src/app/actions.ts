@@ -126,6 +126,17 @@ export async function updateClaim(claimId: string, updatedData: Partial<Claim>) 
     return;
 }
 
+export async function deleteClaim(claimId: string) {
+    const supabase = createClient();
+    const { error } = await supabase.from('claims').delete().eq('id', claimId);
+    if (error) {
+        console.error("Error deleting claim:", error);
+        throw new Error("Could not delete the claim.");
+    }
+    revalidatePath('/');
+    revalidatePath('/claims');
+}
+
 export async function getDssRecommendation(villageId: string): Promise<DssRecommendation[]> {
     const supabase = createClient();
     const { data: village, error: villageError } = await supabase.from('villages').select('*').eq('id', villageId).single();

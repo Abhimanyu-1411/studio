@@ -6,15 +6,25 @@ import type { Claim } from '@/types';
 import { ClaimsTable } from '@/components/claims-table';
 import { useToast } from '@/hooks/use-toast';
 import { ClaimEdit } from '@/components/claim-edit';
-import { getClaims, getVillages, updateClaim } from '../actions';
+import { getClaims, getVillages, updateClaim, deleteClaim } from '../actions';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
-import { FileDown, Upload, FileText, CheckCircle2, Clock, XCircle } from 'lucide-react';
+import { FileDown, Upload, FileText, CheckCircle2, Clock, XCircle, Trash2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ClaimUpload } from '@/components/claim-upload';
 import { cn } from '@/lib/utils';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 const StatsCard = ({ title, value, icon: Icon, color, bgColor }: { title: string, value: string | number, icon: React.ElementType, color: string, bgColor: string }) => (
     <Card className="shadow-sm">
@@ -35,6 +45,7 @@ export default function ClaimsPage() {
   const [allClaims, setAllClaims] = useState<Claim[]>([]);
   const [villages, setVillages] = useState<string[]>([]);
   const [editingClaim, setEditingClaim] = useState<Claim | null>(null);
+  const [deletingClaim, setDeletingClaim] = useState<Claim | null>(null);
   const [loading, setLoading] = useState(true);
   const [isUploadOpen, setUploadOpen] = useState(false);
   const { toast } = useToast();
@@ -116,6 +127,30 @@ export default function ClaimsPage() {
         description: `Claim for ${claimToReject.claimantName.value} has been rejected.`
     });
   };
+
+  const handleClaimDelete = (claim: Claim) => {
+    setDeletingClaim(claim);
+  }
+
+  const confirmDelete = async () => {
+    if (!deletingClaim) return;
+    try {
+        await deleteClaim(deletingClaim.id);
+        setAllClaims(prev => prev.filter(c => c.id !== deletingClaim.id));
+        toast({
+            title: 'Claim Deleted',
+            description: `Claim for ${deletingClaim.claimantName.value} has been permanently deleted.`
+        });
+    } catch (error) {
+        toast({
+            variant: 'destructive',
+            title: 'Error',
+            description: 'Could not delete the claim.'
+        });
+    } finally {
+        setDeletingClaim(null);
+    }
+  }
 
   const handleClaimEdit = (claim: Claim) => {
     setEditingClaim(claim);
@@ -226,6 +261,7 @@ export default function ClaimsPage() {
                         onClaimEdit={handleClaimEdit}
                         onClaimLink={handleClaimLink}
                         onClaimReject={handleClaimReject}
+                        onClaimDelete={handleClaimDelete}
                     />
                 </CardContent>
             </Card>
@@ -236,6 +272,23 @@ export default function ClaimsPage() {
           onOpenChange={setUploadOpen} 
           onClaimAdded={handleClaimAdded} 
       />
+      <AlertDialog open={!!deletingClaim} onOpenChange={(open) => !open && setDeletingClaim(null)}>
+        <AlertDialogContent>
+            <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+                This action cannot be undone. This will permanently delete the claim for <span className="font-bold">{deletingClaim?.claimantName.value}</span>.
+            </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setDeletingClaim(null)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className={buttonVariants({ variant: "destructive" })}>
+                <Trash2 className="mr-2" />
+                Yes, delete claim
+            </AlertDialogAction>
+            </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }
