@@ -44,8 +44,8 @@ export function QuickActions({ onUpload, onViewClaims, onUploadShapefile }: Quic
                 <FileJson className="h-5 w-5 text-purple-700" />
             </div>
             <div>
-                <p className="font-semibold">Upload Shapefile</p>
-                <p className="text-xs text-muted-foreground">Import patta data</p>
+                <p className="font-semibold">Upload Shapefile (Patta/Boundary Data)</p>
+                <p className="text-xs text-muted-foreground">Import patta or correct village boundaries</p>
             </div>
         </Button>
       </CardContent>
