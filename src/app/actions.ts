@@ -137,6 +137,18 @@ export async function deleteClaim(claimId: string) {
     revalidatePath('/claims');
 }
 
+export async function deleteVillage(villageId: string) {
+    const supabase = createClient();
+    const { error } = await supabase.from('villages').delete().eq('id', villageId);
+    if (error) {
+        console.error("Error deleting village:", error);
+        throw new Error("Could not delete the village.");
+    }
+    revalidatePath('/');
+    revalidatePath('/villages');
+}
+
+
 export async function getDssRecommendation(villageId: string): Promise<DssRecommendation[]> {
     const supabase = createClient();
     const { data: village, error: villageError } = await supabase.from('villages').select('*').eq('id', villageId).single();
