@@ -1,15 +1,16 @@
 
+
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import type { Claim } from '@/types';
+import type { Claim, Village } from '@/types';
 import { ClaimsTable } from '@/components/claims-table';
 import { useToast } from '@/hooks/use-toast';
 import { ClaimEdit } from '@/components/claim-edit';
-import { getClaims, getVillages, updateClaim, deleteClaim } from '../actions';
+import { getClaims, getVillages, updateClaim, deleteClaim, addCommunityAsset } from '../actions';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button, buttonVariants } from '@/components/ui/button';
-import { FileDown, Upload, FileText, CheckCircle2, Clock, XCircle, Trash2 } from 'lucide-react';
+import { FileDown, Upload, FileText, CheckCircle2, Clock, XCircle, Trash2, LandPlot } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -25,6 +26,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import { AssetEdit } from '@/components/asset-edit';
+import type { CommunityAsset } from '@/types';
 
 const StatsCard = ({ title, value, icon: Icon, color, bgColor }: { title: string, value: string | number, icon: React.ElementType, color: string, bgColor: string }) => (
     <Card className="shadow-sm">
@@ -43,11 +46,13 @@ const StatsCard = ({ title, value, icon: Icon, color, bgColor }: { title: string
 
 export default function ClaimsPage() {
   const [allClaims, setAllClaims] = useState<Claim[]>([]);
-  const [villages, setVillages] = useState<string[]>([]);
+  const [villages, setVillages] = useState<Village[]>([]);
   const [editingClaim, setEditingClaim] = useState<Claim | null>(null);
   const [deletingClaim, setDeletingClaim] = useState<Claim | null>(null);
   const [loading, setLoading] = useState(true);
   const [isUploadOpen, setUploadOpen] = useState(false);
+  const [isAssetEditOpen, setAssetEditOpen] = useState(false);
+  const [claimForAsset, setClaimForAsset] = useState<Claim | null>(null);
   const { toast } = useToast();
 
   // Filtering states
@@ -60,7 +65,7 @@ export default function ClaimsPage() {
       try {
         const [claimsData, villagesData] = await Promise.all([getClaims(), getVillages()]);
         setAllClaims(claimsData);
-        setVillages(villagesData.map(v => v.name));
+        setVillages(villagesData);
       } catch (error) {
         toast({
           variant: 'destructive',
@@ -131,6 +136,16 @@ export default function ClaimsPage() {
   const handleClaimDelete = (claim: Claim) => {
     setDeletingClaim(claim);
   }
+
+  const handleAddAsset = (claim: Claim) => {
+    setClaimForAsset(claim);
+    setAssetEditOpen(true);
+  }
+
+  const handleAssetAdded = async (newAssetData: Omit<CommunityAsset, 'id'>) => {
+      await addCommunityAsset(newAssetData);
+      // You may want to update some state here if you display assets on this page.
+  };
 
   const confirmDelete = async () => {
     if (!deletingClaim) return;
@@ -247,7 +262,7 @@ export default function ClaimsPage() {
                 claim={editingClaim}
                 onClose={handleCloseEdit}
                 onClaimUpdate={handleClaimUpdate}
-                availableVillages={villages}
+                availableVillages={villages.map(v => v.name)}
             />
           ) : (
             <Card>
@@ -262,6 +277,7 @@ export default function ClaimsPage() {
                         onClaimLink={handleClaimLink}
                         onClaimReject={handleClaimReject}
                         onClaimDelete={handleClaimDelete}
+                        onAddAsset={handleAddAsset}
                     />
                 </CardContent>
             </Card>
@@ -271,6 +287,14 @@ export default function ClaimsPage() {
           open={isUploadOpen} 
           onOpenChange={setUploadOpen} 
           onClaimAdded={handleClaimAdded} 
+      />
+      <AssetEdit 
+          open={isAssetEditOpen} 
+          onOpenChange={setAssetEditOpen} 
+          onAssetAdded={handleAssetAdded} 
+          villages={villages}
+          claimLocation={claimForAsset?.location}
+          preselectedVillageName={(claimForAsset?.village as any)?.value}
       />
       <AlertDialog open={!!deletingClaim} onOpenChange={(open) => !open && setDeletingClaim(null)}>
         <AlertDialogContent>

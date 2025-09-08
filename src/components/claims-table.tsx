@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import {
@@ -11,7 +12,7 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from './ui/button';
-import { Edit, Link as LinkIcon, XCircle, Trash2 } from 'lucide-react';
+import { Edit, Link as LinkIcon, XCircle, Trash2, LandPlot } from 'lucide-react';
 import type { Claim } from '@/types';
 import {
   Tooltip,
@@ -26,6 +27,7 @@ type ClaimsTableProps = {
   onClaimLink: (claim: Claim) => void;
   onClaimReject: (claim: Claim) => void;
   onClaimDelete: (claim: Claim) => void;
+  onAddAsset: (claim: Claim) => void;
 };
 
 const claimStatusBadges: Record<Claim['status'], 'default' | 'destructive' | 'secondary' | 'outline'> = {
@@ -45,7 +47,7 @@ const claimStatusText: Record<Claim['status'], string> = {
 }
 
 
-export function ClaimsTable({ claims, onClaimEdit, onClaimLink, onClaimReject, onClaimDelete }: ClaimsTableProps) {
+export function ClaimsTable({ claims, onClaimEdit, onClaimLink, onClaimReject, onClaimDelete, onAddAsset }: ClaimsTableProps) {
   
   const getFieldValue = (field: any) => field?.value ?? 'N/A';
 
@@ -97,6 +99,17 @@ export function ClaimsTable({ claims, onClaimEdit, onClaimLink, onClaimReject, o
                                     </TooltipContent>
                                 </Tooltip>
                             )}
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <Button variant="ghost" size="icon" onClick={() => onAddAsset(claim)}>
+                                        <LandPlot className="h-4 w-4" />
+                                        <span className="sr-only">Add Asset</span>
+                                    </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    <p>Add Community Asset for this Claim</p>
+                                </TooltipContent>
+                            </Tooltip>
                              {claim.status !== 'rejected' && (
                                 <Tooltip>
                                     <TooltipTrigger asChild>

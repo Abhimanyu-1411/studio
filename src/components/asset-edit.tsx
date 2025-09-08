@@ -1,7 +1,8 @@
 
+
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import Image from 'next/image';
 import {
   Dialog,
@@ -26,13 +27,15 @@ import { useToast } from '@/hooks/use-toast';
 import { useDropzone } from 'react-dropzone';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
-import type { Village, CommunityAsset } from '@/types';
+import type { Village, CommunityAsset, Claim } from '@/types';
 
 type AssetEditProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onAssetAdded: (asset: Omit<CommunityAsset, 'id'>) => void;
   villages: Village[];
+  claimLocation?: Claim['location'];
+  preselectedVillageName?: string;
 };
 
 const assetTypes = [
@@ -42,7 +45,7 @@ const assetTypes = [
   { value: 'other', label: 'Other' },
 ];
 
-export function AssetEdit({ open, onOpenChange, onAssetAdded, villages }: AssetEditProps) {
+export function AssetEdit({ open, onOpenChange, onAssetAdded, villages, claimLocation, preselectedVillageName }: AssetEditProps) {
   const [villageId, setVillageId] = useState('');
   const [assetType, setAssetType] = useState('');
   const [description, setDescription] = useState('');
@@ -51,6 +54,15 @@ export function AssetEdit({ open, onOpenChange, onAssetAdded, villages }: AssetE
   const [status, setStatus] = useState<'idle' | 'reading' | 'processing' | 'success' | 'error'>('idle');
   const [progress, setProgress] = useState(0);
   const { toast } = useToast();
+  
+  useEffect(() => {
+    if (open && preselectedVillageName) {
+        const village = villages.find(v => v.name === preselectedVillageName);
+        if (village) {
+            setVillageId(village.id);
+        }
+    }
+  }, [open, preselectedVillageName, villages]);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const selectedFile = acceptedFiles[0];
@@ -109,14 +121,15 @@ export function AssetEdit({ open, onOpenChange, onAssetAdded, villages }: AssetE
     setProgress(80);
 
     const selectedVillage = villages.find(v => v.id === villageId);
+    const center = claimLocation || selectedVillage?.center;
 
     await new Promise(resolve => setTimeout(resolve, 500)); // Simulate processing
 
-    const placeholderGeometry = selectedVillage ? [
-        { lat: selectedVillage.center.lat + 0.005, lng: selectedVillage.center.lng + 0.005 },
-        { lat: selectedVillage.center.lat + 0.005, lng: selectedVillage.center.lng - 0.005 },
-        { lat: selectedVillage.center.lat - 0.005, lng: selectedVillage.center.lng - 0.005 },
-        { lat: selectedVillage.center.lat - 0.005, lng: selectedVillage.center.lng + 0.005 },
+    const placeholderGeometry = center ? [
+        { lat: center.lat + 0.005, lng: center.lng + 0.005 },
+        { lat: center.lat + 0.005, lng: center.lng - 0.005 },
+        { lat: center.lat - 0.005, lng: center.lng - 0.005 },
+        { lat: center.lat - 0.005, lng: center.lng + 0.005 },
     ] : [];
 
     const newAsset: Omit<CommunityAsset, 'id'> = {
