@@ -6,6 +6,7 @@ import { dssRecommendations } from '@/ai/flows/dss-recommendations';
 import { predictiveAnalysis } from '@/ai/flows/predictive-analysis';
 import { processShapefile } from '@/ai/flows/process-shapefile';
 import { geocodeAddress } from '@/ai/flows/geocode-address';
+import { getVillageBoundary } from '@/ai/flows/get-village-boundary';
 import type { DssRecommendation, Claim, Village, CommunityAsset, TimeSeriesDataPoint, Patta } from '@/types';
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
@@ -14,6 +15,32 @@ export async function handleClaimUpload(documentDataUri: string, documentType: s
   const supabase = createClient();
 
   const extractedData = await extractClaimData({ documentDataUri });
+
+  // Get or create village
+  const villageName = extractedData.village.value;
+  let { data: village } = await supabase.from('villages').select('id').eq('name', villageName).single();
+
+  if (!village) {
+    const boundaryData = await getVillageBoundary({
+        village: villageName,
+        district: extractedData.district.value,
+        state: extractedData.state.value,
+    });
+    const { data: newVillage, error: newVillageError } = await supabase.from('villages').insert({
+        name: villageName,
+        bounds: boundaryData.bounds,
+        center: boundaryData.center,
+        // Default values for new villages, can be updated later
+        ndwi: 0, 
+        assetCoverage: { water: 0, forest: 0, agriculture: 0 }
+    }).select().single();
+
+    if (newVillageError) {
+        console.error("Supabase insert new village error:", newVillageError);
+        throw new Error("Failed to save the new village to the database.");
+    }
+    village = newVillage;
+  }
 
   const locationResult = await geocodeAddress({
     address: extractedData.address.value,
@@ -96,7 +123,8 @@ export async function updateClaim(claimId: string, updatedData: Partial<Claim>) 
     const supabase = createClient();
     
     const dataToUpdate = { ...updatedData };
-    delete (dataToUpdate as Partial<Claim>).id;
+    // These fields should not be updated.
+    delete (dataToUpdate as Partial<Claim>).id; 
     delete (dataToUpdate as Partial<Claim>).created_at;
 
     const { data, error } = await supabase
