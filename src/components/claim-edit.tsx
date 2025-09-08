@@ -149,42 +149,43 @@ export function ClaimEdit({ claim, onClose, onClaimUpdate, availableVillages }: 
                     const fieldKey = key as keyof Claim;
                     
                     // Don't render an input for these fields
-                    if (['id', 'created_at', 'documentUrl', 'documentType', 'linkedVillage', 'geoLinkConfidence', 'status', 'location'].includes(fieldKey)) {
-                         if (fieldKey === 'linkedVillage') {
-                            return (
-                                <div key={fieldKey} className="grid grid-cols-5 items-center gap-4">
-                                    <Label htmlFor="linkedVillage" className="text-right col-span-1 capitalize">Linked Village</Label>
-                                    <Select name="linkedVillage" value={formData.linkedVillage || ''} onValueChange={handleSelectChange('linkedVillage')}>
-                                        <SelectTrigger className="col-span-3">
-                                            <SelectValue placeholder="Select a village" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {availableVillages.map(v => <SelectItem key={v} value={v}>{v}</SelectItem>)}
-                                        </SelectContent>
-                                    </Select>
-                                    <ConfidenceBadge score={claim.geoLinkConfidence} />
-                                </div>
-                            )
-                         }
-                         if (fieldKey === 'claimType') {
-                             return (
-                                <div key={fieldKey} className="grid grid-cols-5 items-center gap-4">
-                                    <Label htmlFor="claimType" className="text-right col-span-1">Claim Type</Label>
-                                    <Select name="claimType" value={(formData.claimType as any)?.value || ''} onValueChange={handleSelectChange('claimType')}>
-                                        <SelectTrigger className="col-span-3">
-                                            <SelectValue placeholder="Select a type" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="IFR">IFR</SelectItem>
-                                            <SelectItem value="CFR">CFR</SelectItem>
-                                            <SelectItem value="CR">CR</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                    <ConfidenceBadge score={(claim.claimType as any).confidence} />
-                                </div>
-                             )
-                         }
-                        return null;
+                    if (['id', 'created_at', 'documentUrl', 'documentType', 'status', 'location', 'geoLinkConfidence'].includes(fieldKey)) {
+                         return null;
+                    }
+                    
+                    if (fieldKey === 'linkedVillage') {
+                        return (
+                            <div key={fieldKey} className="grid grid-cols-5 items-center gap-4">
+                                <Label htmlFor="linkedVillage" className="text-right col-span-1 capitalize">Linked Village</Label>
+                                <Select name="linkedVillage" value={formData.linkedVillage || ''} onValueChange={handleSelectChange('linkedVillage')}>
+                                    <SelectTrigger className="col-span-3">
+                                        <SelectValue placeholder="Select a village" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {availableVillages.map(v => <SelectItem key={v} value={v}>{v}</SelectItem>)}
+                                    </SelectContent>
+                                </Select>
+                                <ConfidenceBadge score={claim.geoLinkConfidence} />
+                            </div>
+                        )
+                    }
+                    if (fieldKey === 'claimType') {
+                        return (
+                           <div key={fieldKey} className="grid grid-cols-5 items-center gap-4">
+                               <Label htmlFor="claimType" className="text-right col-span-1">Claim Type</Label>
+                               <Select name="claimType" value={(formData.claimType as any)?.value || ''} onValueChange={handleSelectChange('claimType')}>
+                                   <SelectTrigger className="col-span-3">
+                                       <SelectValue placeholder="Select a type" />
+                                   </SelectTrigger>
+                                   <SelectContent>
+                                       <SelectItem value="IFR">IFR</SelectItem>
+                                       <SelectItem value="CFR">CFR</SelectItem>
+                                       <SelectItem value="CR">CR</SelectItem>
+                                   </SelectContent>
+                               </Select>
+                               <ConfidenceBadge score={(claim.claimType as any).confidence} />
+                           </div>
+                        )
                     }
 
                     const label = key.replace(/([A-Z])/g, ' $1').replace(/^./, (str) => str.toUpperCase());
