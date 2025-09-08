@@ -49,15 +49,11 @@ export function ClaimEdit({ claim, onClose, onClaimUpdate, availableVillages }: 
   };
 
   const handleSelectChange = (name: keyof Claim) => (value: string) => {
-    if (name === 'linkedVillage') {
-        setFormData(prev => ({ ...prev, [name]: value, geoLinkConfidence: 1.0 }));
-    } else {
-        const fieldData = formData[name as keyof Claim] as { value: string; confidence: number };
-        setFormData(prev => ({ 
-            ...prev, 
-            [name]: { ...fieldData, value: value, confidence: 1.0 } 
-        }));
-    }
+    const fieldData = formData[name as keyof Claim] as { value: string; confidence: number };
+    setFormData(prev => ({ 
+        ...prev, 
+        [name]: { ...fieldData, value: value, confidence: 1.0 } 
+    }));
   }
 
   const handleSubmit = async () => {
@@ -82,7 +78,6 @@ export function ClaimEdit({ claim, onClose, onClaimUpdate, availableVillages }: 
                 }
             }
         }
-        updatedClaim.geoLinkConfidence = 1.0;
     }
     
     onClaimUpdate(updatedClaim);
@@ -158,9 +153,16 @@ export function ClaimEdit({ claim, onClose, onClaimUpdate, availableVillages }: 
                     <Input id="extentOfForestLandOccupied" name="extentOfForestLandOccupied" value={getFieldValue(formData.extentOfForestLandOccupied)} onChange={handleInputChange} className="col-span-3" />
                     <ConfidenceBadge score={getFieldConfidence(formData.extentOfForestLandOccupied)} />
                 </div>
-                <div className="grid grid-cols-5 items-center gap-4">
+                 <div className="grid grid-cols-5 items-center gap-4">
                     <Label htmlFor="village" className="text-right col-span-1">Village</Label>
-                    <Input id="village" name="village" value={getFieldValue(formData.village)} onChange={handleInputChange} className="col-span-3" />
+                    <Select name="village" value={getFieldValue(formData.village)} onValueChange={handleSelectChange('village')}>
+                        <SelectTrigger className="col-span-3">
+                            <SelectValue placeholder="Select a village" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {availableVillages.map(v => <SelectItem key={v} value={v}>{v}</SelectItem>)}
+                        </SelectContent>
+                    </Select>
                     <ConfidenceBadge score={getFieldConfidence(formData.village)} />
                 </div>
                 <div className="grid grid-cols-5 items-center gap-4">
@@ -206,18 +208,6 @@ export function ClaimEdit({ claim, onClose, onClaimUpdate, availableVillages }: 
                     <Label htmlFor="address" className="text-right col-span-1">Address</Label>
                     <Textarea id="address" name="address" value={getFieldValue(formData.address)} onChange={handleInputChange} className="col-span-3" />
                     <ConfidenceBadge score={getFieldConfidence(formData.address)} />
-                </div>
-                 <div key="linkedVillage" className="grid grid-cols-5 items-center gap-4">
-                    <Label htmlFor="linkedVillage" className="text-right col-span-1 capitalize">Linked Village</Label>
-                    <Select name="linkedVillage" value={formData.linkedVillage || ''} onValueChange={handleSelectChange('linkedVillage')}>
-                        <SelectTrigger className="col-span-3">
-                            <SelectValue placeholder="Select a village" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {availableVillages.map(v => <SelectItem key={v} value={v}>{v}</SelectItem>)}
-                        </SelectContent>
-                    </Select>
-                    <ConfidenceBadge score={claim.geoLinkConfidence} />
                 </div>
             </div>
         </div>

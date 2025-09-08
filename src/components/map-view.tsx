@@ -157,11 +157,7 @@ const MapViewComponent = ({ claims, villages, assets, pattas, onVillageClick, on
                 <p>Village: {getFieldValue(claim.village)}</p>
                 <p>Date: {getFieldValue(claim.date)}</p>
                 <div>
-                  {claim.linkedVillage ? (
-                    <Badge variant="secondary">Linked to: {claim.linkedVillage} ({(claim.geoLinkConfidence! * 100).toFixed(0)}%)</Badge>
-                  ) : (
-                    <Badge variant="destructive">Unlinked</Badge>
-                  )}
+                  <Badge variant="secondary">Status: {claim.status}</Badge>
                   {claim.status === 'needs-review' && (
                     <Badge variant="secondary" className="ml-2 bg-yellow-100 text-yellow-800">Needs Review</Badge>
                   )}

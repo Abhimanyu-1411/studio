@@ -73,7 +73,7 @@ export function ClaimsTable({ claims, onClaimEdit, onClaimLink, onClaimReject, o
                     {claims.map((claim) => (
                     <TableRow key={claim.id}>
                         <TableCell className="font-medium whitespace-nowrap">{getFieldValue(claim.claimantName)}</TableCell>
-                        <TableCell className="whitespace-nowrap">{claim.linkedVillage || getFieldValue(claim.village)}</TableCell>
+                        <TableCell className="whitespace-nowrap">{getFieldValue(claim.village)}</TableCell>
                         <TableCell>
                             <Badge variant="outline">{getFieldValue(claim.claimType)}</Badge>
                         </TableCell>

@@ -92,7 +92,7 @@ export const VillageAnalysis = ({ villages, claims }: { villages: Village[], cla
 
   const villageClaims = useMemo(() => {
     if (!selectedVillage) return [];
-    return claims.filter(c => c.linkedVillage === selectedVillage.name);
+    return claims.filter(c => (c.village as any)?.value === selectedVillage.name);
   }, [selectedVillage, claims]);
 
   const handleMarkAsActed = (recommendation: string) => {

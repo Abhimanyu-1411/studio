@@ -21,8 +21,6 @@ export type Claim = {
   claimType: FieldWithConfidence<'IFR' | 'CFR' | 'CR' | string>;
   documentUrl: string;
   documentType: string;
-  linkedVillage: string | null;
-  geoLinkConfidence: number | null;
   status: 'unlinked' | 'linked' | 'reviewed' | 'needs-review' | 'rejected';
   location: { lat: number; lng: number };
 };

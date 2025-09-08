@@ -2,7 +2,6 @@
 'use server';
 
 import { extractClaimData } from '@/ai/flows/extract-claim-data';
-import { intelligentGeoLinking } from '@/ai/flows/intelligent-geo-linking';
 import { dssRecommendations } from '@/ai/flows/dss-recommendations';
 import { predictiveAnalysis } from '@/ai/flows/predictive-analysis';
 import { processShapefile } from '@/ai/flows/process-shapefile';
@@ -14,19 +13,7 @@ import { revalidatePath } from 'next/cache';
 export async function handleClaimUpload(documentDataUri: string, documentType: string) {
   const supabase = createClient();
 
-  const villagesResult = await supabase.from('villages').select('name');
-  if (villagesResult.error) {
-    console.error("Error fetching village names:", villagesResult.error);
-    throw new Error("Could not fetch village names from database.");
-  }
-  const availableVillageNames = villagesResult.data.map(v => v.name);
-
   const extractedData = await extractClaimData({ documentDataUri });
-
-  const geoLinkResult = await intelligentGeoLinking({
-    claimVillageName: extractedData.village.value,
-    availableVillageNames: availableVillageNames,
-  });
 
   const locationResult = await geocodeAddress({
     address: extractedData.address.value,
@@ -47,14 +34,13 @@ export async function handleClaimUpload(documentDataUri: string, documentType: s
       extractedData.date.confidence,
       extractedData.claimType.confidence,
       extractedData.address.confidence,
-      geoLinkResult.confidenceScore,
       locationResult.confidenceScore
   ];
   
   const lowestConfidence = Math.min(...allConfidences.map(c => c ?? 0));
 
   let status: Claim['status'] = 'linked';
-  if (!geoLinkResult.linkedVillageName || lowestConfidence < 0.8) {
+  if (lowestConfidence < 0.8) {
       status = 'needs-review';
   }
   
@@ -72,8 +58,6 @@ export async function handleClaimUpload(documentDataUri: string, documentType: s
     address: extractedData.address,
     documentUrl: documentDataUri,
     documentType: documentType,
-    linkedVillage: geoLinkResult.linkedVillageName,
-    geoLinkConfidence: geoLinkResult.confidenceScore,
     status: status,
     location: { lat: locationResult.lat, lng: locationResult.lng },
   };
@@ -111,7 +95,6 @@ export async function handleShapefileUpload(shapefileDataUri: string): Promise<P
 export async function updateClaim(claimId: string, updatedData: Partial<Claim>) {
     const supabase = createClient();
     
-    // Create a copy to avoid mutating the original object, then remove fields that should not be updated.
     const dataToUpdate = { ...updatedData };
     delete (dataToUpdate as Partial<Claim>).id;
     delete (dataToUpdate as Partial<Claim>).created_at;
@@ -161,7 +144,7 @@ export async function getDssRecommendation(villageId: string): Promise<DssRecomm
         throw new Error("Village not found");
     }
 
-    const { data: claimsInVillage, error: claimsError } = await supabase.from('claims').select('*').eq('linkedVillage', village.name);
+    const { data: claimsInVillage, error: claimsError } = await supabase.from('claims').select('claimType, status, village').eq('village->>value', village.name);
     
     if(claimsError) {
         throw new Error("Could not fetch claims for village.");

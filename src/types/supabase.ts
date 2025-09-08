@@ -21,10 +21,8 @@ export type Database = {
           documentType: string
           documentUrl: string
           extentOfForestLandOccupied: Json
-          geoLinkConfidence: number | null
           gramPanchayat: Json
           id: string
-          linkedVillage: string | null
           location: Json
           pattaNumber: Json
           state: Json
@@ -42,10 +40,8 @@ export type Database = {
           documentType: string
           documentUrl: string
           extentOfForestLandOccupied: Json
-          geoLinkConfidence?: number | null
           gramPanchayat: Json
           id?: string
-          linkedVillage?: string | null
           location: Json
           pattaNumber: Json
           state: Json
@@ -63,10 +59,8 @@ export type Database = {
           documentType?: string
           documentUrl?: string
           extentOfForestLandOccupied?: Json
-          geoLinkConfidence?: number | null
           gramPanchayat?: Json
           id?: string
-          linkedVillage?: string | null
           location?: Json
           pattaNumber?: Json
           state?: Json
