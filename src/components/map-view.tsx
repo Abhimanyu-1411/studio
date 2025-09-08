@@ -30,6 +30,7 @@ const claimStatusColors = {
   unlinked: 'hsl(var(--destructive))',
   'needs-review': 'hsl(var(--chart-4))',
   reviewed: 'hsl(var(--primary))',
+  rejected: 'hsl(var(--destructive))',
 };
 
 const getClaimIcon = (claim: Claim) => {
@@ -75,6 +76,8 @@ const MapViewComponent = ({ claims, villages, assets, pattas, onVillageClick, on
       fillOpacity: 0.1,
     };
   };
+  
+  const getFieldValue = (field: any) => field?.value ?? 'N/A';
 
   return (
     <MapContainer
@@ -147,12 +150,12 @@ const MapViewComponent = ({ claims, villages, assets, pattas, onVillageClick, on
           <Popup>
             <Card className="border-0 shadow-none max-w-sm">
               <CardHeader className="p-2">
-                <CardTitle className="text-base">{(claim.claimantName as any).value}</CardTitle>
-                <CardDescription>{(claim.claimType as any).value} - {(claim.extentOfForestLandOccupied as any).value}</CardDescription>
+                <CardTitle className="text-base">{getFieldValue(claim.claimantName)}</CardTitle>
+                <CardDescription>{getFieldValue(claim.claimType)} - {getFieldValue(claim.extentOfForestLandOccupied)}</CardDescription>
               </CardHeader>
               <CardContent className="p-2 space-y-2 text-sm">
-                <p>Village: {(claim.village as any).value}</p>
-                <p>Date: {(claim.date as any).value}</p>
+                <p>Village: {getFieldValue(claim.village)}</p>
+                <p>Date: {getFieldValue(claim.date)}</p>
                 <div>
                   {claim.linkedVillage ? (
                     <Badge variant="secondary">Linked to: {claim.linkedVillage} ({(claim.geoLinkConfidence! * 100).toFixed(0)}%)</Badge>

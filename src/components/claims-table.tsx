@@ -40,6 +40,8 @@ const claimStatusText: Record<Claim['status'], string> = {
 
 export function ClaimsTable({ claims, onClaimEdit, onClaimLink, onClaimReject }: ClaimsTableProps) {
   
+  const getFieldValue = (field: any) => field?.value ?? 'N/A';
+
   return (
     <>
         {claims.length === 0 ? (
@@ -62,12 +64,12 @@ export function ClaimsTable({ claims, onClaimEdit, onClaimLink, onClaimReject }:
                 <TableBody>
                     {claims.map((claim) => (
                     <TableRow key={claim.id}>
-                        <TableCell className="font-medium whitespace-nowrap">{(claim.claimantName as any).value}</TableCell>
-                        <TableCell className="whitespace-nowrap">{claim.linkedVillage || (claim.village as any).value}</TableCell>
+                        <TableCell className="font-medium whitespace-nowrap">{getFieldValue(claim.claimantName)}</TableCell>
+                        <TableCell className="whitespace-nowrap">{claim.linkedVillage || getFieldValue(claim.village)}</TableCell>
                         <TableCell>
-                            <Badge variant="outline">{(claim.claimType as any).value}</Badge>
+                            <Badge variant="outline">{getFieldValue(claim.claimType)}</Badge>
                         </TableCell>
-                        <TableCell className="whitespace-nowrap">{(claim.extentOfForestLandOccupied as any).value}</TableCell>
+                        <TableCell className="whitespace-nowrap">{getFieldValue(claim.extentOfForestLandOccupied)}</TableCell>
                         <TableCell>
                             <Badge variant={claimStatusBadges[claim.status]} className="whitespace-nowrap">
                                 {claimStatusText[claim.status]}
