@@ -39,7 +39,7 @@ const prompt = ai.definePrompt({
   name: 'getVillageBoundaryPrompt',
   input: {schema: GetVillageBoundaryInputSchema},
   output: {schema: GetVillageBoundaryOutputSchema},
-  prompt: `You are an expert geospatial information service. Your task is to provide the administrative boundary polygon and the center coordinates for a given village.
+  prompt: `You are an expert geospatial information service. Your task is to provide the administrative boundary polygon and the center coordinates for a given village. It is crucial to use the district and state to find the correct village.
 
 Village: {{{village}}}
 District: {{{district}}}

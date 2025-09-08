@@ -60,7 +60,7 @@ const prompt = ai.definePrompt({
   name: 'geocodeAddressPrompt',
   input: {schema: GeocodeAddressInputSchema},
   output: {schema: GeocodeAddressOutputSchema},
-  prompt: `You are an expert geocoding service. Based on the provided address information, determine the precise latitude and longitude.
+  prompt: `You are an expert geocoding service. Based on the provided address information, determine the precise latitude and longitude. It is crucial to use the village, district, and state for accurate geographical context.
 
 Address: {{{address}}}
 Village: {{{village}}}
@@ -82,3 +82,4 @@ const geocodeAddressFlow = ai.defineFlow(
     return output!;
   }
 );
+
