@@ -78,7 +78,7 @@ export async function handleClaimUpload(documentDataUri: string, documentType: s
     location: { lat: locationResult.lat, lng: locationResult.lng },
   };
   
-  const { data, error } = await supabase.from('claims').insert(newClaimData as any).select().single();
+  const { data, error } = await supabase.from('claims').insert(newClaimData).select().single();
 
   if (error) {
     console.error("Supabase insert error:", error);
@@ -96,7 +96,7 @@ export async function handleShapefileUpload(shapefileDataUri: string): Promise<P
   const extractedPattas = await processShapefile({ shapefileDataUri });
   
   if (extractedPattas.length > 0) {
-    const { data, error } = await supabase.from('pattas').insert(extractedPattas as any).select();
+    const { data, error } = await supabase.from('pattas').insert(extractedPattas).select();
     if (error) {
         console.error("Supabase error inserting pattas:", error);
         throw new Error("Could not save patta data to the database.");
@@ -112,10 +112,11 @@ export async function updateClaim(claimId: string, updatedData: Partial<Claim>) 
     const supabase = createClient();
     
     const dataToUpdate = { ...updatedData };
+    // These fields are not part of the database table or are auto-managed
     delete (dataToUpdate as Partial<Claim>).id;
     delete (dataToUpdate as Partial<Claim>).created_at;
 
-    const { data, error } = await supabase.from('claims').update(dataToUpdate as any).eq('id', claimId);
+    const { data, error } = await supabase.from('claims').update(dataToUpdate).eq('id', claimId);
     if (error) {
         console.error("Error updating claim:", error);
         throw new Error("Could not update the claim.");
@@ -239,7 +240,7 @@ export async function getVillages(): Promise<Village[]> {
 
 export async function addCommunityAsset(asset: Omit<CommunityAsset, 'id'>): Promise<CommunityAsset> {
     const supabase = createClient();
-    const { data, error } = await supabase.from('community_assets').insert(asset as any).select().single();
+    const { data, error } = await supabase.from('community_assets').insert(asset).select().single();
     if(error) {
         console.error("Error adding community asset:", error);
         throw new Error("Could not add community asset.");
