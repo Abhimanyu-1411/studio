@@ -28,7 +28,7 @@ export async function handleClaimUpload(documentDataUri: string, documentType: s
     availableVillageNames: availableVillageNames,
   });
 
-  const location = await geocodeAddress({
+  const locationResult = await geocodeAddress({
     address: extractedData.address.value,
     village: extractedData.village.value,
     district: extractedData.district.value,
@@ -47,7 +47,8 @@ export async function handleClaimUpload(documentDataUri: string, documentType: s
       extractedData.date.confidence,
       extractedData.claimType.confidence,
       extractedData.address.confidence,
-      geoLinkResult.confidenceScore
+      geoLinkResult.confidenceScore,
+      locationResult.confidenceScore
   ];
   
   const lowestConfidence = Math.min(...allConfidences.map(c => c ?? 0));
@@ -74,7 +75,7 @@ export async function handleClaimUpload(documentDataUri: string, documentType: s
     linkedVillage: geoLinkResult.linkedVillageName,
     geoLinkConfidence: geoLinkResult.confidenceScore,
     status,
-    location,
+    location: { lat: locationResult.lat, lng: locationResult.lng },
   };
   
   const { data, error } = await supabase.from('claims').insert(newClaimData as any).select().single();

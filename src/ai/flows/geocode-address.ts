@@ -10,6 +10,7 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
+import {createClient} from '@/lib/supabase/server';
 
 const GeocodeAddressInputSchema = z.object({
   address: z.string().describe('The full address line, if available.'),
@@ -22,13 +23,35 @@ export type GeocodeAddressInput = z.infer<typeof GeocodeAddressInputSchema>;
 const GeocodeAddressOutputSchema = z.object({
   lat: z.number().describe('The latitude of the address.'),
   lng: z.number().describe('The longitude of the address.'),
+  confidenceScore: z.number().describe('A score from 0 to 1 indicating the confidence of the geocoding accuracy.'),
 });
 export type GeocodeAddressOutput = z.infer<typeof GeocodeAddressOutputSchema>;
 
 export async function geocodeAddress(
   input: GeocodeAddressInput
 ): Promise<GeocodeAddressOutput> {
-  return geocodeAddressFlow(input);
+  // First, try to get a precise location
+  const geocodeResult = await geocodeAddressFlow(input);
+  
+  // If confidence is low, fall back to village center
+  if (geocodeResult.confidenceScore < 0.5) {
+      const supabase = createClient();
+      const { data: village, error } = await supabase
+        .from('villages')
+        .select('center')
+        .eq('name', input.village)
+        .single();
+      
+      if (village && village.center) {
+        const center = village.center as {lat: number, lng: number};
+        return {
+            ...center,
+            confidenceScore: 0.2 // Low confidence, as it's a fallback
+        };
+      }
+  }
+  
+  return geocodeResult;
 }
 
 const prompt = ai.definePrompt({
@@ -42,7 +65,7 @@ Village: {{{village}}}
 District: {{{district}}}
 State: {{{state}}}
 
-Return the coordinates in JSON format.
+Return the coordinates in JSON format, including a confidence score from 0.0 to 1.0 indicating how certain you are of the location's accuracy. A score of 1.0 means you are 100% confident. If the address is vague, provide the most likely coordinates with a lower confidence score.
 `,
 });
 
