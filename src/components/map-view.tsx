@@ -148,7 +148,7 @@ const MapViewComponent = ({ claims, villages, assets, pattas, onVillageClick, on
             <Card className="border-0 shadow-none max-w-sm">
               <CardHeader className="p-2">
                 <CardTitle className="text-base">{(claim.claimantName as any).value}</CardTitle>
-                <CardDescription>{(claim.claimType as any).value} - {(claim.area as any).value}</CardDescription>
+                <CardDescription>{(claim.claimType as any).value} - {(claim.extentOfForestLandOccupied as any).value}</CardDescription>
               </CardHeader>
               <CardContent className="p-2 space-y-2 text-sm">
                 <p>Village: {(claim.village as any).value}</p>
