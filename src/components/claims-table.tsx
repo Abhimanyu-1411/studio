@@ -54,7 +54,7 @@ export function ClaimsTable({ claims, onClaimEdit, onClaimLink, onClaimReject }:
                     <TableHead>Applicant Name</TableHead>
                     <TableHead>Village</TableHead>
                     <TableHead>Claim Type</TableHead>
-                    <TableHead>Area</TableHead>
+                    <TableHead>Extent of Land</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
