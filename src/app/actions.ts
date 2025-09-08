@@ -110,7 +110,13 @@ export async function handleShapefileUpload(shapefileDataUri: string): Promise<P
 
 export async function updateClaim(claimId: string, updatedData: Partial<Claim>) {
     const supabase = createClient();
-    const { data, error } = await supabase.from('claims').update(updatedData as any).eq('id', claimId);
+    
+    // Omit fields that should not be updated, like the primary key and created_at
+    const dataToUpdate = { ...updatedData };
+    delete (dataToUpdate as Partial<Claim>).id;
+    delete (dataToUpdate as Partial<Claim>).created_at;
+
+    const { data, error } = await supabase.from('claims').update(dataToUpdate as any).eq('id', claimId);
     if (error) {
         console.error("Error updating claim:", error);
         throw new Error("Could not update the claim.");
