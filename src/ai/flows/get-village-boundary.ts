@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -45,7 +46,7 @@ Village: {{{village}}}
 District: {{{district}}}
 State: {{{state}}}
 
-Based on this information, find the official administrative boundary for the village. Return the boundary as an array of latitude and longitude points, and also provide the central latitude and longitude of the village.
+Based on this information, find the official administrative boundary for the village. The polygon should be high-resolution and detailed to accurately cover the entire village area. Do not return a simplified or low-vertex shape. Return the boundary as an array of latitude and longitude points, and also provide the central latitude and longitude of the village.
 
 Return the information in the specified JSON format.
 `,
