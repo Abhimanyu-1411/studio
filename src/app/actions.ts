@@ -111,12 +111,16 @@ export async function handleShapefileUpload(shapefileDataUri: string): Promise<P
 export async function updateClaim(claimId: string, updatedData: Partial<Claim>) {
     const supabase = createClient();
     
+    // Create a copy to avoid mutating the original object, then remove fields that should not be updated.
     const dataToUpdate = { ...updatedData };
-    // These fields are not part of the database table or are auto-managed
     delete (dataToUpdate as Partial<Claim>).id;
     delete (dataToUpdate as Partial<Claim>).created_at;
 
-    const { data, error } = await supabase.from('claims').update(dataToUpdate).eq('id', claimId);
+    const { data, error } = await supabase
+        .from('claims')
+        .update(dataToUpdate)
+        .eq('id', claimId);
+        
     if (error) {
         console.error("Error updating claim:", error);
         throw new Error("Could not update the claim.");
