@@ -125,8 +125,8 @@ export default function DashboardPage() {
   const handleClaimEdit = (claim: Claim) => {
     setEditingClaim(claim);
     setShapefileUploadOpen(false); // Close shapefile upload if open
-    if(claim.location) {
-        setMapCenter(claim.location as {lat: number, lng: number});
+    if(claim.location && typeof claim.location.lat === 'number' && typeof claim.location.lng === 'number') {
+        setMapCenter({lat: claim.location.lat, lng: claim.location.lng});
         setMapZoom(14);
     }
   }
@@ -194,7 +194,7 @@ export default function DashboardPage() {
       );
     }
     return null;
-  }, [editingClaim, isShapefileUploadOpen, villages, handleClaimUpdate]);
+  }, [editingClaim, isShapefileUploadOpen, villages, handleClaimUpdate, handlePattasAdded]);
 
 
   if (loading) {

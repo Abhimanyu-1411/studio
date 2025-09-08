@@ -115,7 +115,7 @@ export function ClaimEdit({ claim, onClose, onClaimUpdate, availableVillages }: 
         </CardHeader>
         
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
-            <div className="border rounded-lg bg-muted/20 p-2 h-[35vh] flex flex-col">
+            <div className="border rounded-lg bg-muted/20 p-2 h-[25vh] flex flex-col">
                 <Label className="text-center pb-2">Document Preview</Label>
                 <div className="relative flex-1 w-full h-full">
                 {claim.documentUrl ? (
@@ -236,5 +236,3 @@ export function ClaimEdit({ claim, onClose, onClaimUpdate, availableVillages }: 
     </Card>
   );
 }
-
-    
