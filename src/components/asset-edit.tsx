@@ -44,6 +44,18 @@ const assetTypes = [
   { value: 'other', label: 'Other' },
 ];
 
+// Helper to generate a regular polygon
+const createPolygon = (center: { lat: number; lng: number }, sides: number, radius: number) => {
+    const coords = [];
+    for (let i = 0; i < sides; i++) {
+        const angle = (i / sides) * 2 * Math.PI;
+        const lat = center.lat + radius * Math.cos(angle);
+        const lng = center.lng + radius * Math.sin(angle);
+        coords.push({ lat, lng });
+    }
+    return coords;
+};
+
 export function AssetEdit({ open, onOpenChange, onAssetAdded, villages, claimLocation, preselectedVillageName }: AssetEditProps) {
   const [villageId, setVillageId] = useState('');
   const [assetType, setAssetType] = useState('');
@@ -124,12 +136,7 @@ export function AssetEdit({ open, onOpenChange, onAssetAdded, villages, claimLoc
 
     await new Promise(resolve => setTimeout(resolve, 500)); // Simulate processing
 
-    const placeholderGeometry = center ? [
-        { lat: center.lat + 0.001, lng: center.lng + 0.001 },
-        { lat: center.lat + 0.001, lng: center.lng - 0.001 },
-        { lat: center.lat - 0.001, lng: center.lng - 0.001 },
-        { lat: center.lat - 0.001, lng: center.lng + 0.001 },
-    ] : [];
+    const placeholderGeometry = center ? createPolygon(center, 45, 0.001) : [];
 
     const newAsset: Omit<CommunityAsset, 'id'> = {
       villageId,
