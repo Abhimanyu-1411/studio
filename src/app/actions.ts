@@ -74,7 +74,7 @@ export async function handleClaimUpload(documentDataUri: string, documentType: s
     documentType: documentType,
     linkedVillage: geoLinkResult.linkedVillageName,
     geoLinkConfidence: geoLinkResult.confidenceScore,
-    status,
+    status: status,
     location: { lat: locationResult.lat, lng: locationResult.lng },
   };
   
@@ -111,7 +111,6 @@ export async function handleShapefileUpload(shapefileDataUri: string): Promise<P
 export async function updateClaim(claimId: string, updatedData: Partial<Claim>) {
     const supabase = createClient();
     
-    // Omit fields that should not be updated, like the primary key and created_at
     const dataToUpdate = { ...updatedData };
     delete (dataToUpdate as Partial<Claim>).id;
     delete (dataToUpdate as Partial<Claim>).created_at;
