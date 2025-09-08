@@ -8,7 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { ClaimEdit } from '@/components/claim-edit';
 import { getClaims, getVillages, updateClaim, deleteClaim } from '../actions';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import { FileDown, Upload, FileText, CheckCircle2, Clock, XCircle, Trash2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -103,7 +103,7 @@ export default function ClaimsPage() {
     setEditingClaim(null);
     toast({
         title: 'Claim Updated',
-        description: `Successfully updated claim for ${updatedClaim.claimantName.value}.`
+        description: `Successfully updated claim for ${(updatedClaim.claimantName as any).value}.`
     });
   };
 
@@ -113,7 +113,7 @@ export default function ClaimsPage() {
     setAllClaims(prev => prev.map(c => c.id === claimToLink.id ? updatedClaim : c));
     toast({
         title: 'Claim Linked',
-        description: `Claim for ${claimToLink.claimantName.value} is now visible on the map.`
+        description: `Claim for ${(claimToLink.claimantName as any).value} is now visible on the map.`
     });
   };
   
@@ -124,7 +124,7 @@ export default function ClaimsPage() {
     toast({
         variant: 'destructive',
         title: 'Claim Rejected',
-        description: `Claim for ${claimToReject.claimantName.value} has been rejected.`
+        description: `Claim for ${(claimToReject.claimantName as any).value} has been rejected.`
     });
   };
 
@@ -136,10 +136,10 @@ export default function ClaimsPage() {
     if (!deletingClaim) return;
     try {
         await deleteClaim(deletingClaim.id);
-        setAllClaims(prev => prev.filter(c => c.id !== deletingClaim.id));
+        setAllClaims(prev => prev.filter(c => c.id !== deletingClaim!.id));
         toast({
             title: 'Claim Deleted',
-            description: `Claim for ${deletingClaim.claimantName.value} has been permanently deleted.`
+            description: `Claim for ${(deletingClaim.claimantName as any).value} has been permanently deleted.`
         });
     } catch (error) {
         toast({
@@ -277,7 +277,7 @@ export default function ClaimsPage() {
             <AlertDialogHeader>
             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
             <AlertDialogDescription>
-                This action cannot be undone. This will permanently delete the claim for <span className="font-bold">{deletingClaim?.claimantName.value}</span>.
+                This action cannot be undone. This will permanently delete the claim for <span className="font-bold">{(deletingClaim?.claimantName as any)?.value}</span>.
             </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
@@ -292,3 +292,5 @@ export default function ClaimsPage() {
     </>
   );
 }
+
+    
