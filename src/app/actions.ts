@@ -6,6 +6,7 @@ import { intelligentGeoLinking } from '@/ai/flows/intelligent-geo-linking';
 import { dssRecommendations } from '@/ai/flows/dss-recommendations';
 import { predictiveAnalysis } from '@/ai/flows/predictive-analysis';
 import { processShapefile } from '@/ai/flows/process-shapefile';
+import { geocodeAddress } from '@/ai/flows/geocode-address';
 import type { DssRecommendation, Claim, Village, CommunityAsset, TimeSeriesDataPoint, Patta } from '@/types';
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
@@ -25,6 +26,13 @@ export async function handleClaimUpload(documentDataUri: string, documentType: s
   const geoLinkResult = await intelligentGeoLinking({
     claimVillageName: extractedData.village.value,
     availableVillageNames: availableVillageNames,
+  });
+
+  const location = await geocodeAddress({
+    address: extractedData.address.value,
+    village: extractedData.village.value,
+    district: extractedData.district.value,
+    state: extractedData.state.value,
   });
   
   const allConfidences = [
@@ -48,11 +56,6 @@ export async function handleClaimUpload(documentDataUri: string, documentType: s
   if (!geoLinkResult.linkedVillageName || lowestConfidence < 0.8) {
       status = 'needs-review';
   }
-
-  const randomLocation = {
-      lat: 26.5 + (Math.random() - 0.5) * 0.5,
-      lng: 82.4 + (Math.random() - 0.5) * 0.8
-  };
   
   const newClaimData = {
     claimantName: extractedData.claimantName,
@@ -71,7 +74,7 @@ export async function handleClaimUpload(documentDataUri: string, documentType: s
     linkedVillage: geoLinkResult.linkedVillageName,
     geoLinkConfidence: geoLinkResult.confidenceScore,
     status,
-    location: randomLocation,
+    location,
   };
   
   const { data, error } = await supabase.from('claims').insert(newClaimData as any).select().single();
