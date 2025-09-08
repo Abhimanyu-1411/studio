@@ -29,20 +29,20 @@ export async function handleClaimUpload(documentDataUri: string, documentType: s
   
   const allConfidences = [
       extractedData.claimantName.confidence,
-      extractedData.village.confidence,
-      extractedData.claimType.confidence,
       extractedData.pattaNumber.confidence,
       extractedData.extentOfForestLandOccupied.confidence,
+      extractedData.village.confidence,
       extractedData.gramPanchayat.confidence,
       extractedData.tehsilTaluka.confidence,
       extractedData.district.confidence,
       extractedData.state.confidence,
-      extractedData.address.confidence,
       extractedData.date.confidence,
+      extractedData.claimType.confidence,
+      extractedData.address.confidence,
       geoLinkResult.confidenceScore
   ];
   
-  const lowestConfidence = Math.min(...allConfidences);
+  const lowestConfidence = Math.min(...allConfidences.map(c => c ?? 0));
 
   let status: Claim['status'] = 'linked';
   if (!geoLinkResult.linkedVillageName || lowestConfidence < 0.8) {
@@ -55,13 +55,23 @@ export async function handleClaimUpload(documentDataUri: string, documentType: s
   };
   
   const newClaimData = {
-    ...extractedData,
+    claimantName: extractedData.claimantName,
+    pattaNumber: extractedData.pattaNumber,
+    extentOfForestLandOccupied: extractedData.extentOfForestLandOccupied,
+    village: extractedData.village,
+    gramPanchayat: extractedData.gramPanchayat,
+    tehsilTaluka: extractedData.tehsilTaluka,
+    district: extractedData.district,
+    state: extractedData.state,
+    date: extractedData.date,
+    claimType: extractedData.claimType,
+    address: extractedData.address,
+    documentUrl: documentDataUri,
+    documentType: documentType,
     linkedVillage: geoLinkResult.linkedVillageName,
     geoLinkConfidence: geoLinkResult.confidenceScore,
     status,
     location: randomLocation,
-    documentUrl: documentDataUri,
-    documentType: documentType,
   };
   
   const { data, error } = await supabase.from('claims').insert(newClaimData as any).select().single();
