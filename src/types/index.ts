@@ -9,10 +9,16 @@ export type Claim = {
   id: string;
   created_at: string;
   claimantName: FieldWithConfidence<string>;
+  pattaNumber: FieldWithConfidence<string>;
+  extentOfForestLandOccupied: FieldWithConfidence<string>;
   village: FieldWithConfidence<string>;
-  claimType: FieldWithConfidence<'IFR' | 'CFR' | 'CR' | string>;
-  area: FieldWithConfidence<string>;
+  gramPanchayat: FieldWithConfidence<string>;
+  tehsilTaluka: FieldWithConfidence<string>;
+  district: FieldWithConfidence<string>;
+  state: FieldWithConfidence<string>;
   date: FieldWithConfidence<string>;
+  address: FieldWithConfidence<string>;
+  claimType: FieldWithConfidence<'IFR' | 'CFR' | 'CR' | string>;
   documentUrl: string;
   documentType: string;
   linkedVillage: string | null;

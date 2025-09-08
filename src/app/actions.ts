@@ -31,7 +31,13 @@ export async function handleClaimUpload(documentDataUri: string, documentType: s
       extractedData.claimantName.confidence,
       extractedData.village.confidence,
       extractedData.claimType.confidence,
-      extractedData.area.confidence,
+      extractedData.pattaNumber.confidence,
+      extractedData.extentOfForestLandOccupied.confidence,
+      extractedData.gramPanchayat.confidence,
+      extractedData.tehsilTaluka.confidence,
+      extractedData.district.confidence,
+      extractedData.state.confidence,
+      extractedData.address.confidence,
       extractedData.date.confidence,
       geoLinkResult.confidenceScore
   ];
@@ -49,20 +55,16 @@ export async function handleClaimUpload(documentDataUri: string, documentType: s
   };
   
   const newClaimData = {
-    claimantName: extractedData.claimantName,
-    village: extractedData.village,
-    claimType: extractedData.claimType,
-    area: extractedData.area,
-    date: extractedData.date,
+    ...extractedData,
     linkedVillage: geoLinkResult.linkedVillageName,
     geoLinkConfidence: geoLinkResult.confidenceScore,
     status,
     location: randomLocation,
-    documentUrl: documentDataUri, // Ensure this is saved
-    documentType: documentType,   // Ensure this is saved
+    documentUrl: documentDataUri,
+    documentType: documentType,
   };
   
-  const { data, error } = await supabase.from('claims').insert(newClaimData).select().single();
+  const { data, error } = await supabase.from('claims').insert(newClaimData as any).select().single();
 
   if (error) {
     console.error("Supabase insert error:", error);

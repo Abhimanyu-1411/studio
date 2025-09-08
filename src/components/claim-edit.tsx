@@ -19,6 +19,7 @@ import { useToast } from '@/hooks/use-toast';
 import type { Claim } from '@/types';
 import { Loader2, Save, CheckCircle, X } from 'lucide-react';
 import { ConfidenceBadge } from './confidence-badge';
+import { Textarea } from './ui/textarea';
 
 type ClaimEditProps = {
   claim: Claim | null;
@@ -38,7 +39,7 @@ export function ClaimEdit({ claim, onClose, onClaimUpdate, availableVillages }: 
     }
   }, [claim]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     const fieldData = formData[name as keyof Claim] as { value: string; confidence: number };
     setFormData(prev => ({ 
@@ -65,24 +66,22 @@ export function ClaimEdit({ claim, onClose, onClaimUpdate, availableVillages }: 
     
     const isReviewAction = claim.status === 'needs-review';
 
-    let updatedClaim: Claim = {
-        ...claim,
-        ...formData,
-        claimantName: { ...claim.claimantName, ...(formData.claimantName as any) },
-        village: { ...claim.village, ...(formData.village as any) },
-        claimType: { ...claim.claimType, ...(formData.claimType as any) },
-        area: { ...claim.area, ...(formData.area as any) },
-        date: { ...claim.date, ...(formData.date as any) },
-        status: claim.status,
+    const updatedClaim: Claim = {
+        ...(claim as Claim), // Cast to ensure all properties are there
+        ...formData, // Apply the changes from the form
     };
 
     if (isReviewAction) {
         updatedClaim.status = 'reviewed';
-        (updatedClaim.claimantName as any).confidence = 1.0;
-        (updatedClaim.village as any).confidence = 1.0;
-        (updatedClaim.claimType as any).confidence = 1.0;
-        (updatedClaim.area as any).confidence = 1.0;
-        (updatedClaim.date as any).confidence = 1.0;
+        // When reviewing, boost confidence of all fields to 100% as they are manually verified
+        for (const key in updatedClaim) {
+            if (Object.prototype.hasOwnProperty.call(updatedClaim, key)) {
+                const prop = (updatedClaim as any)[key];
+                if (prop && typeof prop === 'object' && 'confidence' in prop) {
+                    prop.confidence = 1.0;
+                }
+            }
+        }
         updatedClaim.geoLinkConfidence = 1.0;
     }
     
@@ -141,47 +140,67 @@ export function ClaimEdit({ claim, onClose, onClaimUpdate, availableVillages }: 
             </div>
 
             <div className="space-y-4">
-                <div className="grid grid-cols-5 items-center gap-4">
-                    <Label htmlFor="claimantName" className="text-right col-span-1">Claimant</Label>
-                    <Input id="claimantName" name="claimantName" value={(formData.claimantName as any)?.value || ''} onChange={handleInputChange} className="col-span-3" />
-                    <ConfidenceBadge score={(claim.claimantName as any).confidence} />
-                </div>
-                <div className="grid grid-cols-5 items-center gap-4">
-                    <Label htmlFor="village" className="text-right col-span-1">Village</Label>
-                    <Select name="linkedVillage" value={formData.linkedVillage || ''} onValueChange={handleSelectChange('linkedVillage')}>
-                        <SelectTrigger className="col-span-3">
-                            <SelectValue placeholder="Select a village" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {availableVillages.map(v => <SelectItem key={v} value={v}>{v}</SelectItem>)}
-                        </SelectContent>
-                    </Select>
-                    <ConfidenceBadge score={claim.geoLinkConfidence} />
-                </div>
-                <div className="grid grid-cols-5 items-center gap-4">
-                    <Label htmlFor="claimType" className="text-right col-span-1">Claim Type</Label>
-                    <Select name="claimType" value={(formData.claimType as any)?.value || ''} onValueChange={handleSelectChange('claimType')}>
-                        <SelectTrigger className="col-span-3">
-                            <SelectValue placeholder="Select a type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="IFR">IFR</SelectItem>
-                            <SelectItem value="CFR">CFR</SelectItem>
-                            <SelectItem value="CR">CR</SelectItem>
-                        </SelectContent>
-                    </Select>
-                    <ConfidenceBadge score={(claim.claimType as any).confidence} />
-                </div>
-                <div className="grid grid-cols-5 items-center gap-4">
-                    <Label htmlFor="area" className="text-right col-span-1">Area</Label>
-                    <Input id="area" name="area" value={(formData.area as any)?.value || ''} onChange={handleInputChange} className="col-span-3" />
-                    <ConfidenceBadge score={(claim.area as any).confidence} />
-                </div>
-                <div className="grid grid-cols-5 items-center gap-4">
-                    <Label htmlFor="date" className="text-right col-span-1">Date</Label>
-                    <Input id="date" name="date" value={(formData.date as any)?.value || ''} onChange={handleInputChange} className="col-span-3" />
-                    <ConfidenceBadge score={(claim.date as any).confidence} />
-                </div>
+                 {Object.keys(formData).map(key => {
+                    const field = (formData as any)[key];
+                    if (typeof field !== 'object' || field === null || !('value' in field)) {
+                        return null;
+                    }
+
+                    const fieldKey = key as keyof Claim;
+                    
+                    // Don't render an input for these fields
+                    if (['id', 'created_at', 'documentUrl', 'documentType', 'linkedVillage', 'geoLinkConfidence', 'status', 'location'].includes(fieldKey)) {
+                         if (fieldKey === 'linkedVillage') {
+                            return (
+                                <div key={fieldKey} className="grid grid-cols-5 items-center gap-4">
+                                    <Label htmlFor="linkedVillage" className="text-right col-span-1 capitalize">Linked Village</Label>
+                                    <Select name="linkedVillage" value={formData.linkedVillage || ''} onValueChange={handleSelectChange('linkedVillage')}>
+                                        <SelectTrigger className="col-span-3">
+                                            <SelectValue placeholder="Select a village" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {availableVillages.map(v => <SelectItem key={v} value={v}>{v}</SelectItem>)}
+                                        </SelectContent>
+                                    </Select>
+                                    <ConfidenceBadge score={claim.geoLinkConfidence} />
+                                </div>
+                            )
+                         }
+                         if (fieldKey === 'claimType') {
+                             return (
+                                <div key={fieldKey} className="grid grid-cols-5 items-center gap-4">
+                                    <Label htmlFor="claimType" className="text-right col-span-1">Claim Type</Label>
+                                    <Select name="claimType" value={(formData.claimType as any)?.value || ''} onValueChange={handleSelectChange('claimType')}>
+                                        <SelectTrigger className="col-span-3">
+                                            <SelectValue placeholder="Select a type" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="IFR">IFR</SelectItem>
+                                            <SelectItem value="CFR">CFR</SelectItem>
+                                            <SelectItem value="CR">CR</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                    <ConfidenceBadge score={(claim.claimType as any).confidence} />
+                                </div>
+                             )
+                         }
+                        return null;
+                    }
+
+                    const label = key.replace(/([A-Z])/g, ' $1').replace(/^./, (str) => str.toUpperCase());
+                    
+                    return (
+                        <div key={fieldKey} className="grid grid-cols-5 items-center gap-4">
+                            <Label htmlFor={fieldKey} className="text-right col-span-1">{label}</Label>
+                            {fieldKey === 'address' ? (
+                                <Textarea id={fieldKey} name={fieldKey} value={field.value} onChange={handleInputChange} className="col-span-3" />
+                            ) : (
+                                <Input id={fieldKey} name={fieldKey} value={field.value} onChange={handleInputChange} className="col-span-3" />
+                            )}
+                            <ConfidenceBadge score={field.confidence} />
+                        </div>
+                    );
+                })}
             </div>
         </div>
 

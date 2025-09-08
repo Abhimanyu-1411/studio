@@ -12,48 +12,66 @@ export type Database = {
     Tables: {
       claims: {
         Row: {
-          area: Json
+          address: Json
           claimType: Json
           claimantName: Json
           created_at: string
           date: Json
+          district: Json
           documentType: string
           documentUrl: string
+          extentOfForestLandOccupied: Json
           geoLinkConfidence: number | null
+          gramPanchayat: Json
           id: string
           linkedVillage: string | null
           location: Json
+          pattaNumber: Json
+          state: Json
           status: string
+          tehsilTaluka: Json
           village: Json
         }
         Insert: {
-          area: Json
+          address: Json
           claimType: Json
           claimantName: Json
           created_at?: string
           date: Json
+          district: Json
           documentType: string
           documentUrl: string
+          extentOfForestLandOccupied: Json
           geoLinkConfidence?: number | null
+          gramPanchayat: Json
           id?: string
           linkedVillage?: string | null
           location: Json
+          pattaNumber: Json
+          state: Json
           status: string
+          tehsilTaluka: Json
           village: Json
         }
         Update: {
-          area?: Json
+          address?: Json
           claimType?: Json
           claimantName?: Json
           created_at?: string
           date?: Json
+          district?: Json
           documentType?: string
           documentUrl?: string
+          extentOfForestLandOccupied?: Json
           geoLinkConfidence?: number | null
+          gramPanchayat?: Json
           id?: string
           linkedVillage?: string | null
           location?: Json
+          pattaNumber?: Json
+          state?: Json
           status?: string
+          tehsilTaluka?: Json
           village?: Json
         }
         Relationships: []

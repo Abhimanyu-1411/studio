@@ -67,7 +67,7 @@ export function ClaimsTable({ claims, onClaimEdit, onClaimLink, onClaimReject }:
                         <TableCell>
                             <Badge variant="outline">{(claim.claimType as any).value}</Badge>
                         </TableCell>
-                        <TableCell className="whitespace-nowrap">{(claim.area as any).value}</TableCell>
+                        <TableCell className="whitespace-nowrap">{(claim.extentOfForestLandOccupied as any).value}</TableCell>
                         <TableCell>
                             <Badge variant={claimStatusBadges[claim.status]} className="whitespace-nowrap">
                                 {claimStatusText[claim.status]}
