@@ -95,14 +95,23 @@ export function ClaimUpload({ open, onOpenChange, onClaimAdded }: ClaimUploadPro
         description: `Extracted data for ${(newClaim.claimantName as any).value}.`,
       });
       setTimeout(() => handleClose(false), 1000);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Upload failed:', error);
       setStatus('error');
-      toast({
-        variant: 'destructive',
-        title: 'Upload Failed',
-        description: 'Could not extract data from the document.',
-      });
+      const errorMessage = error.message || '';
+      if (errorMessage.includes('503') || errorMessage.includes('overloaded')) {
+          toast({
+              variant: 'destructive',
+              title: 'AI Service Unavailable',
+              description: 'The AI model is currently overloaded. Please try again in a few moments.',
+          });
+      } else {
+          toast({
+              variant: 'destructive',
+              title: 'Upload Failed',
+              description: 'Could not extract data from the document.',
+          });
+      }
     }
   };
   
