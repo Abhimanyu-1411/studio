@@ -11,6 +11,14 @@ type RecentClaimsProps = {
   onClaimSelect: (claim: Claim) => void;
 };
 
+const getClaimValue = (field: any): string => {
+    if (typeof field === 'object' && field !== null && 'value' in field) {
+        return field.value;
+    }
+    return field as string;
+}
+
+
 export function RecentClaims({ claims, onClaimSelect }: RecentClaimsProps) {
   return (
     <Card className="shadow-lg">
@@ -35,8 +43,8 @@ export function RecentClaims({ claims, onClaimSelect }: RecentClaimsProps) {
                     <FileText className="h-5 w-5 text-muted-foreground" />
                 </div>
                 <div className="flex-grow">
-                  <p className="font-medium">{claim.claimantName}</p>
-                  <p className="text-sm text-muted-foreground">{claim.village}</p>
+                  <p className="font-medium">{getClaimValue(claim.claimantName)}</p>
+                  <p className="text-sm text-muted-foreground">{getClaimValue(claim.village)}</p>
                 </div>
                 <Button variant="ghost" size="sm" onClick={() => onClaimSelect(claim)}>View</Button>
               </li>
@@ -47,5 +55,3 @@ export function RecentClaims({ claims, onClaimSelect }: RecentClaimsProps) {
     </Card>
   );
 }
-
-    
