@@ -22,7 +22,8 @@ const ExtractClaimDataInputSchema = z.object({
 export type ExtractClaimDataInput = z.infer<typeof ExtractClaimDataInputSchema>;
 
 const FieldWithConfidenceSchema = z.object({
-    value: z.string().describe('The extracted value.'),
+    raw: z.string().describe('The raw text extracted directly from the document without any cleaning or normalization.'),
+    value: z.string().describe('The cleaned, standardized, and normalized value.'),
     confidence: z.number().min(0).max(1).describe('The confidence score of the extraction, from 0 to 1.'),
 });
 
@@ -50,10 +51,14 @@ const prompt = ai.definePrompt({
   name: 'extractClaimDataPrompt',
   input: {schema: ExtractClaimDataInputSchema},
   output: {schema: ExtractClaimDataOutputSchema},
-  prompt: `You are an expert GIS analyst specializing in extracting information from Forest Rights Act (FRA) claim documents.
+  prompt: `You are an expert GIS analyst specializing in extracting information from Forest Rights Act (FRA) claim documents. OCR can be imperfect, so you must be able to handle common spelling variations.
 
-Your task is to meticulously extract the following fields from the provided document. For each field, provide the extracted value and a confidence score from 0.0 to 1.0 indicating your certainty.
+Your task is to meticulously extract the following fields from the provided document. For each field, you must provide:
+1.  \`raw\`: The text as it appears directly in the document.
+2.  \`value\`: The cleaned, standardized, and normalized version of the text. For example, normalize spelling variations like "Baxa" to "Baksa".
+3.  \`confidence\`: A confidence score from 0.0 to 1.0 indicating your certainty.
 
+Here are the fields to extract:
 - claimantName: The name of the claimant.
 - pattaNumber: The patta number, if available.
 - extentOfForestLandOccupied: The area of land, specified in hectares.

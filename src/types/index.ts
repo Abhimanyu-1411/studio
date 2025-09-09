@@ -1,6 +1,7 @@
 
 
 type FieldWithConfidence<T> = {
+    raw: string;
     value: T;
     confidence: number;
 }
