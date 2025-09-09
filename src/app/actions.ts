@@ -91,21 +91,35 @@ export async function handleClaimUpload(documentDataUri: string, documentType: s
 
   // 6. Insert the new claim
   const newClaimData = {
-    claimantName: extractedData.claimantName,
-    pattaNumber: extractedData.pattaNumber,
-    extentOfForestLandOccupied: extractedData.extentOfForestLandOccupied,
-    village: extractedData.village,
-    gramPanchayat: extractedData.gramPanchayat,
-    tehsilTaluka: extractedData.tehsilTaluka,
-    district: extractedData.district,
-    state: extractedData.state,
-    date: extractedData.date,
-    claimType: extractedData.claimType,
-    address: extractedData.address,
+    claimantName: extractedData.claimantName.value,
+    pattaNumber: extractedData.pattaNumber.value,
+    extentOfForestLandOccupied: extractedData.extentOfForestLandOccupied.value,
+    village: extractedData.village.value,
+    gramPanchayat: extractedData.gramPanchayat.value,
+    tehsilTaluka: extractedData.tehsilTaluka.value,
+    district: extractedData.district.value,
+    state: extractedData.state.value,
+    date: extractedData.date.value,
+    claimType: extractedData.claimType.value,
+    address: extractedData.address.value,
     documentUrl: documentDataUri,
     documentType: documentType,
     status: status,
     location: { lat: locationResult.lat, lng: locationResult.lng },
+    confidenceScores: {
+      claimantName: extractedData.claimantName.confidence,
+      pattaNumber: extractedData.pattaNumber.confidence,
+      extentOfForestLandOccupied: extractedData.extentOfForestLandOccupied.confidence,
+      village: extractedData.village.confidence,
+      gramPanchayat: extractedData.gramPanchayat.confidence,
+      tehsilTaluka: extractedData.tehsilTaluka.confidence,
+      district: extractedData.district.confidence,
+      state: extractedData.state.confidence,
+      date: extractedData.date.confidence,
+      claimType: extractedData.claimType.confidence,
+      address: extractedData.address.confidence,
+      location: locationResult.confidenceScore
+    }
   };
 
   const { data, error } = await supabase.from('claims').insert(newClaimData).select().single();
@@ -191,7 +205,7 @@ export async function getDssRecommendation(villageId: string): Promise<DssRecomm
         throw new Error("Village not found");
     }
 
-    const { data: claimsInVillage, error: claimsError } = await supabase.from('claims').select('claimType, status, village').eq('village->>value', village.name);
+    const { data: claimsInVillage, error: claimsError } = await supabase.from('claims').select('claimType, status, village').eq('village', village.name);
     
     if(claimsError) {
         throw new Error("Could not fetch claims for village.");
@@ -201,8 +215,8 @@ export async function getDssRecommendation(villageId: string): Promise<DssRecomm
         villageName: village.name,
         claimCount: claimsInVillage.length,
         pendingClaims: claimsInVillage.filter(c => c.status !== 'reviewed' && c.status !== 'linked').length,
-        cfrClaims: claimsInVillage.filter(c => (c.claimType as any)?.value === 'CFR').length,
-        ifrClaims: claimsInVillage.filter(c => (c.claimType as any)?.value === 'IFR').length,
+        cfrClaims: claimsInVillage.filter(c => c.claimType === 'CFR').length,
+        ifrClaims: claimsInVillage.filter(c => c.claimType === 'IFR').length,
         waterCoverage: (village.assetCoverage as any).water,
         forestCoverage: (village.assetCoverage as any).forest,
         agriculturalArea: (village.assetCoverage as any).agriculture,
@@ -302,3 +316,5 @@ export async function getPattas(): Promise<Patta[]> {
     }
     return data as Patta[];
 }
+
+    

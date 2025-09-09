@@ -77,7 +77,6 @@ const MapViewComponent = ({ claims, villages, assets, pattas, onVillageClick, on
     };
   };
   
-  const getFieldValue = (field: any) => field?.value ?? 'N/A';
 
   return (
     <MapContainer
@@ -150,12 +149,12 @@ const MapViewComponent = ({ claims, villages, assets, pattas, onVillageClick, on
           <Popup>
             <Card className="border-0 shadow-none max-w-sm">
               <CardHeader className="p-2">
-                <CardTitle className="text-base">{getFieldValue(claim.claimantName)}</CardTitle>
-                <CardDescription>{getFieldValue(claim.claimType)} - {getFieldValue(claim.extentOfForestLandOccupied)}</CardDescription>
+                <CardTitle className="text-base">{claim.claimantName}</CardTitle>
+                <CardDescription>{claim.claimType} - {claim.extentOfForestLandOccupied}</CardDescription>
               </CardHeader>
               <CardContent className="p-2 space-y-2 text-sm">
-                <p>Village: {getFieldValue(claim.village)}</p>
-                <p>Date: {getFieldValue(claim.date)}</p>
+                <p>Village: {claim.village}</p>
+                <p>Date: {claim.date}</p>
                 <div>
                   <Badge variant="secondary">Status: {claim.status}</Badge>
                   {claim.status === 'needs-review' && (
@@ -179,3 +178,5 @@ const MapViewComponent = ({ claims, villages, assets, pattas, onVillageClick, on
 }
 
 export const MapView = memo(MapViewComponent);
+
+    

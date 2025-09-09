@@ -28,8 +28,10 @@ type ClaimEditProps = {
   availableVillages: string[];
 };
 
+type FormData = Omit<Claim, 'id' | 'created_at' | 'confidenceScores'>;
+
 export function ClaimEdit({ claim, onClose, onClaimUpdate, availableVillages }: ClaimEditProps) {
-  const [formData, setFormData] = useState<Partial<Claim>>({});
+  const [formData, setFormData] = useState<Partial<FormData>>({});
   const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
 
@@ -41,18 +43,16 @@ export function ClaimEdit({ claim, onClose, onClaimUpdate, availableVillages }: 
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    const fieldData = formData[name as keyof Claim] as { value: string; confidence: number };
     setFormData(prev => ({ 
         ...prev, 
-        [name]: { ...fieldData, value: value } 
+        [name]: value
     }));
   };
 
-  const handleSelectChange = (name: keyof Claim) => (value: string) => {
-    const fieldData = formData[name as keyof Claim] as { value: string; confidence: number };
+  const handleSelectChange = (name: keyof FormData) => (value: string) => {
     setFormData(prev => ({ 
         ...prev, 
-        [name]: { ...fieldData, value: value, confidence: 1.0 } 
+        [name]: value
     }));
   }
 
@@ -62,29 +62,26 @@ export function ClaimEdit({ claim, onClose, onClaimUpdate, availableVillages }: 
     
     const isReviewAction = claim.status === 'needs-review';
 
+    // Create a new confidenceScores object where all values are 1.0
+    const newConfidenceScores = { ...claim.confidenceScores };
+    for (const key in newConfidenceScores) {
+      if (Object.prototype.hasOwnProperty.call(newConfidenceScores, key)) {
+        (newConfidenceScores as any)[key] = 1.0;
+      }
+    }
+
     const updatedClaim: Claim = {
         ...(claim as Claim), // Cast to ensure all properties are there
         ...formData, // Apply the changes from the form
+        confidenceScores: isReviewAction ? newConfidenceScores : claim.confidenceScores, // Update scores only on review
+        status: isReviewAction ? 'reviewed' : claim.status, // Update status only on review
     };
-
-    if (isReviewAction) {
-        updatedClaim.status = 'reviewed';
-        // When reviewing, boost confidence of all fields to 100% as they are manually verified
-        for (const key in updatedClaim) {
-            if (Object.prototype.hasOwnProperty.call(updatedClaim, key)) {
-                const prop = (updatedClaim as any)[key];
-                if (prop && typeof prop === 'object' && 'confidence' in prop) {
-                    prop.confidence = 1.0;
-                }
-            }
-        }
-    }
     
     onClaimUpdate(updatedClaim);
     setIsSaving(false);
     toast({
         title: isReviewAction ? 'Claim Reviewed' : 'Claim Updated',
-        description: `Successfully updated claim for ${(updatedClaim.claimantName as any).value}.`
+        description: `Successfully updated claim for ${updatedClaim.claimantName}.`
     });
     onClose();
   };
@@ -93,9 +90,10 @@ export function ClaimEdit({ claim, onClose, onClaimUpdate, availableVillages }: 
 
   const isReviewAction = claim.status === 'needs-review';
   const isDocumentImage = claim.documentType?.startsWith('image/');
-
-  const getFieldValue = (field: any) => field?.value ?? '';
-  const getFieldConfidence = (field: any) => field?.confidence;
+  
+  const getConfidence = (field: keyof Claim['confidenceScores']) => {
+    return claim.confidenceScores ? claim.confidenceScores[field] : 0;
+  }
 
   return (
     <Card className="h-full flex flex-col">
@@ -140,22 +138,22 @@ export function ClaimEdit({ claim, onClose, onClaimUpdate, availableVillages }: 
             <div className="space-y-4">
                  <div className="grid grid-cols-5 items-center gap-4">
                     <Label htmlFor="claimantName" className="text-right col-span-1">Claimant Name</Label>
-                    <Input id="claimantName" name="claimantName" value={getFieldValue(formData.claimantName)} onChange={handleInputChange} className="col-span-3" />
-                    <ConfidenceBadge score={getFieldConfidence(formData.claimantName)} />
+                    <Input id="claimantName" name="claimantName" value={formData.claimantName || ''} onChange={handleInputChange} className="col-span-3" />
+                    <ConfidenceBadge score={getConfidence('claimantName')} />
                 </div>
                 <div className="grid grid-cols-5 items-center gap-4">
                     <Label htmlFor="pattaNumber" className="text-right col-span-1">Patta Number</Label>
-                    <Input id="pattaNumber" name="pattaNumber" value={getFieldValue(formData.pattaNumber)} onChange={handleInputChange} className="col-span-3" />
-                    <ConfidenceBadge score={getFieldConfidence(formData.pattaNumber)} />
+                    <Input id="pattaNumber" name="pattaNumber" value={formData.pattaNumber || ''} onChange={handleInputChange} className="col-span-3" />
+                    <ConfidenceBadge score={getConfidence('pattaNumber')} />
                 </div>
                 <div className="grid grid-cols-5 items-center gap-4">
                     <Label htmlFor="extentOfForestLandOccupied" className="text-right col-span-1">Extent Of Forest Land Occupied</Label>
-                    <Input id="extentOfForestLandOccupied" name="extentOfForestLandOccupied" value={getFieldValue(formData.extentOfForestLandOccupied)} onChange={handleInputChange} className="col-span-3" />
-                    <ConfidenceBadge score={getFieldConfidence(formData.extentOfForestLandOccupied)} />
+                    <Input id="extentOfForestLandOccupied" name="extentOfForestLandOccupied" value={formData.extentOfForestLandOccupied || ''} onChange={handleInputChange} className="col-span-3" />
+                    <ConfidenceBadge score={getConfidence('extentOfForestLandOccupied')} />
                 </div>
                  <div className="grid grid-cols-5 items-center gap-4">
                     <Label htmlFor="village" className="text-right col-span-1">Village</Label>
-                    <Select name="village" value={getFieldValue(formData.village)} onValueChange={handleSelectChange('village')}>
+                    <Select name="village" value={formData.village || ''} onValueChange={handleSelectChange('village')}>
                         <SelectTrigger className="col-span-3">
                             <SelectValue placeholder="Select a village" />
                         </SelectTrigger>
@@ -163,36 +161,36 @@ export function ClaimEdit({ claim, onClose, onClaimUpdate, availableVillages }: 
                             {availableVillages.map(v => <SelectItem key={v} value={v}>{v}</SelectItem>)}
                         </SelectContent>
                     </Select>
-                    <ConfidenceBadge score={getFieldConfidence(formData.village)} />
+                    <ConfidenceBadge score={getConfidence('village')} />
                 </div>
                 <div className="grid grid-cols-5 items-center gap-4">
                     <Label htmlFor="gramPanchayat" className="text-right col-span-1">Gram Panchayat</Label>
-                    <Input id="gramPanchayat" name="gramPanchayat" value={getFieldValue(formData.gramPanchayat)} onChange={handleInputChange} className="col-span-3" />
-                    <ConfidenceBadge score={getFieldConfidence(formData.gramPanchayat)} />
+                    <Input id="gramPanchayat" name="gramPanchayat" value={formData.gramPanchayat || ''} onChange={handleInputChange} className="col-span-3" />
+                    <ConfidenceBadge score={getConfidence('gramPanchayat')} />
                 </div>
                 <div className="grid grid-cols-5 items-center gap-4">
                     <Label htmlFor="tehsilTaluka" className="text-right col-span-1">Tehsil Taluka</Label>
-                    <Input id="tehsilTaluka" name="tehsilTaluka" value={getFieldValue(formData.tehsilTaluka)} onChange={handleInputChange} className="col-span-3" />
-                    <ConfidenceBadge score={getFieldConfidence(formData.tehsilTaluka)} />
+                    <Input id="tehsilTaluka" name="tehsilTaluka" value={formData.tehsilTaluka || ''} onChange={handleInputChange} className="col-span-3" />
+                    <ConfidenceBadge score={getConfidence('tehsilTaluka')} />
                 </div>
                 <div className="grid grid-cols-5 items-center gap-4">
                     <Label htmlFor="district" className="text-right col-span-1">District</Label>
-                    <Input id="district" name="district" value={getFieldValue(formData.district)} onChange={handleInputChange} className="col-span-3" />
-                    <ConfidenceBadge score={getFieldConfidence(formData.district)} />
+                    <Input id="district" name="district" value={formData.district || ''} onChange={handleInputChange} className="col-span-3" />
+                    <ConfidenceBadge score={getConfidence('district')} />
                 </div>
                 <div className="grid grid-cols-5 items-center gap-4">
                     <Label htmlFor="state" className="text-right col-span-1">State</Label>
-                    <Input id="state" name="state" value={getFieldValue(formData.state)} onChange={handleInputChange} className="col-span-3" />
-                    <ConfidenceBadge score={getFieldConfidence(formData.state)} />
+                    <Input id="state" name="state" value={formData.state || ''} onChange={handleInputChange} className="col-span-3" />
+                    <ConfidenceBadge score={getConfidence('state')} />
                 </div>
                 <div className="grid grid-cols-5 items-center gap-4">
                     <Label htmlFor="date" className="text-right col-span-1">Date</Label>
-                    <Input id="date" name="date" value={getFieldValue(formData.date)} onChange={handleInputChange} className="col-span-3" />
-                    <ConfidenceBadge score={getFieldConfidence(formData.date)} />
+                    <Input id="date" name="date" value={formData.date || ''} onChange={handleInputChange} className="col-span-3" />
+                    <ConfidenceBadge score={getConfidence('date')} />
                 </div>
                 <div key="claimType" className="grid grid-cols-5 items-center gap-4">
                     <Label htmlFor="claimType" className="text-right col-span-1">Claim Type</Label>
-                    <Select name="claimType" value={getFieldValue(formData.claimType)} onValueChange={handleSelectChange('claimType')}>
+                    <Select name="claimType" value={formData.claimType || ''} onValueChange={handleSelectChange('claimType')}>
                         <SelectTrigger className="col-span-3">
                             <SelectValue placeholder="Select a type" />
                         </SelectTrigger>
@@ -202,12 +200,12 @@ export function ClaimEdit({ claim, onClose, onClaimUpdate, availableVillages }: 
                             <SelectItem value="CR">CR</SelectItem>
                         </SelectContent>
                     </Select>
-                    <ConfidenceBadge score={getFieldConfidence(formData.claimType)} />
+                    <ConfidenceBadge score={getConfidence('claimType')} />
                 </div>
                  <div className="grid grid-cols-5 items-center gap-4">
                     <Label htmlFor="address" className="text-right col-span-1">Address</Label>
-                    <Textarea id="address" name="address" value={getFieldValue(formData.address)} onChange={handleInputChange} className="col-span-3" />
-                    <ConfidenceBadge score={getFieldConfidence(formData.address)} />
+                    <Textarea id="address" name="address" value={formData.address || ''} onChange={handleInputChange} className="col-span-3" />
+                    <ConfidenceBadge score={getConfidence('address')} />
                 </div>
             </div>
         </div>
@@ -236,3 +234,5 @@ export function ClaimEdit({ claim, onClose, onClaimUpdate, availableVillages }: 
     </Card>
   );
 }
+
+    

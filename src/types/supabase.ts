@@ -12,61 +12,64 @@ export type Database = {
     Tables: {
       claims: {
         Row: {
-          address: Json
-          claimType: Json
-          claimantName: Json
+          address: string
+          claimType: string
+          claimantName: string
+          confidenceScores: Json
           created_at: string
-          date: Json
-          district: Json
+          date: string
+          district: string
           documentType: string
           documentUrl: string
-          extentOfForestLandOccupied: Json
-          gramPanchayat: Json
+          extentOfForestLandOccupied: string
+          gramPanchayat: string
           id: string
           location: Json
-          pattaNumber: Json
-          state: Json
+          pattaNumber: string
+          state: string
           status: string
-          tehsilTaluka: Json
-          village: Json
+          tehsilTaluka: string
+          village: string
         }
         Insert: {
-          address: Json
-          claimType: Json
-          claimantName: Json
+          address: string
+          claimType: string
+          claimantName: string
+          confidenceScores: Json
           created_at?: string
-          date: Json
-          district: Json
+          date: string
+          district: string
           documentType: string
           documentUrl: string
-          extentOfForestLandOccupied: Json
-          gramPanchayat: Json
+          extentOfForestLandOccupied: string
+          gramPanchayat: string
           id?: string
           location: Json
-          pattaNumber: Json
-          state: Json
+          pattaNumber: string
+          state: string
           status: string
-          tehsilTaluka: Json
-          village: Json
+          tehsilTaluka: string
+          village: string
         }
         Update: {
-          address?: Json
-          claimType?: Json
-          claimantName?: Json
+          address?: string
+          claimType?: string
+          claimantName?: string
+          confidenceScores?: Json
           created_at?: string
-          date?: Json
-          district?: Json
+          date?: string
+          district?: string
           documentType?: string
           documentUrl?: string
-          extentOfForestLandOccupied?: Json
-          gramPanchayat?: Json
+          extentOfForestLandOccupied?: string
+          gramPanchayat?: string
           id?: string
           location?: Json
-          pattaNumber?: Json
-          state?: Json
+          pattaNumber?: string
+          state?: string
           status?: string
-          tehsilTaluka?: Json
-          village?: Json
+          tehsilTaluka?: string
+          village?: string
         }
         Relationships: []
       }
@@ -266,3 +269,5 @@ export type Enums<
   : PublicEnumNameOrOptions extends keyof Database["public"]["Enums"]
   ? Database["public"]["Enums"][PublicEnumNameOrOptions]
   : never
+
+    

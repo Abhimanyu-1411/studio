@@ -81,8 +81,8 @@ export default function ClaimsPage() {
 
   const filteredClaims = useMemo(() => {
     return allClaims.filter(claim => {
-      const claimantName = (claim.claimantName as any)?.value || '';
-      const claimType = (claim.claimType as any)?.value || '';
+      const claimantName = claim.claimantName || '';
+      const claimType = claim.claimType || '';
       const searchMatch = claimantName.toLowerCase().includes(searchQuery.toLowerCase());
       const typeMatch = typeFilter === 'all' || claimType === typeFilter;
       const statusMatch = statusFilter === 'all' || claim.status === statusFilter;
@@ -108,7 +108,7 @@ export default function ClaimsPage() {
     setEditingClaim(null);
     toast({
         title: 'Claim Updated',
-        description: `Successfully updated claim for ${(updatedClaim.claimantName as any).value}.`
+        description: `Successfully updated claim for ${updatedClaim.claimantName}.`
     });
   };
 
@@ -118,7 +118,7 @@ export default function ClaimsPage() {
     setAllClaims(prev => prev.map(c => c.id === claimToLink.id ? updatedClaim : c));
     toast({
         title: 'Claim Linked',
-        description: `Claim for ${(claimToLink.claimantName as any).value} is now visible on the map.`
+        description: `Claim for ${claimToLink.claimantName} is now visible on the map.`
     });
   };
   
@@ -129,7 +129,7 @@ export default function ClaimsPage() {
     toast({
         variant: 'destructive',
         title: 'Claim Rejected',
-        description: `Claim for ${(claimToReject.claimantName as any).value} has been rejected.`
+        description: `Claim for ${claimToReject.claimantName} has been rejected.`
     });
   };
 
@@ -154,7 +154,7 @@ export default function ClaimsPage() {
         setAllClaims(prev => prev.filter(c => c.id !== deletingClaim!.id));
         toast({
             title: 'Claim Deleted',
-            description: `Claim for ${(deletingClaim.claimantName as any).value} has been permanently deleted.`
+            description: `Claim for ${deletingClaim.claimantName} has been permanently deleted.`
         });
     } catch (error) {
         toast({
@@ -294,14 +294,14 @@ export default function ClaimsPage() {
           onAssetAdded={handleAssetAdded} 
           villages={villages}
           claimLocation={claimForAsset?.location}
-          preselectedVillageName={(claimForAsset?.village as any)?.value}
+          preselectedVillageName={claimForAsset?.village}
       />
       <AlertDialog open={!!deletingClaim} onOpenChange={(open) => !open && setDeletingClaim(null)}>
         <AlertDialogContent>
             <AlertDialogHeader>
             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
             <AlertDialogDescription>
-                This action cannot be undone. This will permanently delete the claim for <span className="font-bold">{(deletingClaim?.claimantName as any)?.value}</span>.
+                This action cannot be undone. This will permanently delete the claim for <span className="font-bold">{deletingClaim?.claimantName}</span>.
             </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
