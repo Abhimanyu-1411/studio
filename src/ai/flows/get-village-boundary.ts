@@ -25,7 +25,7 @@ const GetVillageBoundaryInputSchema = z.object({
 export type GetVillageBoundaryInput = z.infer<typeof GetVillageBoundaryInputSchema>;
 
 const GetVillageBoundaryOutputSchema = z.object({
-  bounds: z.array(LatLngSchema).describe('An array of latitude and longitude points forming the boundary of the village.'),
+  bounds: z.array(z.array(LatLngSchema)).describe('An array of polygons, where each polygon is an array of latitude and longitude points forming a village boundary. A village can have multiple discontinuous polygons.'),
   center: LatLngSchema.describe('The center point of the village.'),
 });
 export type GetVillageBoundaryOutput = z.infer<typeof GetVillageBoundaryOutputSchema>;
@@ -40,13 +40,13 @@ const prompt = ai.definePrompt({
   name: 'getVillageBoundaryPrompt',
   input: {schema: GetVillageBoundaryInputSchema},
   output: {schema: GetVillageBoundaryOutputSchema},
-  prompt: `You are an expert geospatial information service. Your task is to provide the administrative boundary polygon and the center coordinates for a given village. It is crucial to use the district and state to find the correct village.
+  prompt: `You are an expert geospatial information service. Your task is to provide the administrative boundary polygon(s) and the center coordinates for a given village.
 
-Village: {{{village}}}
-District: {{{district}}}
-State: {{{state}}}
+It is crucial to use the full address hierarchy to find the correct village: {{{village}}}, {{{district}}}, {{{state}}}, India.
 
-Based on this information, find the official administrative boundary for the village. The polygon should be high-resolution and detailed to accurately cover the entire village area. Do not return a simplified or low-vertex shape. Return the boundary as an array of latitude and longitude points, and also provide the central latitude and longitude of the village.
+Based on this information, find the official administrative boundary for the village. A village may consist of multiple, non-contiguous polygons. Return all polygons associated with the village. The polygons should be high-resolution and detailed.
+
+Return the boundary as an array of polygons, where each polygon is an array of latitude and longitude points in EPSG:4326 format. Also provide the central latitude and longitude of the overall village area.
 
 Return the information in the specified JSON format.
 `,

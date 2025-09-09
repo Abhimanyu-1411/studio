@@ -24,9 +24,20 @@ export async function handleClaimUpload(documentDataUri: string, documentType: s
   const districtName = extractedData.district.value;
   const stateName = extractedData.state.value;
 
-  // 2. Get or create the village and fetch its boundary
+  // 2. Geocode the address to get a location point FIRST. This point will be used to select the correct boundary.
+  const locationResult = await geocodeAddress({
+    address: extractedData.address.value,
+    village: villageName,
+    tehsilTaluka: tehsilTalukaName,
+    district: districtName,
+    state: stateName,
+  });
+  const claimPoint = point([locationResult.lng, locationResult.lat]);
+
+  // 3. Get or create the village and fetch its boundary
   let { data: village } = await supabase.from('villages').select('id, bounds').eq('name', villageName).single();
-  let villageBounds;
+  let villageBounds: { lat: number; lng: number }[] | null = null;
+  let isLocationValid = false;
 
   if (village && village.bounds) {
     villageBounds = village.bounds as { lat: number; lng: number }[];
@@ -37,46 +48,59 @@ export async function handleClaimUpload(documentDataUri: string, documentType: s
       state: stateName,
     });
     
-    const { data: newVillage, error: newVillageError } = await supabase.from('villages').insert({
-      name: villageName,
-      bounds: boundaryData.bounds,
-      center: boundaryData.center,
-      ndwi: 0,
-      assetCoverage: { water: 0, forest: 0, agriculture: 0 }
-    }).select('id, bounds').single();
-    
-    if (newVillageError) {
-      console.error("Supabase insert new village error:", newVillageError);
-      throw new Error("Failed to save the new village to the database.");
+    // Find the correct polygon that contains the claim point
+    for (const poly of boundaryData.bounds) {
+      if (poly.length > 2) {
+        const boundaryCoords = poly.map(p => [p.lng, p.lat]);
+        if (boundaryCoords.length > 0 && (boundaryCoords[0][0] !== boundaryCoords[boundaryCoords.length - 1][0] || boundaryCoords[0][1] !== boundaryCoords[boundaryCoords.length - 1][1])) {
+            boundaryCoords.push(boundaryCoords[0]);
+        }
+        if (boundaryCoords.length > 3) {
+          const villagePolygon = polygon([boundaryCoords]);
+          if (booleanPointInPolygon(claimPoint, villagePolygon)) {
+            villageBounds = poly;
+            isLocationValid = true;
+            break; // Found the correct polygon
+          }
+        }
+      }
     }
-    village = newVillage;
-    villageBounds = newVillage.bounds as { lat: number; lng: number }[];
+
+    if(villageBounds){
+      const { data: newVillage, error: newVillageError } = await supabase.from('villages').insert({
+        name: villageName,
+        bounds: villageBounds,
+        center: boundaryData.center,
+        ndwi: 0,
+        assetCoverage: { water: 0, forest: 0, agriculture: 0 }
+      }).select('id').single();
+      
+      if (newVillageError) {
+        console.error("Supabase insert new village error:", newVillageError);
+        throw new Error("Failed to save the new village to the database.");
+      }
+      village = newVillage;
+    } else {
+        // If no polygon contains the point after fetching, the location is invalid.
+        isLocationValid = false;
+    }
   }
   
-  // 3. Geocode the address to get a location point
-  const locationResult = await geocodeAddress({
-    address: extractedData.address.value,
-    village: villageName,
-    tehsilTaluka: tehsilTalukaName,
-    district: districtName,
-    state: stateName,
-  });
-
-  // 4. Validate that the claim point is inside the village polygon
-  let isLocationValid = false;
-  if (locationResult && Array.isArray(villageBounds) && villageBounds.length > 2) {
-    const claimPoint = point([locationResult.lng, locationResult.lat]);
-    const boundaryCoords = villageBounds.map(p => [p.lng, p.lat]);
-    if (boundaryCoords.length > 0 && (boundaryCoords[0][0] !== boundaryCoords[boundaryCoords.length - 1][0] || boundaryCoords[0][1] !== boundaryCoords[boundaryCoords.length - 1][1])) {
-        boundaryCoords.push(boundaryCoords[0]);
-    }
-    if (boundaryCoords.length > 3) {
-      const villagePolygon = polygon([boundaryCoords]);
-      isLocationValid = booleanPointInPolygon(claimPoint, villagePolygon);
+  if (villageBounds && !isLocationValid) {
+    if (Array.isArray(villageBounds) && villageBounds.length > 2) {
+        const boundaryCoords = villageBounds.map(p => [p.lng, p.lat]);
+        if (boundaryCoords.length > 0 && (boundaryCoords[0][0] !== boundaryCoords[boundaryCoords.length - 1][0] || boundaryCoords[0][1] !== boundaryCoords[boundaryCoords.length - 1][1])) {
+            boundaryCoords.push(boundaryCoords[0]);
+        }
+        if (boundaryCoords.length > 3) {
+            const villagePolygon = polygon([boundaryCoords]);
+            isLocationValid = booleanPointInPolygon(claimPoint, villagePolygon);
+        }
     }
   }
 
-  // 5. Determine status based on confidence and validation
+
+  // 4. Determine status based on confidence and validation
   const allConfidences = Object.values(extractedData).map(field => field.confidence);
   
   const lowestConfidence = Math.min(...allConfidences);
@@ -86,7 +110,7 @@ export async function handleClaimUpload(documentDataUri: string, documentType: s
     status = 'needs-review';
   }
 
-  // 6. Insert the new claim
+  // 5. Insert the new claim
   const claimToInsert = {
     claimantName: extractedData.claimantName,
     pattaNumber: extractedData.pattaNumber,
