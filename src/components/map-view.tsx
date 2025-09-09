@@ -33,6 +33,24 @@ const claimStatusColors = {
   rejected: 'hsl(var(--destructive))',
 };
 
+const getClaimValue = (field: any): string => {
+    if (typeof field === 'object' && field !== null && 'value' in field) {
+        return field.value;
+    }
+    return field as string;
+}
+
+const getClaimLocation = (location: any): L.LatLngExpression | null => {
+    if (typeof location === 'object' && location !== null && 'value' in location) {
+        const { lat, lng } = location.value;
+        if (typeof lat === 'number' && typeof lng === 'number') {
+            return { lat, lng };
+        }
+    }
+    return null;
+}
+
+
 const getClaimIcon = (claim: Claim) => {
   const color = claimStatusColors[claim.status as keyof typeof claimStatusColors] || 'hsl(var(--muted-foreground))';
   const markerHtml = `<div style="background-color: ${color}; width: 24px; height: 24px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; color: white; font-weight: bold;">${claim.status === 'unlinked' ? '?' : ''}</div>`;
@@ -140,38 +158,43 @@ const MapViewComponent = ({ claims, villages, assets, pattas, onVillageClick, on
          </Polygon>
       ))}
 
-      {claims.map((claim) => (
-        <Marker
-          key={claim.id}
-          position={claim.location as L.LatLngExpression}
-          icon={getClaimIcon(claim)}
-        >
-          <Popup>
-            <Card className="border-0 shadow-none max-w-sm">
-              <CardHeader className="p-2">
-                <CardTitle className="text-base">{claim.claimantName}</CardTitle>
-                <CardDescription>{claim.claimType} - {claim.extentOfForestLandOccupied}</CardDescription>
-              </CardHeader>
-              <CardContent className="p-2 space-y-2 text-sm">
-                <p>Village: {claim.village}</p>
-                <p>Date: {claim.date}</p>
-                <div>
-                  <Badge variant="secondary">Status: {claim.status}</Badge>
-                  {claim.status === 'needs-review' && (
-                    <Badge variant="secondary" className="ml-2 bg-yellow-100 text-yellow-800">Needs Review</Badge>
-                  )}
-                </div>
-              </CardContent>
-              <CardFooter className="p-2">
-                <Button variant="outline" size="sm" onClick={() => onClaimEdit(claim)}>
-                  <Edit className="mr-2 h-3 w-3" />
-                  Correct Data
-                </Button>
-              </CardFooter>
-            </Card>
-          </Popup>
-        </Marker>
-      ))}
+      {claims.map((claim) => {
+        const location = getClaimLocation(claim.location);
+        if (!location) return null;
+        
+        return (
+            <Marker
+            key={claim.id}
+            position={location}
+            icon={getClaimIcon(claim)}
+            >
+            <Popup>
+                <Card className="border-0 shadow-none max-w-sm">
+                <CardHeader className="p-2">
+                    <CardTitle className="text-base">{getClaimValue(claim.claimantName)}</CardTitle>
+                    <CardDescription>{getClaimValue(claim.claimType)} - {getClaimValue(claim.extentOfForestLandOccupied)}</CardDescription>
+                </CardHeader>
+                <CardContent className="p-2 space-y-2 text-sm">
+                    <p>Village: {getClaimValue(claim.village)}</p>
+                    <p>Date: {getClaimValue(claim.date)}</p>
+                    <div>
+                    <Badge variant="secondary">Status: {claim.status}</Badge>
+                    {claim.status === 'needs-review' && (
+                        <Badge variant="secondary" className="ml-2 bg-yellow-100 text-yellow-800">Needs Review</Badge>
+                    )}
+                    </div>
+                </CardContent>
+                <CardFooter className="p-2">
+                    <Button variant="outline" size="sm" onClick={() => onClaimEdit(claim)}>
+                    <Edit className="mr-2 h-3 w-3" />
+                    Correct Data
+                    </Button>
+                </CardFooter>
+                </Card>
+            </Popup>
+            </Marker>
+        )
+      })}
       {children}
     </MapContainer>
   );

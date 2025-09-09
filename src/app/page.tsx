@@ -20,6 +20,7 @@ import { getClaims, getVillages, getCommunityAssets, updateClaim, addCommunityAs
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Logo } from '@/components/icons';
+import L from 'leaflet';
 
 const MapView = dynamic(() => import('@/components/map-view').then(mod => mod.MapView), {
   ssr: false,
@@ -39,6 +40,23 @@ const StatsCard = ({ title, value, icon: Icon, color, borderColor }: { title: st
       </CardContent>
     </Card>
 );
+
+const getClaimLocation = (location: any): { lat: number; lng: number } | null => {
+    if (typeof location === 'object' && location !== null && 'value' in location) {
+        const { lat, lng } = location.value;
+        if (typeof lat === 'number' && typeof lng === 'number') {
+            return { lat, lng };
+        }
+    }
+    return null;
+}
+
+const getClaimValue = (field: any): string => {
+    if (typeof field === 'object' && field !== null && 'value' in field) {
+        return field.value;
+    }
+    return field as string;
+}
 
 export default function DashboardPage() {
   const [claims, setClaims] = useState<Claim[]>([]);
@@ -93,8 +111,9 @@ export default function DashboardPage() {
 
   const handleClaimAdded = (newClaim: Claim) => {
     setClaims((prevClaims) => [newClaim, ...prevClaims]);
-    if (newClaim.location) {
-        setMapCenter(newClaim.location as {lat: number, lng: number});
+    const location = getClaimLocation(newClaim.location);
+    if (location) {
+        setMapCenter(location);
         setMapZoom(12);
     }
   };
@@ -125,8 +144,9 @@ export default function DashboardPage() {
   const handleClaimEdit = (claim: Claim) => {
     setEditingClaim(claim);
     setShapefileUploadOpen(false); // Close shapefile upload if open
-    if(claim.location && typeof claim.location.lat === 'number' && typeof claim.location.lng === 'number') {
-        setMapCenter({lat: claim.location.lat, lng: claim.location.lng});
+    const location = getClaimLocation(claim.location);
+    if(location) {
+        setMapCenter(location);
         setMapZoom(14);
     }
   }

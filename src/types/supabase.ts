@@ -12,64 +12,61 @@ export type Database = {
     Tables: {
       claims: {
         Row: {
-          address: string
-          claimType: string
-          claimantName: string
-          confidenceScores: Json
+          address: Json
+          claimType: Json
+          claimantName: Json
           created_at: string
-          date: string
-          district: string
+          date: Json
+          district: Json
           documentType: string
           documentUrl: string
-          extentOfForestLandOccupied: string
-          gramPanchayat: string
+          extentOfForestLandOccupied: Json
+          gramPanchayat: Json
           id: string
           location: Json
-          pattaNumber: string
-          state: string
+          pattaNumber: Json
+          state: Json
           status: string
-          tehsilTaluka: string
-          village: string
+          tehsilTaluka: Json
+          village: Json
         }
         Insert: {
-          address: string
-          claimType: string
-          claimantName: string
-          confidenceScores: Json
+          address: Json
+          claimType: Json
+          claimantName: Json
           created_at?: string
-          date: string
-          district: string
+          date: Json
+          district: Json
           documentType: string
           documentUrl: string
-          extentOfForestLandOccupied: string
-          gramPanchayat: string
+          extentOfForestLandOccupied: Json
+          gramPanchayat: Json
           id?: string
           location: Json
-          pattaNumber: string
-          state: string
+          pattaNumber: Json
+          state: Json
           status: string
-          tehsilTaluka: string
-          village: string
+          tehsilTaluka: Json
+          village: Json
         }
         Update: {
-          address?: string
-          claimType?: string
-          claimantName?: string
-          confidenceScores?: Json
+          address?: Json
+          claimType?: Json
+          claimantName?: Json
           created_at?: string
-          date?: string
-          district?: string
+          date?: Json
+          district?: Json
           documentType?: string
           documentUrl?: string
-          extentOfForestLandOccupied?: string
-          gramPanchayat?: string
+          extentOfForestLandOccupied?: Json
+          gramPanchayat?: Json
           id?: string
           location?: Json
-          pattaNumber?: string
-          state?: string
+          pattaNumber?: Json
+          state?: Json
           status?: string
-          tehsilTaluka?: string
-          village?: string
+          tehsilTaluka?: Json
+          village?: Json
         }
         Relationships: []
       }

@@ -73,53 +73,26 @@ export async function handleClaimUpload(documentDataUri: string, documentType: s
   }
 
   // 5. Determine status based on confidence and validation
-  const allConfidences = [
-    extractedData.claimantName.confidence,
-    extractedData.pattaNumber.confidence,
-    extractedData.village.confidence,
-    extractedData.district.confidence,
-    extractedData.state.confidence,
-    locationResult.confidenceScore
-  ].map(c => c ?? 0);
+  const allConfidences = Object.values(extractedData).map(field => field.confidence);
+  allConfidences.push(locationResult.confidenceScore);
   
-  const lowestConfidence = Math.min(...allConfidences);
+  const lowestConfidence = Math.min(...allConfidences.map(c => c ?? 0));
   
   let status: Claim['status'] = 'unlinked';
   if (lowestConfidence < 0.8 || !isLocationValid) {
     status = 'needs-review';
   }
 
-  // 6. Insert the new claim
+  // 6. Insert the new claim - Pass the full extractedData object
   const newClaimData = {
-    claimantName: extractedData.claimantName.value,
-    pattaNumber: extractedData.pattaNumber.value,
-    extentOfForestLandOccupied: extractedData.extentOfForestLandOccupied.value,
-    village: extractedData.village.value,
-    gramPanchayat: extractedData.gramPanchayat.value,
-    tehsilTaluka: extractedData.tehsilTaluka.value,
-    district: extractedData.district.value,
-    state: extractedData.state.value,
-    date: extractedData.date.value,
-    claimType: extractedData.claimType.value,
-    address: extractedData.address.value,
+    ...extractedData, // This contains all the fields with { value, confidence }
     documentUrl: documentDataUri,
     documentType: documentType,
     status: status,
-    location: { lat: locationResult.lat, lng: locationResult.lng },
-    confidenceScores: {
-      claimantName: extractedData.claimantName.confidence,
-      pattaNumber: extractedData.pattaNumber.confidence,
-      extentOfForestLandOccupied: extractedData.extentOfForestLandOccupied.confidence,
-      village: extractedData.village.confidence,
-      gramPanchayat: extractedData.gramPanchayat.confidence,
-      tehsilTaluka: extractedData.tehsilTaluka.confidence,
-      district: extractedData.district.confidence,
-      state: extractedData.state.confidence,
-      date: extractedData.date.confidence,
-      claimType: extractedData.claimType.confidence,
-      address: extractedData.address.confidence,
-      location: locationResult.confidenceScore
-    }
+    location: {
+        value: { lat: locationResult.lat, lng: locationResult.lng },
+        confidence: locationResult.confidenceScore
+    },
   };
 
   const { data, error } = await supabase.from('claims').insert(newClaimData).select().single();
@@ -205,7 +178,7 @@ export async function getDssRecommendation(villageId: string): Promise<DssRecomm
         throw new Error("Village not found");
     }
 
-    const { data: claimsInVillage, error: claimsError } = await supabase.from('claims').select('claimType, status, village').eq('village', village.name);
+    const { data: claimsInVillage, error: claimsError } = await supabase.from('claims').select('claimType, status, village').eq('village->>value', village.name);
     
     if(claimsError) {
         throw new Error("Could not fetch claims for village.");
@@ -214,9 +187,9 @@ export async function getDssRecommendation(villageId: string): Promise<DssRecomm
     const result = await dssRecommendations({
         villageName: village.name,
         claimCount: claimsInVillage.length,
-        pendingClaims: claimsInVillage.filter(c => c.status !== 'reviewed' && c.status !== 'linked').length,
-        cfrClaims: claimsInVillage.filter(c => c.claimType === 'CFR').length,
-        ifrClaims: claimsInVillage.filter(c => c.claimType === 'IFR').length,
+        pendingClaims: claimsInVillage.filter(c => (c.status as string) !== 'reviewed' && (c.status as string) !== 'linked').length,
+        cfrClaims: claimsInVillage.filter(c => (c.claimType as any).value === 'CFR').length,
+        ifrClaims: claimsInVillage.filter(c => (c.claimType as any).value === 'IFR').length,
         waterCoverage: (village.assetCoverage as any).water,
         forestCoverage: (village.assetCoverage as any).forest,
         agriculturalArea: (village.assetCoverage as any).agriculture,
