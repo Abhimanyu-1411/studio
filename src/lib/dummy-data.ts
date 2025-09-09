@@ -60,6 +60,26 @@ export const dummyVillages: Village[] = [
             { lat: 23.89, lng: 91.87 },
             { lat: 23.89, lng: 91.83 },
         ],
+        assetGeometries: {
+            ndwi: [[
+                { lat: 23.92, lng: 91.840 },
+                { lat: 23.92, lng: 91.845 },
+                { lat: 23.91, lng: 91.845 },
+                { lat: 23.91, lng: 91.840 },
+            ]],
+            forest: [[
+                { lat: 23.925, lng: 91.85 },
+                { lat: 23.925, lng: 91.86 },
+                { lat: 23.90, lng: 91.86 },
+                { lat: 23.90, lng: 91.85 },
+            ]],
+            agriculture: [[
+                { lat: 23.90, lng: 91.832 },
+                { lat: 23.90, lng: 91.838 },
+                { lat: 23.895, lng: 91.838 },
+                { lat: 23.895, lng: 91.832 },
+            ]],
+        },
         timeSeriesData: generateTimeSeries(150, 'rainfall')
     },
     {
@@ -74,6 +94,21 @@ export const dummyVillages: Village[] = [
             { lat: 23.51, lng: 91.50 },
             { lat: 23.51, lng: 91.46 },
         ],
+        assetGeometries: {
+            ndwi: [[
+                { lat: 23.54, lng: 91.47 },
+                { lat: 23.54, lng: 91.48 },
+                { lat: 23.53, lng: 91.48 },
+                { lat: 23.53, lng: 91.47 },
+            ]],
+            forest: [],
+            agriculture: [[
+                { lat: 23.52, lng: 91.49 },
+                { lat: 23.52, lng: 91.495 },
+                { lat: 23.515, lng: 91.495 },
+                { lat: 23.515, lng: 91.49 },
+            ]],
+        },
         timeSeriesData: generateTimeSeries(0.6, 'ndwi')
     },
     {
@@ -88,6 +123,16 @@ export const dummyVillages: Village[] = [
             { lat: 24.30, lng: 92.03 },
             { lat: 24.30, lng: 91.99 },
         ],
+        assetGeometries: {
+            ndwi: [],
+            forest: [[
+                { lat: 24.33, lng: 92.00 },
+                { lat: 24.33, lng: 92.02 },
+                { lat: 24.31, lng: 92.02 },
+                { lat: 24.31, lng: 92.00 },
+            ]],
+            agriculture: [],
+        },
         timeSeriesData: generateTimeSeries(0.8, 'ndvi')
     }
 ];
