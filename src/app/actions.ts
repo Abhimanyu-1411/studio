@@ -65,7 +65,7 @@ export async function handleClaimUpload(documentDataUri: string, documentType: s
     const claimPoint = point([locationResult.lng, locationResult.lat]);
     // Turf expects the first and last points to be the same to close the polygon
     const boundaryCoords = villageBounds.map(p => [p.lng, p.lat]);
-    if (boundaryCoords[0][0] !== boundaryCoords[boundaryCoords.length - 1][0] || boundaryCoords[0][1] !== boundaryCoords[boundaryCoords.length - 1][1]) {
+    if (boundaryCoords.length > 0 && (boundaryCoords[0][0] !== boundaryCoords[boundaryCoords.length - 1][0] || boundaryCoords[0][1] !== boundaryCoords[boundaryCoords.length - 1][1])) {
         boundaryCoords.push(boundaryCoords[0]);
     }
     const villagePolygon = polygon([boundaryCoords]);
@@ -202,7 +202,7 @@ export async function getDssRecommendation(villageId: string): Promise<DssRecomm
         claimCount: claimsInVillage.length,
         pendingClaims: claimsInVillage.filter(c => c.status !== 'reviewed' && c.status !== 'linked').length,
         cfrClaims: claimsInVillage.filter(c => (c.claimType as any)?.value === 'CFR').length,
-        ifrClaims: claimsInVillage.filter(c => (c.claimType as any)?.value === 'IFR').length,
+        ifrClaims: claimsInV_illage.filter(c => (c.claimType as any)?.value === 'IFR').length,
         waterCoverage: (village.assetCoverage as any).water,
         forestCoverage: (village.assetCoverage as any).forest,
         agriculturalArea: (village.assetCoverage as any).agriculture,
