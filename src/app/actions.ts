@@ -24,7 +24,7 @@ export async function handleClaimUpload(documentDataUri: string, documentType: s
   const districtName = extractedData.district.value;
   const stateName = extractedData.state.value;
 
-  // 2. Geocode the address to get a location point FIRST. This point will be used to select the correct boundary.
+  // 2. Geocode the address to get a location point
   const locationResult = await geocodeAddress({
     address: extractedData.address.value,
     village: villageName,
@@ -34,14 +34,28 @@ export async function handleClaimUpload(documentDataUri: string, documentType: s
   });
   const claimPoint = point([locationResult.lng, locationResult.lat]);
 
-  // 3. Get or create the village and fetch its boundary
-  let { data: villageRecord } = await supabase.from('villages').select('id, bounds').eq('name', villageName).single();
+  // 3. Get or create the village and validate location
+  let villageRecord: Pick<Village, 'id' | 'bounds'> | null = null;
   let villageBounds: { lat: number; lng: number }[] | null = null;
   let isLocationValid = false;
 
-  if (villageRecord && villageRecord.bounds) {
-    villageBounds = villageRecord.bounds as { lat: number; lng: number }[];
+  const { data: existingVillage } = await supabase.from('villages').select('id, bounds').eq('name', villageName).maybeSingle();
+
+  if (existingVillage) {
+      villageRecord = existingVillage;
+      villageBounds = existingVillage.bounds as { lat: number, lng: number }[];
+      
+      const boundaryCoords = villageBounds.map(p => [p.lng, p.lat]);
+       if (boundaryCoords.length > 0 && (boundaryCoords[0][0] !== boundaryCoords[boundaryCoords.length - 1][0] || boundaryCoords[0][1] !== boundaryCoords[boundaryCoords.length - 1][1])) {
+          boundaryCoords.push(boundaryCoords[0]);
+      }
+      if (boundaryCoords.length > 3) {
+          const villagePolygon = polygon([boundaryCoords]);
+          isLocationValid = booleanPointInPolygon(claimPoint, villagePolygon);
+      }
+
   } else {
+    // Village not found, so fetch boundary and create it
     const boundaryData = await getVillageBoundary({
       village: villageName,
       district: districtName,
@@ -59,14 +73,14 @@ export async function handleClaimUpload(documentDataUri: string, documentType: s
           const villagePolygon = polygon([boundaryCoords]);
           if (booleanPointInPolygon(claimPoint, villagePolygon)) {
             villageBounds = poly;
-            isLocationValid = true;
-            break; // Found the correct polygon
+            isLocationValid = true; // Location is valid because we found the containing polygon
+            break; 
           }
         }
       }
     }
 
-    if(villageBounds){
+    if (villageBounds) {
       const { data: newVillage, error: newVillageError } = await supabase.from('villages').insert({
         name: villageName,
         bounds: villageBounds,
@@ -80,33 +94,16 @@ export async function handleClaimUpload(documentDataUri: string, documentType: s
         throw new Error("Failed to save the new village to the database.");
       }
       villageRecord = newVillage; // Assign the newly created village record
-    } else {
-        // If no polygon contains the point after fetching, the location is invalid.
-        isLocationValid = false;
-    }
-  }
-  
-  if (villageBounds && !isLocationValid) {
-    if (Array.isArray(villageBounds) && villageBounds.length > 2) {
-        const boundaryCoords = villageBounds.map(p => [p.lng, p.lat]);
-        if (boundaryCoords.length > 0 && (boundaryCoords[0][0] !== boundaryCoords[boundaryCoords.length - 1][0] || boundaryCoords[0][1] !== boundaryCoords[boundaryCoords.length - 1][1])) {
-            boundaryCoords.push(boundaryCoords[0]);
-        }
-        if (boundaryCoords.length > 3) {
-            const villagePolygon = polygon([boundaryCoords]);
-            isLocationValid = booleanPointInPolygon(claimPoint, villagePolygon);
-        }
     }
   }
 
 
   // 4. Determine status based on confidence and validation
   const allConfidences = Object.values(extractedData).map(field => field.confidence);
-  
   const lowestConfidence = Math.min(...allConfidences);
-  
   let status: Claim['status'] = 'unlinked';
-  if (lowestConfidence < 0.8 || locationResult.confidenceScore < 0.8 || !isLocationValid) {
+
+  if (lowestConfidence < 0.8 || locationResult.confidenceScore < 0.8 || !isLocationValid || !villageRecord) {
     status = 'needs-review';
   }
 
@@ -176,7 +173,9 @@ export async function updateClaim(claimId: string, updatedData: Partial<Claim>) 
     const { data, error } = await supabase
         .from('claims')
         .update(dataToUpdate)
-        .eq('id', claimId);
+        .eq('id', claimId)
+        .select()
+        .single();
         
     if (error) {
         console.error("Error updating claim:", error);
@@ -184,7 +183,7 @@ export async function updateClaim(claimId: string, updatedData: Partial<Claim>) 
     }
     revalidatePath('/');
     revalidatePath('/claims');
-    return;
+    return data;
 }
 
 export async function deleteClaim(claimId: string) {
