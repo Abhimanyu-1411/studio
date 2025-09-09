@@ -16,7 +16,7 @@ import {createClient} from '@/lib/supabase/server';
 const GeocodeAddressInputSchema = z.object({
   address: z.string().describe('The full address line, if available.'),
   village: z.string().describe('The village name.'),
-  tehsil: z.string().describe('The tehsil/taluka name.'),
+  tehsilTaluka: z.string().describe('The tehsil/taluka name.'),
   district: z.string().describe('The district name.'),
   state: z.string().describe('The state name.'),
 });
@@ -63,9 +63,9 @@ const prompt = ai.definePrompt({
   output: {schema: GeocodeAddressOutputSchema},
   prompt: `You are an expert geocoding service like Nominatim or Google Maps. Your task is to convert a textual address into precise geographic coordinates (latitude and longitude) in EPSG:4326 format.
 
-Use the standardized address format for the query: "{{address}}, {{village}}, {{tehsil}}, {{district}}, {{state}}, India".
+Use the standardized address format for the query: "{{address}}, {{village}}, {{tehsilTaluka}}, {{district}}, {{state}}, India".
 
-It is crucial to use the village, tehsil, district, and state for accurate geographical context to avoid ambiguity.
+It is crucial to use the village, tehsil/taluka, district, and state for accurate geographical context to avoid ambiguity.
 
 Return the coordinates in JSON format, including a confidence score from 0.0 to 1.0 indicating how certain you are of the location's accuracy. A score of 1.0 means you are 100% confident. If the address is vague or lacks a specific landmark/Plus Code, provide the most likely coordinates with a lower confidence score.
 `,

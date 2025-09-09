@@ -20,7 +20,7 @@ export async function handleClaimUpload(documentDataUri: string, documentType: s
   const extractedData = await extractClaimData({ documentDataUri });
 
   const villageName = extractedData.village.value;
-  const tehsilName = extractedData.tehsilTaluka.value;
+  const tehsilTalukaName = extractedData.tehsilTaluka.value;
   const districtName = extractedData.district.value;
   const stateName = extractedData.state.value;
 
@@ -57,7 +57,7 @@ export async function handleClaimUpload(documentDataUri: string, documentType: s
   const locationResult = await geocodeAddress({
     address: extractedData.address.value,
     village: villageName,
-    tehsil: tehsilName,
+    tehsilTaluka: tehsilTalukaName,
     district: districtName,
     state: stateName,
   });
