@@ -95,6 +95,8 @@ export async function handleClaimUpload(documentDataUri: string, documentType: s
         value: { lat: locationResult.lat, lng: locationResult.lng },
         confidence: locationResult.confidenceScore
     },
+    boundary_at_validation: villageBounds,
+    is_location_valid: isLocationValid,
   }).select().single();
 
   if (error) {

@@ -14,6 +14,7 @@ export type Database = {
         Row: {
           address: Json
           boundaries: Json
+          boundary_at_validation: Json | null
           claimType: Json
           claimantName: Json
           created_at: string
@@ -24,6 +25,7 @@ export type Database = {
           extentOfForestLandOccupied: Json
           gramPanchayat: Json
           id: string
+          is_location_valid: boolean | null
           location: Json
           pattaNumber: Json
           state: Json
@@ -34,6 +36,7 @@ export type Database = {
         Insert: {
           address: Json
           boundaries: Json
+          boundary_at_validation?: Json | null
           claimType: Json
           claimantName: Json
           created_at?: string
@@ -44,6 +47,7 @@ export type Database = {
           extentOfForestLandOccupied: Json
           gramPanchayat: Json
           id?: string
+          is_location_valid?: boolean | null
           location: Json
           pattaNumber: Json
           state: Json
@@ -54,6 +58,7 @@ export type Database = {
         Update: {
           address?: Json
           boundaries?: Json
+          boundary_at_validation?: Json | null
           claimType?: Json
           claimantName?: Json
           created_at?: string
@@ -64,6 +69,7 @@ export type Database = {
           extentOfForestLandOccupied?: Json
           gramPanchayat?: Json
           id?: string
+          is_location_valid?: boolean | null
           location?: Json
           pattaNumber?: Json
           state?: Json
