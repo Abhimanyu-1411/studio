@@ -42,6 +42,13 @@ const RecommendationCard = ({ recommendation, onActed, isActedOn }: { recommenda
   )
 }
 
+const getClaimValue = (field: any): string => {
+    if (typeof field === 'object' && field !== null && 'value' in field) {
+        return field.value;
+    }
+    return field as string;
+}
+
 export const VillageAnalysis = ({ villages, claims }: { villages: Village[], claims: Claim[] }) => {
   const [selectedVillageId, setSelectedVillageId] = useState<string | null>(null);
   const [recommendations, setRecommendations] = useState<DssRecommendation[] | null>(null);
@@ -92,7 +99,7 @@ export const VillageAnalysis = ({ villages, claims }: { villages: Village[], cla
 
   const villageClaims = useMemo(() => {
     if (!selectedVillage) return [];
-    return claims.filter(c => c.village === selectedVillage.name);
+    return claims.filter(c => getClaimValue(c.village) === selectedVillage.name);
   }, [selectedVillage, claims]);
 
   const handleMarkAsActed = (recommendation: string) => {
@@ -131,8 +138,8 @@ export const VillageAnalysis = ({ villages, claims }: { villages: Village[], cla
             <CardContent className="text-sm space-y-2">
                 <p><strong>Total Claims:</strong> {villageClaims.length}</p>
                 <p><strong>Pending Claims:</strong> {villageClaims.filter(c => c.status !== 'reviewed' && c.status !== 'linked').length}</p>
-                <p><strong>CFR Claims:</strong> {villageClaims.filter(c => c.claimType === 'CFR').length}</p>
-                <p><strong>IFR Claims:</strong> {villageClaims.filter(c => c.claimType === 'IFR').length}</p>
+                <p><strong>CFR Claims:</strong> {villageClaims.filter(c => getClaimValue(c.claimType) === 'CFR').length}</p>
+                <p><strong>IFR Claims:</strong> {villageClaims.filter(c => getClaimValue(c.claimType) === 'IFR').length}</p>
                 <p><strong>Water Coverage:</strong> {selectedVillage.assetCoverage.water}%</p>
                 <p><strong>Forest Coverage:</strong> {selectedVillage.assetCoverage.forest}%</p>
                 <p><strong>Agricultural Area:</strong> {selectedVillage.assetCoverage.agriculture}%</p>
@@ -185,5 +192,3 @@ export const VillageAnalysis = ({ villages, claims }: { villages: Village[], cla
     </div>
   )
 }
-
-    

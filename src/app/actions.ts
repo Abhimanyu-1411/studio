@@ -29,7 +29,7 @@ export async function handleClaimUpload(documentDataUri: string, documentType: s
   let villageBounds;
 
   if (village && village.bounds) {
-    villageBounds = village.bounds;
+    villageBounds = village.bounds as { lat: number; lng: number }[];
   } else {
     const boundaryData = await getVillageBoundary({
       village: villageName,
@@ -50,7 +50,7 @@ export async function handleClaimUpload(documentDataUri: string, documentType: s
       throw new Error("Failed to save the new village to the database.");
     }
     village = newVillage;
-    villageBounds = newVillage.bounds;
+    villageBounds = newVillage.bounds as { lat: number; lng: number }[];
   }
   
   // 3. Geocode the address to get a location point
@@ -67,7 +67,6 @@ export async function handleClaimUpload(documentDataUri: string, documentType: s
   if (locationResult && Array.isArray(villageBounds) && villageBounds.length > 2) {
     const claimPoint = point([locationResult.lng, locationResult.lat]);
     const boundaryCoords = villageBounds.map(p => [p.lng, p.lat]);
-    // Ensure the polygon is closed for valid GeoJSON
     if (boundaryCoords.length > 0 && (boundaryCoords[0][0] !== boundaryCoords[boundaryCoords.length - 1][0] || boundaryCoords[0][1] !== boundaryCoords[boundaryCoords.length - 1][1])) {
         boundaryCoords.push(boundaryCoords[0]);
     }
@@ -89,7 +88,18 @@ export async function handleClaimUpload(documentDataUri: string, documentType: s
 
   // 6. Insert the new claim
   const claimToInsert = {
-    ...extractedData,
+    claimantName: extractedData.claimantName,
+    pattaNumber: extractedData.pattaNumber,
+    extentOfForestLandOccupied: extractedData.extentOfForestLandOccupied,
+    village: extractedData.village,
+    gramPanchayat: extractedData.gramPanchayat,
+    tehsilTaluka: extractedData.tehsilTaluka,
+    district: extractedData.district,
+    state: extractedData.state,
+    date: extractedData.date,
+    address: extractedData.address,
+    boundaries: extractedData.boundaries,
+    claimType: extractedData.claimType,
     documentUrl: documentDataUri,
     documentType: documentType,
     status: status,
@@ -134,10 +144,9 @@ export async function handleShapefileUpload(shapefileDataUri: string): Promise<P
 export async function updateClaim(claimId: string, updatedData: Partial<Claim>) {
     const supabase = createClient();
     
-    const dataToUpdate = { ...updatedData };
-    // These fields should not be updated.
-    delete (dataToUpdate as Partial<Claim>).id; 
-    delete (dataToUpdate as Partial<Claim>).created_at;
+    const dataToUpdate: { [key: string]: any } = { ...updatedData };
+    delete dataToUpdate.id; 
+    delete dataToUpdate.created_at;
 
     const { data, error } = await supabase
         .from('claims')

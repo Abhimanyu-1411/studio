@@ -160,5 +160,3 @@ export function ClaimsTable({ claims, onClaimEdit, onClaimLink, onClaimReject, o
     </>
   );
 }
-
-    
