@@ -92,7 +92,7 @@ export function ClaimUpload({ open, onOpenChange, onClaimAdded }: ClaimUploadPro
       setProgress(100);
       toast({
         title: 'Claim Processed',
-        description: `Extracted data for ${newClaim.claimantName}.`,
+        description: `Extracted data for ${newClaim.claimantName.value}.`,
       });
       setTimeout(() => handleClose(false), 1000);
     } catch (error: any) {
