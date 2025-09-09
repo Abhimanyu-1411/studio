@@ -35,12 +35,12 @@ export async function handleClaimUpload(documentDataUri: string, documentType: s
   const claimPoint = point([locationResult.lng, locationResult.lat]);
 
   // 3. Get or create the village and fetch its boundary
-  let { data: village } = await supabase.from('villages').select('id, bounds').eq('name', villageName).single();
+  let { data: villageRecord } = await supabase.from('villages').select('id, bounds').eq('name', villageName).single();
   let villageBounds: { lat: number; lng: number }[] | null = null;
   let isLocationValid = false;
 
-  if (village && village.bounds) {
-    villageBounds = village.bounds as { lat: number; lng: number }[];
+  if (villageRecord && villageRecord.bounds) {
+    villageBounds = villageRecord.bounds as { lat: number; lng: number }[];
   } else {
     const boundaryData = await getVillageBoundary({
       village: villageName,
@@ -73,13 +73,13 @@ export async function handleClaimUpload(documentDataUri: string, documentType: s
         center: boundaryData.center,
         ndwi: 0,
         assetCoverage: { water: 0, forest: 0, agriculture: 0 }
-      }).select('id').single();
+      }).select('id, bounds').single();
       
       if (newVillageError) {
         console.error("Supabase insert new village error:", newVillageError);
         throw new Error("Failed to save the new village to the database.");
       }
-      village = newVillage;
+      villageRecord = newVillage; // Assign the newly created village record
     } else {
         // If no polygon contains the point after fetching, the location is invalid.
         isLocationValid = false;
@@ -131,6 +131,7 @@ export async function handleClaimUpload(documentDataUri: string, documentType: s
         value: { lat: locationResult.lat, lng: locationResult.lng },
         confidence: locationResult.confidenceScore
     },
+    villageId: villageRecord?.id || null,
     boundary_at_validation: villageBounds,
     is_location_valid: isLocationValid,
   };
@@ -328,3 +329,5 @@ export async function getPattas(): Promise<Patta[]> {
     }
     return data as Patta[];
 }
+
+    

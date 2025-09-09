@@ -43,6 +43,7 @@ export type Database = {
           status: string
           tehsilTaluka: FieldWithConfidence
           village: FieldWithConfidence
+          villageId: string | null
         }
         Insert: {
           address: FieldWithConfidence
@@ -65,6 +66,7 @@ export type Database = {
           status: string
           tehsilTaluka: FieldWithConfidence
           village: FieldWithConfidence
+          villageId?: string | null
         }
         Update: {
           address?: FieldWithConfidence
@@ -87,8 +89,15 @@ export type Database = {
           status?: string
           tehsilTaluka?: FieldWithConfidence
           village?: FieldWithConfidence
+          villageId?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            columns: ["villageId"]
+            referencedRelation: "villages"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       community_assets: {
         Row: {
@@ -286,3 +295,5 @@ export type Enums<
   : PublicEnumNameOrOptions extends keyof Database["public"]["Enums"]
   ? Database["public"]["Enums"][PublicEnumNameOrOptions]
   : never
+
+    

@@ -25,7 +25,8 @@ export type Claim = {
   documentType: string;
   status: 'unlinked' | 'linked' | 'reviewed' | 'needs-review' | 'rejected';
   location: { value: { lat: number; lng: number }, confidence: number };
-  boundary_at_validation?: LatLng[];
+  villageId?: string | null;
+  boundary_at_validation?: LatLng[] | null;
   is_location_valid: boolean;
 };
 
@@ -80,3 +81,5 @@ export type Patta = {
     villageName: string;
     geometry: LatLng[];
 }
+
+    
