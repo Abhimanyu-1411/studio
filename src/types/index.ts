@@ -26,7 +26,7 @@ export type Claim = {
   status: 'unlinked' | 'linked' | 'reviewed' | 'needs-review' | 'rejected';
   location: { value: { lat: number; lng: number }, confidence: number };
   boundary_at_validation?: LatLng[];
-  is_location_valid?: boolean;
+  is_location_valid: boolean;
 };
 
 type LatLng = { lat: number; lng: number };

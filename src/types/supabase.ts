@@ -36,8 +36,8 @@ export type Database = {
           extentOfForestLandOccupied: FieldWithConfidence
           gramPanchayat: FieldWithConfidence
           id: string
-          is_location_valid: boolean | null
-          location: LocationWithConfidence
+          is_location_valid: boolean
+          location: LocationWithConfidence | null
           pattaNumber: FieldWithConfidence
           state: FieldWithConfidence
           status: string
@@ -58,8 +58,8 @@ export type Database = {
           extentOfForestLandOccupied: FieldWithConfidence
           gramPanchayat: FieldWithConfidence
           id?: string
-          is_location_valid?: boolean | null
-          location: LocationWithConfidence
+          is_location_valid: boolean
+          location?: LocationWithConfidence | null
           pattaNumber: FieldWithConfidence
           state: FieldWithConfidence
           status: string
@@ -80,8 +80,8 @@ export type Database = {
           extentOfForestLandOccupied?: FieldWithConfidence
           gramPanchayat?: FieldWithConfidence
           id?: string
-          is_location_valid?: boolean | null
-          location?: LocationWithConfidence
+          is_location_valid?: boolean
+          location?: LocationWithConfidence | null
           pattaNumber?: FieldWithConfidence
           state?: FieldWithConfidence
           status?: string
