@@ -202,7 +202,7 @@ export async function getDssRecommendation(villageId: string): Promise<DssRecomm
         claimCount: claimsInVillage.length,
         pendingClaims: claimsInVillage.filter(c => c.status !== 'reviewed' && c.status !== 'linked').length,
         cfrClaims: claimsInVillage.filter(c => (c.claimType as any)?.value === 'CFR').length,
-        ifrClaims: claimsInV_illage.filter(c => (c.claimType as any)?.value === 'IFR').length,
+        ifrClaims: claimsInVillage.filter(c => (c.claimType as any)?.value === 'IFR').length,
         waterCoverage: (village.assetCoverage as any).water,
         forestCoverage: (village.assetCoverage as any).forest,
         agriculturalArea: (village.assetCoverage as any).agriculture,
