@@ -65,7 +65,6 @@ export async function handleClaimUpload(documentDataUri: string, documentType: s
   let isLocationValid = false;
   if (locationResult && Array.isArray(villageBounds) && villageBounds.length > 2) {
     const claimPoint = point([locationResult.lng, locationResult.lat]);
-    // Turf expects the first and last points to be the same to close the polygon
     const boundaryCoords = villageBounds.map(p => [p.lng, p.lat]);
     if (boundaryCoords.length > 0 && (boundaryCoords[0][0] !== boundaryCoords[boundaryCoords.length - 1][0] || boundaryCoords[0][1] !== boundaryCoords[boundaryCoords.length - 1][1])) {
         boundaryCoords.push(boundaryCoords[0]);
@@ -76,12 +75,11 @@ export async function handleClaimUpload(documentDataUri: string, documentType: s
 
   // 5. Determine status based on confidence and validation
   const allConfidences = Object.values(extractedData).map(field => field.confidence);
-  allConfidences.push(locationResult.confidenceScore);
   
   const lowestConfidence = Math.min(...allConfidences.map(c => c ?? 0));
   
   let status: Claim['status'] = 'unlinked';
-  if (lowestConfidence < 0.8 || !isLocationValid) {
+  if (lowestConfidence < 0.8 || locationResult.confidenceScore < 0.8 || !isLocationValid) {
     status = 'needs-review';
   }
 
