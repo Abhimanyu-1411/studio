@@ -65,7 +65,12 @@ const getClaimIcon = (claim: Claim) => {
 const MapController = ({ center, zoom }: { center: { lat: number, lng: number }, zoom: number }) => {
   const map = useMap();
   useEffect(() => {
-    map.setView(center, zoom);
+    // Only pan/zoom if the map's current center/zoom is different from the props.
+    // This prevents resetting the view on every render.
+    const mapCenter = map.getCenter();
+    if (mapCenter.lat !== center.lat || mapCenter.lng !== center.lng || map.getZoom() !== zoom) {
+      map.setView(center, zoom);
+    }
   }, [center, zoom, map]);
   return null;
 }
