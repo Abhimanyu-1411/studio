@@ -1,15 +1,14 @@
+
 'use server';
 
 /**
  * @fileOverview An AI agent to process shapefiles for patta data.
- *
- * - processShapefile - A function that extracts geospatial and attribute data from a shapefile.
- * - ProcessShapefileInput - The input type for the processShapefile function.
- * - ProcessShapefileOutput - The return type for the processShapefile function.
+ * This file is now using dummy data for demonstration purposes.
  */
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
+import { dummyPattas } from '@/lib/dummy-data';
 
 const LatLngSchema = z.object({
   lat: z.number(),
@@ -35,9 +34,14 @@ export type ProcessShapefileInput = z.infer<typeof ProcessShapefileInputSchema>;
 const ProcessShapefileOutputSchema = z.array(PattaSchema);
 export type ProcessShapefileOutput = z.infer<typeof ProcessShapefileOutputSchema>;
 
+// Return dummy data instead of calling the AI flow
 export async function processShapefile(input: ProcessShapefileInput): Promise<ProcessShapefileOutput> {
-  return processShapefileFlow(input);
+  console.log("Simulating shapefile processing...");
+  // Return a couple of new dummy pattas to simulate a successful upload
+  const newDummyPattas = dummyPattas.slice(0, 2).map(p => ({...p, holderName: `${p.holderName} (New)`}));
+  return Promise.resolve(newDummyPattas);
 }
+
 
 const prompt = ai.definePrompt({
   name: 'processShapefilePrompt',

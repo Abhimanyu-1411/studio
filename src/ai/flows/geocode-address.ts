@@ -3,15 +3,11 @@
 
 /**
  * @fileOverview This flow provides geocoding functionality.
- *
- * - geocodeAddress - A function that converts a textual address to geographic coordinates.
- * - GeocodeAddressInput - The input type for the geocodeAddress function.
- * - GeocodeAddressOutput - The return type for the geocodeAddress function.
+ * This file is now using dummy data for demonstration purposes.
  */
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import {createClient} from '@/lib/supabase/server';
 
 const GeocodeAddressInputSchema = z.object({
   address: z.string().describe('The full address line, if available.'),
@@ -29,32 +25,17 @@ const GeocodeAddressOutputSchema = z.object({
 });
 export type GeocodeAddressOutput = z.infer<typeof GeocodeAddressOutputSchema>;
 
+// Return dummy data instead of calling the AI flow
 export async function geocodeAddress(
   input: GeocodeAddressInput
 ): Promise<GeocodeAddressOutput> {
-  // First, try to get a precise location
-  const geocodeResult = await geocodeAddressFlow(input);
-  
-  // If confidence is low, fall back to village center
-  if (geocodeResult.confidenceScore < 0.5) {
-      const supabase = createClient();
-      const { data: village } = await supabase
-        .from('villages')
-        .select('center')
-        .eq('name', input.village)
-        .single();
-      
-      if (village && village.center) {
-        const center = village.center as {lat: number, lng: number};
-        return {
-            lat: center.lat,
-            lng: center.lng,
-            confidenceScore: 0.2 // Low confidence, as it's a fallback
-        };
-      }
-  }
-  
-  return geocodeResult;
+  console.log("Simulating geocoding for:", input.address);
+  // Return a plausible location within Tripura with high confidence
+  return Promise.resolve({
+    lat: 23.8315,
+    lng: 91.2868,
+    confidenceScore: 0.95
+  });
 }
 
 const prompt = ai.definePrompt({

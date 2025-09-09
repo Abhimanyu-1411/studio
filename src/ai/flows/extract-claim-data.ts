@@ -3,14 +3,12 @@
 
 /**
  * @fileOverview An AI agent to extract claim data from documents.
- *
- * - extractClaimData - A function that extracts data from claim documents.
- * - ExtractClaimDataInput - The input type for the extractClaimdata function.
- * - ExtractClaimDataOutput - The return type for the extractClaimData function.
+ * This file is now using dummy data for demonstration purposes.
  */
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
+import { dummyClaimData } from '@/lib/dummy-data';
 
 const ExtractClaimDataInputSchema = z.object({
   documentDataUri: z
@@ -43,10 +41,14 @@ const ExtractClaimDataOutputSchema = z.object({
 });
 export type ExtractClaimDataOutput = z.infer<typeof ExtractClaimDataOutputSchema>;
 
+// Return dummy data instead of calling the AI flow
 export async function extractClaimData(input: ExtractClaimDataInput): Promise<ExtractClaimDataOutput> {
-  return extractClaimDataFlow(input);
+  console.log("Simulating claim data extraction for:", input.documentDataUri.substring(0, 50) + "...");
+  // You can add logic here to return different dummy data based on the input if needed
+  return Promise.resolve(dummyClaimData);
 }
 
+// The original flow is kept below but is no longer called directly from the app actions.
 const prompt = ai.definePrompt({
   name: 'extractClaimDataPrompt',
   input: {schema: ExtractClaimDataInputSchema},
