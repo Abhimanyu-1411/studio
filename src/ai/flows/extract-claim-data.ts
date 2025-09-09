@@ -1,10 +1,11 @@
+
 'use server';
 
 /**
  * @fileOverview An AI agent to extract claim data from documents.
  *
  * - extractClaimData - A function that extracts data from claim documents.
- * - ExtractClaimDataInput - The input type for the extractClaimData function.
+ * - ExtractClaimDataInput - The input type for the extractClaimdata function.
  * - ExtractClaimDataOutput - The return type for the extractClaimData function.
  */
 
@@ -21,22 +22,23 @@ const ExtractClaimDataInputSchema = z.object({
 export type ExtractClaimDataInput = z.infer<typeof ExtractClaimDataInputSchema>;
 
 const FieldWithConfidenceSchema = z.object({
-    value: z.string(),
+    value: z.string().describe('The extracted value.'),
     confidence: z.number().min(0).max(1).describe('The confidence score of the extraction, from 0 to 1.'),
 });
 
 const ExtractClaimDataOutputSchema = z.object({
   claimantName: FieldWithConfidenceSchema.describe('The name of the claimant.'),
   pattaNumber: FieldWithConfidenceSchema.describe('The patta number of the claim.'),
-  extentOfForestLandOccupied: FieldWithConfidenceSchema.describe('The extent of forest land occupied.'),
+  extentOfForestLandOccupied: FieldWithConfidenceSchema.describe('The extent of forest land occupied, in hectares.'),
   village: FieldWithConfidenceSchema.describe('The village where the claim is located.'),
   gramPanchayat: FieldWithConfidenceSchema.describe('The gram panchayat of the claim.'),
   tehsilTaluka: FieldWithConfidenceSchema.describe('The tehsil/taluka of the claim.'),
   district: FieldWithConfidenceSchema.describe('The district of the claim.'),
   state: FieldWithConfidenceSchema.describe('The state of the claim.'),
   date: FieldWithConfidenceSchema.describe('The date of the claim.'),
-  claimType: FieldWithConfidenceSchema.describe('The type of claim.'),
+  claimType: FieldWithConfidenceSchema.describe('The type of claim (e.g., IFR, CFR).'),
   address: FieldWithConfidenceSchema.describe('The full address of the claimant.'),
+  boundaries: FieldWithConfidenceSchema.describe('The descriptive boundaries (North, South, East, West landmarks).'),
 });
 export type ExtractClaimDataOutput = z.infer<typeof ExtractClaimDataOutputSchema>;
 
@@ -48,27 +50,26 @@ const prompt = ai.definePrompt({
   name: 'extractClaimDataPrompt',
   input: {schema: ExtractClaimDataInputSchema},
   output: {schema: ExtractClaimDataOutputSchema},
-  prompt: `You are an expert in extracting information from claim documents.
+  prompt: `You are an expert GIS analyst specializing in extracting information from Forest Rights Act (FRA) claim documents.
 
-You will receive a claim document and you will extract the following information in this specific order:
+Your task is to meticulously extract the following fields from the provided document. For each field, provide the extracted value and a confidence score from 0.0 to 1.0 indicating your certainty.
+
 - claimantName: The name of the claimant.
-- pattaNumber: The patta number associated with the claim.
-- extentOfForestLandOccupied: The area of the claim, referred to as 'Extent of forest land occupied'.
-- village: The village where the claim is located.
-- gramPanchayat: The gram panchayat for the claim area.
-- tehsilTaluka: The tehsil or taluka for the claim area.
-- district: The district for the claim area.
-- state: The state for the claim area.
+- pattaNumber: The patta number, if available.
+- extentOfForestLandOccupied: The area of land, specified in hectares.
+- village: The village name.
+- gramPanchayat: The gram panchayat.
+- tehsilTaluka: The tehsil or taluka.
+- district: The district.
+- state: The state.
 - date: The date the claim was filed.
-- claimType: The type of claim (e.g., IFR, CFR).
-- address: The full address of the claimant.
-
-
-For each field, provide the extracted value and a confidence score from 0.0 to 1.0 representing how certain you are about the accuracy of the extraction. A score of 1.0 means you are 100% confident.
+- claimType: The type of claim (IFR, CFR, CR).
+- address: The full, complete address of the claimant. Standardize it to "Village, Tehsil, District, State, India".
+- boundaries: The descriptive landmark boundaries for North, South, East, and West.
 
 Here is the claim document: {{media url=documentDataUri}}
 
-Please provide the extracted information in JSON format.`,
+Return the data in the specified structured JSON format. Ensure all geographic data conforms to EPSG:4326 standards where applicable.`,
 });
 
 const extractClaimDataFlow = ai.defineFlow(

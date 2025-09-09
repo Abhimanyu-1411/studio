@@ -13,6 +13,7 @@ export type Database = {
       claims: {
         Row: {
           address: Json
+          boundaries: Json
           claimType: Json
           claimantName: Json
           created_at: string
@@ -32,6 +33,7 @@ export type Database = {
         }
         Insert: {
           address: Json
+          boundaries: Json
           claimType: Json
           claimantName: Json
           created_at?: string
@@ -51,6 +53,7 @@ export type Database = {
         }
         Update: {
           address?: Json
+          boundaries?: Json
           claimType?: Json
           claimantName?: Json
           created_at?: string
@@ -266,5 +269,3 @@ export type Enums<
   : PublicEnumNameOrOptions extends keyof Database["public"]["Enums"]
   ? Database["public"]["Enums"][PublicEnumNameOrOptions]
   : never
-
-    

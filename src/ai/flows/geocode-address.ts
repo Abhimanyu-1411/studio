@@ -16,14 +16,15 @@ import {createClient} from '@/lib/supabase/server';
 const GeocodeAddressInputSchema = z.object({
   address: z.string().describe('The full address line, if available.'),
   village: z.string().describe('The village name.'),
+  tehsil: z.string().describe('The tehsil/taluka name.'),
   district: z.string().describe('The district name.'),
   state: z.string().describe('The state name.'),
 });
 export type GeocodeAddressInput = z.infer<typeof GeocodeAddressInputSchema>;
 
 const GeocodeAddressOutputSchema = z.object({
-  lat: z.number().describe('The latitude of the address.'),
-  lng: z.number().describe('The longitude of the address.'),
+  lat: z.number().describe('The latitude of the address in EPSG:4326.'),
+  lng: z.number().describe('The longitude of the address in EPSG:4326.'),
   confidenceScore: z.number().describe('A score from 0 to 1 indicating the confidence of the geocoding accuracy.'),
 });
 export type GeocodeAddressOutput = z.infer<typeof GeocodeAddressOutputSchema>;
@@ -60,14 +61,13 @@ const prompt = ai.definePrompt({
   name: 'geocodeAddressPrompt',
   input: {schema: GeocodeAddressInputSchema},
   output: {schema: GeocodeAddressOutputSchema},
-  prompt: `You are an expert geocoding service. Based on the provided address information, determine the precise latitude and longitude. It is crucial to use the village, district, and state for accurate geographical context.
+  prompt: `You are an expert geocoding service like Nominatim or Google Maps. Your task is to convert a textual address into precise geographic coordinates (latitude and longitude) in EPSG:4326 format.
 
-Address: {{{address}}}
-Village: {{{village}}}
-District: {{{district}}}
-State: {{{state}}}
+Use the standardized address format for the query: "{{address}}, {{village}}, {{tehsil}}, {{district}}, {{state}}, India".
 
-Return the coordinates in JSON format, including a confidence score from 0.0 to 1.0 indicating how certain you are of the location's accuracy. A score of 1.0 means you are 100% confident. If the address is vague, provide the most likely coordinates with a lower confidence score.
+It is crucial to use the village, tehsil, district, and state for accurate geographical context to avoid ambiguity.
+
+Return the coordinates in JSON format, including a confidence score from 0.0 to 1.0 indicating how certain you are of the location's accuracy. A score of 1.0 means you are 100% confident. If the address is vague or lacks a specific landmark/Plus Code, provide the most likely coordinates with a lower confidence score.
 `,
 });
 
@@ -82,4 +82,3 @@ const geocodeAddressFlow = ai.defineFlow(
     return output!;
   }
 );
-

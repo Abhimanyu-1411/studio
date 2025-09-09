@@ -217,6 +217,11 @@ export function ClaimEdit({ claim, onClose, onClaimUpdate, availableVillages }: 
                     <Textarea id="address" name="address" value={getFieldValue(formData.address) || ''} onChange={handleInputChange} className="col-span-3" />
                     <ConfidenceBadge score={getConfidence(formData.address)} />
                 </div>
+                 <div className="grid grid-cols-5 items-center gap-4">
+                    <Label htmlFor="boundaries" className="text-right col-span-1">Boundaries</Label>
+                    <Textarea id="boundaries" name="boundaries" value={getFieldValue(formData.boundaries) || ''} onChange={handleInputChange} className="col-span-3" />
+                    <ConfidenceBadge score={getConfidence(formData.boundaries)} />
+                </div>
             </div>
         </div>
 
@@ -244,5 +249,3 @@ export function ClaimEdit({ claim, onClose, onClaimUpdate, availableVillages }: 
     </Card>
   );
 }
-
-    

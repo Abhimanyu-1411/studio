@@ -18,6 +18,7 @@ export type Claim = {
   state: FieldWithConfidence<string>;
   date: FieldWithConfidence<string>;
   address: FieldWithConfidence<string>;
+  boundaries: FieldWithConfidence<string>;
   claimType: FieldWithConfidence<'IFR' | 'CFR' | 'CR' | string>;
   documentUrl: string;
   documentType: string;
@@ -76,5 +77,3 @@ export type Patta = {
     villageName: string;
     geometry: LatLng[];
 }
-
-    

@@ -19,6 +19,7 @@ export async function handleClaimUpload(documentDataUri: string, documentType: s
   const extractedData = await extractClaimData({ documentDataUri });
 
   const villageName = extractedData.village.value;
+  const tehsilName = extractedData.tehsilTaluka.value;
   const districtName = extractedData.district.value;
   const stateName = extractedData.state.value;
 
@@ -55,6 +56,7 @@ export async function handleClaimUpload(documentDataUri: string, documentType: s
   const locationResult = await geocodeAddress({
     address: extractedData.address.value,
     village: villageName,
+    tehsil: tehsilName,
     district: districtName,
     state: stateName,
   });
@@ -84,8 +86,8 @@ export async function handleClaimUpload(documentDataUri: string, documentType: s
   }
 
   // 6. Insert the new claim - Pass the full extractedData object
-  const newClaimData = {
-    ...extractedData, // This contains all the fields with { value, confidence }
+  const { data, error } = await supabase.from('claims').insert({
+    ...extractedData,
     documentUrl: documentDataUri,
     documentType: documentType,
     status: status,
@@ -93,9 +95,7 @@ export async function handleClaimUpload(documentDataUri: string, documentType: s
         value: { lat: locationResult.lat, lng: locationResult.lng },
         confidence: locationResult.confidenceScore
     },
-  };
-
-  const { data, error } = await supabase.from('claims').insert(newClaimData).select().single();
+  }).select().single();
 
   if (error) {
     console.error("Supabase insert error:", error);
@@ -289,5 +289,3 @@ export async function getPattas(): Promise<Patta[]> {
     }
     return data as Patta[];
 }
-
-    
