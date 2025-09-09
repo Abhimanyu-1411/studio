@@ -10,67 +10,86 @@ import { getVillageBoundary } from '@/ai/flows/get-village-boundary';
 import type { DssRecommendation, Claim, Village, CommunityAsset, TimeSeriesDataPoint, Patta } from '@/types';
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
+import { point, polygon, booleanPointInPolygon } from '@turf/turf';
 
-export async function handleClaimUpload(documentDataUri: string, documentType: string) {
+export async function handleClaimUpload(documentDataUri: string, documentType: string): Promise<Claim> {
   const supabase = createClient();
 
+  // 1. Extract data from the document
   const extractedData = await extractClaimData({ documentDataUri });
 
-  // Get or create village
   const villageName = extractedData.village.value;
-  let { data: village } = await supabase.from('villages').select('id').eq('name', villageName).single();
+  const districtName = extractedData.district.value;
+  const stateName = extractedData.state.value;
 
-  if (!village) {
+  // 2. Get or create the village and fetch its boundary
+  let { data: village } = await supabase.from('villages').select('id, bounds').eq('name', villageName).single();
+  let villageBounds;
+
+  if (village && village.bounds) {
+    villageBounds = village.bounds;
+  } else {
     const boundaryData = await getVillageBoundary({
-        village: villageName,
-        district: extractedData.district.value,
-        state: extractedData.state.value,
+      village: villageName,
+      district: districtName,
+      state: stateName,
     });
+    
     const { data: newVillage, error: newVillageError } = await supabase.from('villages').insert({
-        name: villageName,
-        bounds: boundaryData.bounds,
-        center: boundaryData.center,
-        // Default values for new villages, can be updated later
-        ndwi: 0, 
-        assetCoverage: { water: 0, forest: 0, agriculture: 0 }
-    }).select().single();
-
+      name: villageName,
+      bounds: boundaryData.bounds,
+      center: boundaryData.center,
+      ndwi: 0,
+      assetCoverage: { water: 0, forest: 0, agriculture: 0 }
+    }).select('id, bounds').single();
+    
     if (newVillageError) {
-        console.error("Supabase insert new village error:", newVillageError);
-        throw new Error("Failed to save the new village to the database.");
+      console.error("Supabase insert new village error:", newVillageError);
+      throw new Error("Failed to save the new village to the database.");
     }
     village = newVillage;
+    villageBounds = newVillage.bounds;
   }
-
+  
+  // 3. Geocode the address to get a location point
   const locationResult = await geocodeAddress({
     address: extractedData.address.value,
-    village: extractedData.village.value,
-    district: extractedData.district.value,
-    state: extractedData.state.value,
+    village: villageName,
+    district: districtName,
+    state: stateName,
   });
-  
-  const allConfidences = [
-      extractedData.claimantName.confidence,
-      extractedData.pattaNumber.confidence,
-      extractedData.extentOfForestLandOccupied.confidence,
-      extractedData.village.confidence,
-      extractedData.gramPanchayat.confidence,
-      extractedData.tehsilTaluka.confidence,
-      extractedData.district.confidence,
-      extractedData.state.confidence,
-      extractedData.date.confidence,
-      extractedData.claimType.confidence,
-      extractedData.address.confidence,
-      locationResult.confidenceScore
-  ];
-  
-  const lowestConfidence = Math.min(...allConfidences.map(c => c ?? 0));
 
-  let status: Claim['status'] = 'linked';
-  if (lowestConfidence < 0.8) {
-      status = 'needs-review';
+  // 4. Validate that the claim point is inside the village polygon
+  let isLocationValid = false;
+  if (locationResult && Array.isArray(villageBounds) && villageBounds.length > 2) {
+    const claimPoint = point([locationResult.lng, locationResult.lat]);
+    // Turf expects the first and last points to be the same to close the polygon
+    const boundaryCoords = villageBounds.map(p => [p.lng, p.lat]);
+    if (boundaryCoords[0][0] !== boundaryCoords[boundaryCoords.length - 1][0] || boundaryCoords[0][1] !== boundaryCoords[boundaryCoords.length - 1][1]) {
+        boundaryCoords.push(boundaryCoords[0]);
+    }
+    const villagePolygon = polygon([boundaryCoords]);
+    isLocationValid = booleanPointInPolygon(claimPoint, villagePolygon);
   }
+
+  // 5. Determine status based on confidence and validation
+  const allConfidences = [
+    extractedData.claimantName.confidence,
+    extractedData.pattaNumber.confidence,
+    extractedData.village.confidence,
+    extractedData.district.confidence,
+    extractedData.state.confidence,
+    locationResult.confidenceScore
+  ].map(c => c ?? 0);
   
+  const lowestConfidence = Math.min(...allConfidences);
+  
+  let status: Claim['status'] = 'unlinked';
+  if (lowestConfidence < 0.8 || !isLocationValid) {
+    status = 'needs-review';
+  }
+
+  // 6. Insert the new claim
   const newClaimData = {
     claimantName: extractedData.claimantName,
     pattaNumber: extractedData.pattaNumber,
@@ -88,7 +107,7 @@ export async function handleClaimUpload(documentDataUri: string, documentType: s
     status: status,
     location: { lat: locationResult.lat, lng: locationResult.lng },
   };
-  
+
   const { data, error } = await supabase.from('claims').insert(newClaimData).select().single();
 
   if (error) {
