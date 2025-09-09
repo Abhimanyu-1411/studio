@@ -7,75 +7,86 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
+type FieldWithConfidence = {
+    raw: string;
+    value: string;
+    confidence: number;
+}
+
+type LocationWithConfidence = {
+    value: { lat: number, lng: number };
+    confidence: number;
+}
+
 export type Database = {
   public: {
     Tables: {
       claims: {
         Row: {
-          address: Json
-          boundaries: Json
+          address: FieldWithConfidence
+          boundaries: FieldWithConfidence
           boundary_at_validation: Json | null
-          claimType: Json
-          claimantName: Json
+          claimType: FieldWithConfidence
+          claimantName: FieldWithConfidence
           created_at: string
-          date: Json
-          district: Json
+          date: FieldWithConfidence
+          district: FieldWithConfidence
           documentType: string
           documentUrl: string
-          extentOfForestLandOccupied: Json
-          gramPanchayat: Json
+          extentOfForestLandOccupied: FieldWithConfidence
+          gramPanchayat: FieldWithConfidence
           id: string
           is_location_valid: boolean | null
-          location: Json
-          pattaNumber: Json
-          state: Json
+          location: LocationWithConfidence
+          pattaNumber: FieldWithConfidence
+          state: FieldWithConfidence
           status: string
-          tehsilTaluka: Json
-          village: Json
+          tehsilTaluka: FieldWithConfidence
+          village: FieldWithConfidence
         }
         Insert: {
-          address: Json
-          boundaries: Json
+          address: FieldWithConfidence
+          boundaries: FieldWithConfidence
           boundary_at_validation?: Json | null
-          claimType: Json
-          claimantName: Json
+          claimType: FieldWithConfidence
+          claimantName: FieldWithConfidence
           created_at?: string
-          date: Json
-          district: Json
+          date: FieldWithConfidence
+          district: FieldWithConfidence
           documentType: string
           documentUrl: string
-          extentOfForestLandOccupied: Json
-          gramPanchayat: Json
+          extentOfForestLandOccupied: FieldWithConfidence
+          gramPanchayat: FieldWithConfidence
           id?: string
           is_location_valid?: boolean | null
-          location: Json
-          pattaNumber: Json
-          state: Json
+          location: LocationWithConfidence
+          pattaNumber: FieldWithConfidence
+          state: FieldWithConfidence
           status: string
-          tehsilTaluka: Json
-          village: Json
+          tehsilTaluka: FieldWithConfidence
+          village: FieldWithConfidence
         }
         Update: {
-          address?: Json
-          boundaries?: Json
+          address?: FieldWithConfidence
+          boundaries?: FieldWithConfidence
           boundary_at_validation?: Json | null
-          claimType?: Json
-          claimantName?: Json
+          claimType?: FieldWithConfidence
+          claimantName?: FieldWithConfidence
           created_at?: string
-          date?: Json
-          district?: Json
+          date?: FieldWithConfidence
+          district?: FieldWithConfidence
           documentType?: string
           documentUrl?: string
-          extentOfForestLandOccupied?: Json
-          gramPanchayat?: Json
+          extentOfForestLandOccupied?: FieldWithConfidence
+          gramPanchayat?: FieldWithConfidence
           id?: string
           is_location_valid?: boolean | null
-          location?: Json
-          pattaNumber?: Json
-          state?: Json
+          location?: LocationWithConfidence
+          pattaNumber?: FieldWithConfidence
+          state?: FieldWithConfidence
           status?: string
-          tehsilTaluka?: Json
-          village?: Json
+          tehsilTaluka?: FieldWithConfidence
+          village?: FieldWithConfidence
         }
         Relationships: []
       }
@@ -275,3 +286,5 @@ export type Enums<
   : PublicEnumNameOrOptions extends keyof Database["public"]["Enums"]
   ? Database["public"]["Enums"][PublicEnumNameOrOptions]
   : never
+
+    
