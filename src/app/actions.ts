@@ -10,7 +10,8 @@ import { getVillageBoundary } from '@/ai/flows/get-village-boundary';
 import type { DssRecommendation, Claim, Village, CommunityAsset, TimeSeriesDataPoint, Patta } from '@/types';
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
-import { point, polygon, booleanPointInPolygon } from '@turf/turf';
+import { point, polygon } from '@turf/turf';
+import { booleanPointInPolygon } from '@turf/turf';
 
 export async function handleClaimUpload(documentDataUri: string, documentType: string): Promise<Claim> {
   const supabase = createClient();
@@ -289,3 +290,5 @@ export async function getPattas(): Promise<Patta[]> {
     }
     return data as Patta[];
 }
+
+    
