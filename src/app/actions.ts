@@ -67,25 +67,28 @@ export async function handleClaimUpload(documentDataUri: string, documentType: s
   if (locationResult && Array.isArray(villageBounds) && villageBounds.length > 2) {
     const claimPoint = point([locationResult.lng, locationResult.lat]);
     const boundaryCoords = villageBounds.map(p => [p.lng, p.lat]);
+    // Ensure the polygon is closed for valid GeoJSON
     if (boundaryCoords.length > 0 && (boundaryCoords[0][0] !== boundaryCoords[boundaryCoords.length - 1][0] || boundaryCoords[0][1] !== boundaryCoords[boundaryCoords.length - 1][1])) {
         boundaryCoords.push(boundaryCoords[0]);
     }
-    const villagePolygon = polygon([boundaryCoords]);
-    isLocationValid = booleanPointInPolygon(claimPoint, villagePolygon);
+    if (boundaryCoords.length > 3) {
+      const villagePolygon = polygon([boundaryCoords]);
+      isLocationValid = booleanPointInPolygon(claimPoint, villagePolygon);
+    }
   }
 
   // 5. Determine status based on confidence and validation
   const allConfidences = Object.values(extractedData).map(field => field.confidence);
   
-  const lowestConfidence = Math.min(...allConfidences.map(c => c ?? 0));
+  const lowestConfidence = Math.min(...allConfidences);
   
   let status: Claim['status'] = 'unlinked';
   if (lowestConfidence < 0.8 || locationResult.confidenceScore < 0.8 || !isLocationValid) {
     status = 'needs-review';
   }
 
-  // 6. Insert the new claim - Pass the full extractedData object
-  const { data, error } = await supabase.from('claims').insert({
+  // 6. Insert the new claim
+  const claimToInsert = {
     ...extractedData,
     documentUrl: documentDataUri,
     documentType: documentType,
@@ -96,7 +99,9 @@ export async function handleClaimUpload(documentDataUri: string, documentType: s
     },
     boundary_at_validation: villageBounds,
     is_location_valid: isLocationValid,
-  }).select().single();
+  };
+
+  const { data, error } = await supabase.from('claims').insert(claimToInsert).select().single();
 
   if (error) {
     console.error("Supabase insert error:", error);
@@ -290,5 +295,3 @@ export async function getPattas(): Promise<Patta[]> {
     }
     return data as Patta[];
 }
-
-    

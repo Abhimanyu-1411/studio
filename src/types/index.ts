@@ -24,7 +24,7 @@ export type Claim = {
   documentUrl: string;
   documentType: string;
   status: 'unlinked' | 'linked' | 'reviewed' | 'needs-review' | 'rejected';
-  location: FieldWithConfidence<{ lat: number; lng: number }>;
+  location: { value: { lat: number; lng: number }, confidence: number };
   boundary_at_validation?: LatLng[];
   is_location_valid?: boolean;
 };
