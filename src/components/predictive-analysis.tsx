@@ -227,10 +227,10 @@ export function PredictiveAnalysis({ villages }: PredictiveAnalysisProps) {
                         <YAxis domain={['auto', 'auto']} />
                         <Tooltip
                             labelFormatter={formatTooltipLabel}
-                            formatter={(value, name) => [
-                                typeof value === 'number' ? value.toFixed(2) : value,
-                                name === 'historical' ? 'Historical' : 'Predicted'
-                            ]}
+                            formatter={(value, name) => {
+                                const formattedValue = typeof value === 'number' ? value.toFixed(2) : value;
+                                return [formattedValue, name];
+                            }}
                         />
                         <Legend wrapperStyle={{ bottom: 0 }} />
                         <Line type="monotone" dataKey="historical" stroke="#16a34a" strokeWidth={2} dot={false} name="Historical" />
