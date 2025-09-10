@@ -71,9 +71,15 @@ export function PredictiveAnalysis({ villages }: PredictiveAnalysisProps) {
     try {
       const data = await getPrediction(selectedVillageId, selectedMetric, forecastPeriods);
       
-      // We expect the data to be an array of {date, historical, predicted}
       const historicalData = data.filter(d => d.historical !== null).slice(-historicalPeriods);
       const predictedData = data.filter(d => d.predicted !== null);
+
+      if (historicalData.length > 0 && predictedData.length > 0) {
+        // Find the last historical point
+        const lastHistoricalPoint = historicalData[historicalData.length - 1];
+        // Ensure the prediction line starts from the last historical point to avoid a gap
+        predictedData.unshift({ ...lastHistoricalPoint, predicted: lastHistoricalPoint.historical });
+      }
       
       setChartData([...historicalData, ...predictedData]);
       toast({
@@ -229,12 +235,13 @@ export function PredictiveAnalysis({ villages }: PredictiveAnalysisProps) {
                             labelFormatter={formatTooltipLabel}
                             formatter={(value, name) => {
                                 const formattedValue = typeof value === 'number' ? value.toFixed(2) : value;
-                                return [formattedValue, name];
+                                const seriesName = name === 'historical' ? 'Historical' : 'Predicted';
+                                return [formattedValue, seriesName];
                             }}
                         />
                         <Legend wrapperStyle={{ bottom: 0 }} />
-                        <Line type="monotone" dataKey="historical" stroke="#16a34a" strokeWidth={2} dot={false} name="Historical" />
-                        <Line type="monotone" dataKey="predicted" stroke="#ea580c" strokeWidth={2} strokeDasharray="5 5" name="Predicted" />
+                        <Line type="monotone" dataKey="historical" stroke="#16a34a" strokeWidth={2} dot={false} name="Historical" connectNulls={false}/>
+                        <Line type="monotone" dataKey="predicted" stroke="#ea580c" strokeWidth={2} strokeDasharray="5 5" name="Predicted" connectNulls={false}/>
                     </LineChart>
                 </ResponsiveContainer>
             )}
@@ -244,3 +251,5 @@ export function PredictiveAnalysis({ villages }: PredictiveAnalysisProps) {
     </div>
   );
 }
+
+    
