@@ -44,7 +44,7 @@ const metricOptions: { value: Metric; label: string }[] = [
 export function PredictiveAnalysis({ villages }: PredictiveAnalysisProps) {
   const [selectedVillageId, setSelectedVillageId] = useState<string>('');
   const [selectedMetric, setSelectedMetric] = useState<Metric>('rainfall');
-  const [forecastPeriods, setForecastPeriods] = useState(12);
+  const [totalMonths, setTotalMonths] = useState(12);
   const [chartData, setChartData] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [errorState, setErrorState] = useState<{title: string, description: string} | null>(null);
@@ -64,9 +64,18 @@ export function PredictiveAnalysis({ villages }: PredictiveAnalysisProps) {
     setChartData([]);
     setErrorState(null);
 
+    // Calculate forecast periods based on a 2:1 ratio of historical to predicted data
+    const forecastPeriods = Math.round(totalMonths / 3);
+    const historicalPeriods = totalMonths - forecastPeriods;
+
     try {
       const data = await getPrediction(selectedVillageId, selectedMetric, forecastPeriods);
-      setChartData(data);
+      
+      // We expect the data to be an array of {date, historical, predicted}
+      const historicalData = data.filter(d => d.historical !== null).slice(-historicalPeriods);
+      const predictedData = data.filter(d => d.predicted !== null);
+      
+      setChartData([...historicalData, ...predictedData]);
       toast({
         title: 'Forecast Generated',
         description: `Successfully forecasted ${metricOptions.find(m => m.value === selectedMetric)?.label} for the next ${forecastPeriods} months.`,
@@ -154,14 +163,14 @@ export function PredictiveAnalysis({ villages }: PredictiveAnalysisProps) {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="periods">Forecast Months: {forecastPeriods}</Label>
+              <Label htmlFor="periods">Total Months to Display: {totalMonths}</Label>
               <Slider
                 id="periods"
                 min={3}
                 max={24}
                 step={1}
-                value={[forecastPeriods]}
-                onValueChange={(val) => setForecastPeriods(val[0])}
+                value={[totalMonths]}
+                onValueChange={(val) => setTotalMonths(val[0])}
               />
             </div>
           </CardContent>
@@ -218,7 +227,10 @@ export function PredictiveAnalysis({ villages }: PredictiveAnalysisProps) {
                         <YAxis domain={['auto', 'auto']} />
                         <Tooltip
                             labelFormatter={formatTooltipLabel}
-                            formatter={(value, name) => [typeof value === 'number' ? value.toFixed(2) : value, name === 'historical' ? 'Historical' : 'Predicted']}
+                            formatter={(value, name) => [
+                                typeof value === 'number' ? value.toFixed(2) : value,
+                                name === 'historical' ? 'Historical' : 'Predicted'
+                            ]}
                         />
                         <Legend wrapperStyle={{ bottom: 0 }} />
                         <Line type="monotone" dataKey="historical" stroke="#16a34a" strokeWidth={2} dot={false} name="Historical" />
