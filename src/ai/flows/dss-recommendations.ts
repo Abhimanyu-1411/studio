@@ -172,6 +172,11 @@ const prompt = ai.definePrompt({
   - Priority: 7
   - Implementation Criteria: SHG formation for women in poverty pockets; bank linkages and skill training.
   - Why: High female poverty rate (45%, above 30% threshold) limits empowerment; DAY-NRLM fosters self-reliance through collectives and enterprises.
+  
+  **22. Pradhan Mantri Gram Sadak Yojana (PMGSY)**
+  - Priority: 9
+  - Implementation Criteria: Targets unconnected habitations with a population of 500+ in plain areas and 250+ in hill/tribal/desert areas; provides all-weather road connectivity.
+  - Why: Lack of all-weather road connectivity (e.g., village is cut off during monsoon) severely hampers access to markets, healthcare, and education, making PMGSY a top priority for economic and social integration.
   `,
 });
 
@@ -186,5 +191,3 @@ const dssRecommendationsFlow = ai.defineFlow(
     return output!;
   }
 );
-
-    
