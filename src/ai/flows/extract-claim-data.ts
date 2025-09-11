@@ -3,13 +3,10 @@
 
 /**
  * @fileOverview An AI agent to extract claim data from documents.
- * This file is now using dummy data for demonstration purposes.
  */
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import { claims as allClaims } from '@/lib/data/claims';
-import type { Claim } from '@/types';
 
 const ExtractClaimDataInputSchema = z.object({
   documentDataUri: z
@@ -42,33 +39,12 @@ const ExtractClaimDataOutputSchema = z.object({
 });
 export type ExtractClaimDataOutput = z.infer<typeof ExtractClaimDataOutputSchema>;
 
-const firstClaim = allClaims[0];
-
-// Convert the first raw claim from the data file into the format the AI flow expects.
-const dummyClaimData: ExtractClaimDataOutput = {
-    claimantName: { raw: firstClaim.claimantName, value: firstClaim.claimantName, confidence: 0.98 },
-    pattaNumber: { raw: firstClaim.pattaNumber || '', value: firstClaim.pattaNumber || '', confidence: 0.95 },
-    extentOfForestLandOccupied: { raw: firstClaim.landExtent || '', value: firstClaim.landExtent || '', confidence: 0.97 },
-    village: { raw: firstClaim.villageName, value: firstClaim.villageName, confidence: 0.99 },
-    gramPanchayat: { raw: firstClaim.gramPanchayat || '', value: firstClaim.gramPanchayat || '', confidence: 0.92 },
-    tehsilTaluka: { raw: firstClaim.tehsilTaluka || '', value: firstClaim.tehsilTaluka || '', confidence: 0.93 },
-    district: { raw: firstClaim.district || '', value: firstClaim.district || '', confidence: 0.96 },
-    state: { raw: firstClaim.state || '', value: firstClaim.state || '', confidence: 0.99 },
-    date: { raw: firstClaim.date || '', value: firstClaim.date || '', confidence: 0.98 },
-    claimType: { raw: firstClaim.claimType, value: firstClaim.claimType, confidence: 0.97 },
-    address: { raw: firstClaim.address || '', value: firstClaim.address || '', confidence: 0.94 },
-    boundaries: { raw: firstClaim.boundaries || '', value: firstClaim.boundaries || '', confidence: 0.89 },
-};
-
-
-// Return dummy data instead of calling the AI flow
+// This function now calls the live AI flow.
 export async function extractClaimData(input: ExtractClaimDataInput): Promise<ExtractClaimDataOutput> {
-  console.log("Simulating claim data extraction for:", input.documentDataUri.substring(0, 50) + "...");
-  // You can add logic here to return different dummy data based on the input if needed
-  return Promise.resolve(dummyClaimData);
+  console.log("Extracting claim data from document...");
+  return extractClaimDataFlow(input);
 }
 
-// The original flow is kept below but is no longer called directly from the app actions.
 const prompt = ai.definePrompt({
   name: 'extractClaimDataPrompt',
   input: {schema: ExtractClaimDataInputSchema},

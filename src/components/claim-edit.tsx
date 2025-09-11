@@ -128,12 +128,14 @@ export function ClaimEdit({ claim, onClose, onClaimUpdate, availableVillages }: 
                 <div className="relative flex-1 w-full h-full">
                 {claim.documentUrl ? (
                   isDocumentImage ? (
-                      <Image 
-                          src={claim.documentUrl} 
-                          alt="Claim document" 
-                          fill
-                          className="object-contain"
-                      />
+                      <div className="relative w-full h-full">
+                          <Image 
+                              src={claim.documentUrl} 
+                              alt="Claim document" 
+                              fill
+                              className="object-contain"
+                          />
+                      </div>
                   ) : (
                       <iframe src={claim.documentUrl} className="w-full h-full" title="Claim Document" />
                   )
@@ -158,7 +160,7 @@ export function ClaimEdit({ claim, onClose, onClaimUpdate, availableVillages }: 
                     <ConfidenceBadge score={getConfidence(formData.pattaNumber)} />
                 </div>
                 <div className="grid grid-cols-5 items-center gap-4">
-                    <Label htmlFor="extentOfForestLandOccupied" className="text-right col-span-1">Extent Of Forest Land Occupied</Label>
+                    <Label htmlFor="extentOfForestLandOccupied" className="text-right col-span-1">Extent (Hectares)</Label>
                     <Input id="extentOfForestLandOccupied" name="extentOfForestLandOccupied" value={getFieldValue(formData.extentOfForestLandOccupied) || ''} onChange={handleInputChange} className="col-span-3" />
                     <ConfidenceBadge score={getConfidence(formData.extentOfForestLandOccupied)} />
                 </div>
@@ -180,7 +182,7 @@ export function ClaimEdit({ claim, onClose, onClaimUpdate, availableVillages }: 
                     <ConfidenceBadge score={getConfidence(formData.gramPanchayat)} />
                 </div>
                 <div className="grid grid-cols-5 items-center gap-4">
-                    <Label htmlFor="tehsilTaluka" className="text-right col-span-1">Tehsil Taluka</Label>
+                    <Label htmlFor="tehsilTaluka" className="text-right col-span-1">Tehsil/Taluka</Label>
                     <Input id="tehsilTaluka" name="tehsilTaluka" value={getFieldValue(formData.tehsilTaluka) || ''} onChange={handleInputChange} className="col-span-3" />
                     <ConfidenceBadge score={getConfidence(formData.tehsilTaluka)} />
                 </div>

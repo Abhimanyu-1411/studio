@@ -43,10 +43,10 @@ export function RecentClaims({ claims, onClaimSelect }: RecentClaimsProps) {
                     <FileText className="h-5 w-5 text-muted-foreground" />
                 </div>
                 <div className="flex-grow">
-                  <p className="font-medium">{getClaimValue(claim.claimantName)}</p>
+                  <p className="font-medium truncate">{getClaimValue(claim.claimantName)}</p>
                   <p className="text-sm text-muted-foreground">{getClaimValue(claim.village)}</p>
                 </div>
-                <Button variant="ghost" size="sm" onClick={() => onClaimSelect(claim)}>View</Button>
+                <Button variant="ghost" size="sm" onClick={() => onClaimSelect(claim)}>Review</Button>
               </li>
             ))}
           </ul>
@@ -55,5 +55,3 @@ export function RecentClaims({ claims, onClaimSelect }: RecentClaimsProps) {
     </Card>
   );
 }
-
-    

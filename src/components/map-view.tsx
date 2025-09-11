@@ -133,23 +133,31 @@ const MapViewComponent = ({ claims, villages, assets, pattas, onVillageClick, on
             >
               <Popup>
                 <div className="font-bold text-base">{village.name}</div>
-                <div className="text-sm">
-                  <p>Water Coverage: {village.assetCoverage?.water?.toFixed(2) ?? 0}%</p>
-                  <p>Forest Coverage: {village.assetCoverage?.forest?.toFixed(2) ?? 0}%</p>
-                  <p>Agriculture: {village.assetCoverage?.agriculture?.toFixed(2) ?? 0}%</p>
-                </div>
+                {village.assetCoverage && (
+                  <div className="text-sm">
+                    <p>Water Coverage: {village.assetCoverage.water?.toFixed(2) ?? 0}%</p>
+                    <p>Forest Coverage: {village.assetCoverage.forest?.toFixed(2) ?? 0}%</p>
+                    <p>Agriculture: {village.assetCoverage.agriculture?.toFixed(2) ?? 0}%</p>
+                  </div>
+                )}
               </Popup>
             </Polygon>
             
-            {activeLayers.ndwi && village.assetGeometries?.water && village.assetGeometries.water.map((poly, i) => 
-                <Polygon key={`${village.id}-ndwi-${i}`} positions={toMultiLatLngExpression([poly])} pathOptions={{...assetLayerStyles.ndwi, fillOpacity: 0.5}} />
-            )}
-            {activeLayers.forest && village.assetGeometries?.forest && village.assetGeometries.forest.map((poly, i) => 
-                <Polygon key={`${village.id}-forest-${i}`} positions={toMultiLatLngExpression([poly])} pathOptions={{...assetLayerStyles.forest, fillOpacity: 0.5}} />
-            )}
-            {activeLayers.agriculture && village.assetGeometries?.agriculture && village.assetGeometries.agriculture.map((poly, i) => 
-                <Polygon key={`${village.id}-agri-${i}`} positions={toMultiLatLngExpression([poly])} pathOptions={{...assetLayerStyles.agriculture, fillOpacity: 0.5}} />
-            )}
+            {activeLayers.ndwi && village.assetGeometries?.water && village.assetGeometries.water.length > 0 &&
+                village.assetGeometries.water.map((poly, i) => (
+                    <Polygon key={`${village.id}-ndwi-${i}`} positions={toMultiLatLngExpression([poly])} pathOptions={{...assetLayerStyles.ndwi, fillOpacity: 0.5}} />
+                ))
+            }
+            {activeLayers.forest && village.assetGeometries?.forest && village.assetGeometries.forest.length > 0 &&
+                village.assetGeometries.forest.map((poly, i) => (
+                    <Polygon key={`${village.id}-forest-${i}`} positions={toMultiLatLngExpression([poly])} pathOptions={{...assetLayerStyles.forest, fillOpacity: 0.5}} />
+                ))
+            }
+            {activeLayers.agriculture && village.assetGeometries?.agriculture && village.assetGeometries.agriculture.length > 0 &&
+                village.assetGeometries.agriculture.map((poly, i) => (
+                    <Polygon key={`${village.id}-agri-${i}`} positions={toMultiLatLngExpression([poly])} pathOptions={{...assetLayerStyles.agriculture, fillOpacity: 0.5}} />
+                ))
+            }
         </React.Fragment>
       ))}
       
@@ -200,7 +208,7 @@ const MapViewComponent = ({ claims, villages, assets, pattas, onVillageClick, on
                 <CardFooter className="p-2">
                     <Button variant="outline" size="sm" onClick={() => onClaimEdit(claim)}>
                     <Edit className="mr-2 h-3 w-3" />
-                    Correct Data
+                    Review/Correct Data
                     </Button>
                 </CardFooter>
                 </Card>
