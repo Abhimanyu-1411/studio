@@ -146,7 +146,7 @@ export function AssetEdit({ open, onOpenChange, onAssetAdded, villages, claimLoc
 
     await new Promise(resolve => setTimeout(resolve, 500)); // Simulate processing
 
-    const placeholderGeometry = center ? createPolygon(center, 20, 0.001) : [];
+    const placeholderGeometry = center ? createPolygon(center, 19, 0.001) : [];
 
     const newAsset: Omit<CommunityAsset, 'id'> = {
       villageId,
@@ -227,11 +227,13 @@ export function AssetEdit({ open, onOpenChange, onAssetAdded, villages, claimLoc
                 )}
               >
                 <input {...getInputProps()} />
-                <UploadCloud className="w-10 h-10 text-muted-foreground" />
-                <p className="mt-2 text-sm text-muted-foreground">
-                  {isDragActive ? 'Drop the file here...' : "Drag 'n' drop a file, or click to select"}
-                </p>
-                <p className="text-xs text-muted-foreground">Image or PDF (max 5MB)</p>
+                <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                    <UploadCloud className="w-10 h-10 text-muted-foreground" />
+                    <p className="mt-2 text-sm text-muted-foreground">
+                    {isDragActive ? 'Drop the file here...' : "Drag 'n' drop a file, or click to select"}
+                    </p>
+                    <p className="text-xs text-muted-foreground">Image or PDF (max 5MB)</p>
+                </div>
               </div>
             ) : (
               <div className="space-y-2">
