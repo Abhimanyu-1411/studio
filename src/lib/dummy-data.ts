@@ -6,7 +6,7 @@ import type { Claim, Village, CommunityAsset, Patta, TimeSeriesDataPoint } from 
  * DUMMY DATA FOR OFFLINE DEVELOPMENT
  * =================================================================================
  * This file contains hardcoded data to simulate a database connection.
- * All data is themed around Tripura, India.
+ * It now parses CSV data provided by the user.
  * =================================================================================
  */
 
@@ -27,11 +27,11 @@ village_10,Melarmath,23.8307,91.2848,"23.833,91.282;23.833,91.287;23.828,91.287;
 
 const claimsCSV = `
 id,claimant_name,village_name,claim_type,status,location_lat,location_lng,document_image_url,date,patta_number,land_extent,gram_panchayat,tehsil_taluka,district,state,address,boundaries
-claim_001,Rani Debbarma,Ambassa,IFR,linked,23.9145,91.8573,https://picsum.photos/seed/doc1/400/560,2023-01-15,PN001,2.5 Hectares,Ambassa GP,Ambassa,Dhalai,Tripura,Near Ambassa Bazar,"N: River, S: Road"
-claim_002,Biswajit Tripura,Kanchanpur,IFR,reviewed,24.1729,92.0112,https://picsum.photos/seed/doc2/400/560,2023-03-20,PN002,1.8 Hectares,Kanchanpur GP,Kanchanpur,North Tripura,Tripura,West of Bus Stand,"N: Forest, S: Paddy"
-claim_003,Manoranjan Reang,Melaghar,CFR,needs-review,23.4881,91.2742,https://picsum.photos/seed/doc3/400/560,2022-11-30,PN003,5.0 Hectares,Melaghar GP,Udaipur,Gomati,Tripura,Melaghar Ward 2,"N: Road, S: Field"
-claim_004,Santosh Debbarma,Melarmath,CR,linked,23.8319,91.2854,https://picsum.photos/seed/doc4/400/560,2022-06-15,PN004,1.2 Hectares,Melarmath GP,Agartala,West Tripura,Tripura,Opposite Melarmath Kali Bari,"N: Lake, S: Market"
-claim_005,Rabindra Jamatia,Udaipur,IFR,needs-review,23.5350,91.4809,https://picsum.photos/seed/doc5/400/560,2021-12-10,PN005,3.7 Hectares,Udaipur GP,Udaipur,Gomati,Tripura,Old Post Road,"N: Highway, S: Canal"
+claim_001,Rani Debbarma,Ambassa,IFR,linked,23.9145,91.8573,https://picsum.photos/seed/doc1/400/560,2023-01-15,PN001,2.5 Hectares,Ambassa GP,Ambassa,Dhalai,Tripura,"Near Ambassa Bazar","N: River, S: Road"
+claim_002,Biswajit Tripura,Kanchanpur,IFR,reviewed,24.1729,92.0112,https://picsum.photos/seed/doc2/400/560,2023-03-20,PN002,1.8 Hectares,Kanchanpur GP,Kanchanpur,North Tripura,Tripura,"West of Bus Stand","N: Forest, S: Paddy"
+claim_003,Manoranjan Reang,Melaghar,CFR,needs-review,23.4881,91.2742,https://picsum.photos/seed/doc3/400/560,2022-11-30,PN003,5.0 Hectares,Melaghar GP,Udaipur,Gomati,Tripura,"Melaghar Ward 2","N: Road, S: Field"
+claim_004,Santosh Debbarma,Melarmath,CR,linked,23.8319,91.2854,https://picsum.photos/seed/doc4/400/560,2022-06-15,PN004,1.2 Hectares,Melarmath GP,Agartala,West Tripura,Tripura,"Opposite Melarmath Kali Bari","N: Lake, S: Market"
+claim_005,Rabindra Jamatia,Udaipur,IFR,needs-review,23.5350,91.4809,https://picsum.photos/seed/doc5/400/560,2021-12-10,PN005,3.7 Hectares,Udaipur GP,Udaipur,Gomati,Tripura,"Old Post Road","N: Highway, S: Canal"
 `;
 
 const assetsCSV = `
@@ -52,6 +52,27 @@ patta_004,Sunil Debbarma,Udaipur,"23.536,91.479;23.536,91.483;23.532,91.483;23.5
 patta_005,Rina Tripura,Teliamura,"23.802,91.594;23.802,91.599;23.798,91.599;23.798,91.594;23.802,91.594"
 `;
 
+// Helper to parse a single CSV line, accounting for quoted fields.
+const parseCsvLine = (line: string): string[] => {
+    const result: string[] = [];
+    let currentField = '';
+    let inQuotes = false;
+    for (let i = 0; i < line.length; i++) {
+        const char = line[i];
+        if (char === '"') {
+            inQuotes = !inQuotes;
+        } else if (char === ',' && !inQuotes) {
+            result.push(currentField);
+            currentField = '';
+        } else {
+            currentField += char;
+        }
+    }
+    result.push(currentField);
+    return result;
+};
+
+
 // Helper to parse polygon strings
 const parsePolygon = (polyString: string) => {
     if (!polyString) return [];
@@ -71,16 +92,16 @@ const createField = <T extends string>(value: T) => ({
 // --- Process CSV data into application types ---
 
 export const dummyVillages: Village[] = villagesCSV.trim().split('\n').slice(1).map(line => {
-    const [id, name, center_lat, center_lng, bounds_polygon, asset_coverage_water, asset_coverage_forest, asset_coverage_agriculture] = line.split(',');
+    const [id, name, center_lat, center_lng, bounds_polygon, asset_coverage_water, asset_coverage_forest, asset_coverage_agriculture] = parseCsvLine(line);
     return {
         id,
         name,
         center: { lat: parseFloat(center_lat), lng: parseFloat(center_lng) },
         bounds: parsePolygon(bounds_polygon.replace(/"/g, '')),
         assetCoverage: {
-            water: parseInt(asset_coverage_water),
-            forest: parseInt(asset_coverage_forest),
-            agriculture: parseInt(asset_coverage_agriculture),
+            water: parseInt(asset_coverage_water) || 0,
+            forest: parseInt(asset_coverage_forest) || 0,
+            agriculture: parseInt(asset_coverage_agriculture) || 0,
         },
         ndwi: 0, // Placeholder
         assetGeometries: { ndwi: [], forest: [], agriculture: [] }, // Placeholder
@@ -89,8 +110,7 @@ export const dummyVillages: Village[] = villagesCSV.trim().split('\n').slice(1).
 });
 
 export const dummyClaims: Claim[] = claimsCSV.trim().split('\n').slice(1).map(line => {
-    const parts = line.match(/(?:"[^"]*"|[^,])+/g) || [];
-    const [id, claimant_name, village_name, claim_type, status, location_lat, location_lng, document_image_url, date, patta_number, land_extent, gram_panchayat, tehsil_taluka, district, state, address, boundaries] = parts.map(p => p.replace(/"/g, ''));
+    const [id, claimant_name, village_name, claim_type, status, location_lat, location_lng, document_image_url, date, patta_number, land_extent, gram_panchayat, tehsil_taluka, district, state, address, boundaries] = parseCsvLine(line);
     return {
         id,
         created_at: new Date().toISOString(),
@@ -118,8 +138,7 @@ export const dummyClaims: Claim[] = claimsCSV.trim().split('\n').slice(1).map(li
 });
 
 export const dummyAssets: CommunityAsset[] = assetsCSV.trim().split('\n').slice(1).map(line => {
-    const parts = line.match(/(?:"[^"]*"|[^,])+/g) || [];
-    const [id, village_id, asset_type, description, document_image_url, geometry_polygon] = parts.map(p => p.replace(/"/g, ''));
+    const [id, village_id, asset_type, description, document_image_url, geometry_polygon] = parseCsvLine(line);
     return {
         id,
         villageId: village_id,
@@ -132,8 +151,7 @@ export const dummyAssets: CommunityAsset[] = assetsCSV.trim().split('\n').slice(
 });
 
 export const dummyPattas: Patta[] = pattasCSV.trim().split('\n').slice(1).map(line => {
-    const parts = line.match(/(?:"[^"]*"|[^,])+/g) || [];
-    const [id, holder_name, village_name, geometry_polygon] = parts.map(p => p.replace(/"/g, ''));
+    const [id, holder_name, village_name, geometry_polygon] = parseCsvLine(line);
     return {
         id,
         holderName: holder_name,
