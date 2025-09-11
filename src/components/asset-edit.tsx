@@ -146,7 +146,8 @@ export function AssetEdit({ open, onOpenChange, onAssetAdded, villages, claimLoc
 
     await new Promise(resolve => setTimeout(resolve, 500)); // Simulate processing
 
-    const placeholderGeometry = center ? createPolygon(center, 19, 0.001) : [];
+    const sides = Math.floor(Math.random() * 3) + 8; // Random number between 8 and 10
+    const placeholderGeometry = center ? createPolygon(center, sides, 0.001) : [];
 
     const newAsset: Omit<CommunityAsset, 'id'> = {
       villageId,
