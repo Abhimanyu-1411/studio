@@ -43,7 +43,7 @@ const prompt = ai.definePrompt({
   name: 'dssRecommendationsPrompt',
   input: {schema: DSSRecommendationsInputSchema},
   output: {schema: DSSRecommendationsOutputSchema},
-  prompt: `You are an expert in providing recommendations for village development schemes based on geospatial and claim data. Your task is to analyze the provided data for a specific village and recommend ALL applicable schemes from the list below.
+  prompt: `You are an expert in providing recommendations for village development schemes based on geospatial and claim data. Your task is to analyze the provided data for a specific village and identify every single applicable scheme from the list below.
 
   **Village Data:**
   - Village Name: {{{villageName}}}
@@ -55,13 +55,13 @@ const prompt = ai.definePrompt({
   - Forest Coverage: {{{forestCoverage}}}%
   - Agricultural Area: {{{agriculturalArea}}}%
 
-  **Instructions:**
-  1.  Review the village data provided.
-  2.  Compare the data against the "Implementation Criteria" for each of the schemes listed below.
-  3.  Identify **ALL** schemes where the village data meets the criteria. It is very important to return every single scheme that is a match.
-  4.  For each matching scheme, create a recommendation object.
-  5.  The "justification" for your recommendation must be the "Why" text provided for that scheme.
-  6.  The "priority" must be the priority level provided for that scheme.
+  **CRITICAL INSTRUCTIONS:**
+  1.  You **MUST** review the village data provided.
+  2.  You **MUST** evaluate every single scheme listed below, one by one. Do not stop after finding one match.
+  3.  You **MUST** identify **ALL** schemes where the village data meets the "Implementation Criteria".
+  4.  For **EACH** matching scheme, create a recommendation object in the output array.
+  5.  The "justification" for your recommendation **MUST BE** the exact "Why" text provided for that scheme.
+  6.  The "priority" **MUST BE** the priority level provided for that scheme.
   7.  Return an array of these recommendation objects. If no schemes match, return an empty array.
 
   ---
