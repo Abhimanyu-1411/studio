@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -56,7 +57,7 @@ const prompt = ai.definePrompt({
 
   **Instructions:**
   1.  Review the village data provided.
-  2.  Compare the data against the "Implementation Criteria" for each of the 20 schemes listed below.
+  2.  Compare the data against the "Implementation Criteria" for each of the schemes listed below.
   3.  Identify **all** schemes where the village data meets the criteria.
   4.  For each matching scheme, create a recommendation object.
   5.  The "justification" for your recommendation must be the "Why" text provided for that scheme.
@@ -127,42 +128,47 @@ const prompt = ai.definePrompt({
   - Implementation Criteria: In over-exploited groundwater blocks (>70% extraction); community water budgeting and recharge structures.
   - Why: Groundwater depletion at 80% (above 70% threshold) threatens irrigation; the scheme promotes recharge, ensuring long-term water security for farming.
 
-  **13. National Mission for Sustainable Agriculture (NMSA)**
+  **13. Jal Jeevan Mission (JJM)**
+  - Priority: 10
+  - Implementation Criteria: Targets villages with low household tap water connection coverage (<50%); involves laying piped water supply lines, building overhead tanks, and establishing a water source.
+  - Why: With only 10% of households having tap water access (far below the 100% target), the community faces significant health risks and time burdens from collecting water. JJM is critical for public health and quality of life.
+
+  **14. National Mission for Sustainable Agriculture (NMSA)**
   - Priority: 7
   - Implementation Criteria: Promotes organic farming in areas with poor soil health (nutrient index <2); includes subsidies for bio-fertilizers.
   - Why: Soil nutrient levels are low (index 1.5, below 2 threshold), reducing yields; NMSA enhances sustainability, building climate-resilient farming systems.
 
-  **14. Soil Health Card Scheme**
+  **15. Soil Health Card Scheme**
   - Priority: 6
   - Implementation Criteria: Soil sampling every 2 years for farms <10 ha; cards with fertilizer recommendations.
   - Why: Imbalanced nutrient use (e.g., NPK ratio 8:3:1, far from ideal 4:2:1) causes soil degradation; cards guide precise application, improving fertility and yields.
 
-  **15. Rashtriya Krishi Vikas Yojana (RKVY)**
+  **16. Rashtriya Krishi Vikas Yojana (RKVY)**
   - Priority: 7
   - Implementation Criteria: State-specific agri plans with central grants; focuses on infrastructure in low-productivity districts (<2 tons/ha yield).
   - Why: Crop productivity is below state average (1.8 tons/ha vs. 2.5 threshold), limiting growth; RKVY boosts investment, enhancing overall agri infrastructure.
 
-  **16. National Agroforestry Policy**
+  **17. National Agroforestry Policy**
   - Priority: 8
   - Implementation Criteria: Incentives for tree planting on farmlands (>50% area suitable); market linkages for timber/NTFP.
   - Why: Low agroforestry adoption (<10% farms, below 20% threshold) misses income opportunities; the policy integrates trees, diversifying revenue and soil health.
 
-  **17. Vanbandhu Kalyan Yojana**
+  **18. Vanbandhu Kalyan Yojana**
   - Priority: 9
   - Implementation Criteria: Convergence of schemes in tribal villages (>50% ST population); focuses on education, health, and livelihoods.
   - Why: High tribal population (60%, above 50% threshold) faces development gaps; the yojana ensures holistic welfare, bridging access to services.
 
-  **18. National Bamboo Mission**
+  **19. National Bamboo Mission**
   - Priority: 7
   - Implementation Criteria: Bamboo cultivation in suitable climates (>500mm rainfall); processing units and marketing support for clusters.
   - Why: Bamboo potential is underutilized (coverage <5%, below 10% threshold); the mission boosts incomes through sustainable harvesting and industries.
 
-  **19. Pradhan Mantri Awas Yojana (Gramin)**
+  **20. Pradhan Mantri Awas Yojana (Gramin)**
   - Priority: 8
   - Implementation Criteria: Financial aid for pucca houses to BPL households without homes; geo-tagging for verification.
   - Why: 40% rural households lack proper housing (above 30% threshold), exposing them to elements; PMAY-G provides dignity and safety.
 
-  **20. Deendayal Antyodaya Yojana – National Rural Livelihoods Mission (DAY-NRLM)**
+  **21. Deendayal Antyodaya Yojana – National Rural Livelihoods Mission (DAY-NRLM)**
   - Priority: 7
   - Implementation Criteria: SHG formation for women in poverty pockets; bank linkages and skill training.
   - Why: High female poverty rate (45%, above 30% threshold) limits empowerment; DAY-NRLM fosters self-reliance through collectives and enterprises.
@@ -180,3 +186,5 @@ const dssRecommendationsFlow = ai.defineFlow(
     return output!;
   }
 );
+
+    
