@@ -173,7 +173,6 @@ export type Database = {
           created_at: string
           id: string
           name: string
-          ndwi: number
           timeSeriesData: Json | null
         }
         Insert: {
@@ -184,7 +183,6 @@ export type Database = {
           created_at?: string
           id?: string
           name: string
-          ndwi: number
           timeSeriesData?: Json | null
         }
         Update: {
@@ -195,7 +193,6 @@ export type Database = {
           created_at?: string
           id?: string
           name?: string
-          ndwi?: number
           timeSeriesData?: Json | null
         }
         Relationships: []
@@ -295,5 +292,3 @@ export type Enums<
   : PublicEnumNameOrOptions extends keyof Database["public"]["Enums"]
   ? Database["public"]["Enums"][PublicEnumNameOrOptions]
   : never
-
-    

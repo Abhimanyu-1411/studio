@@ -3,14 +3,14 @@ import { villages as rawVillages } from '@/lib/data/villages';
 import { claims as rawClaims } from '@/lib/data/claims';
 import { assets as rawAssets } from '@/lib/data/assets';
 import { pattas as rawPattas } from '@/lib/data/pattas';
-import type { Village, Claim, CommunityAsset, Patta, RawClaim, RawCommunityAsset, RawPatta, TimeSeriesDataPoint } from '@/types';
+import type { Village, Claim, CommunityAsset, Patta, RawClaim, RawCommunityAsset, RawPatta, TimeSeriesDataPoint, LngLat } from '@/types';
 import * as turf from '@turf/turf';
 
 // =================================================================================
 // DATA LOADER AND VALIDATOR
 // =================================================================================
 // This file processes the raw data, validates its geographic integrity,
-// converts it into the primary application types, and caches the result.
+// calculates asset coverage, and caches the result.
 // =================================================================================
 
 const createField = <T extends string | number>(value: T) => ({
@@ -37,30 +37,47 @@ const generateTimeSeriesData = (startDate: Date, numMonths: number): TimeSeriesD
 
 // --- Data Validation and Processing ---
 
-// 1. Process Villages
+// 1. Process Villages with Asset Clipping and Coverage Calculation
 const villages: Village[] = rawVillages.map(v => {
-    // Validate that center is within bounds
-    const centerPoint = turf.point(v.center);
     const villagePolygon = turf.polygon([v.bounds]);
-    const isCenterValid = turf.booleanPointInPolygon(centerPoint, villagePolygon);
+    const villageArea = turf.area(villagePolygon);
+    
+    // Simulate fetching raw asset geometries for the village area.
+    // In a real scenario, this would come from an API or a larger dataset.
+    // Here, we'll create some sample raw geometries that might overlap the boundary.
+    const rawAssetGeometries = {
+        water: [turf.buffer(turf.point(v.center), 0.05, { units: 'kilometers' }).geometry.coordinates[0] as LngLat[]],
+        forest: [turf.buffer(turf.point([v.center[0] + 0.001, v.center[1] + 0.001]), 0.1, { units: 'kilometers' }).geometry.coordinates[0] as LngLat[]],
+        agriculture: [turf.buffer(turf.point([v.center[0] - 0.001, v.center[1] - 0.001]), 0.08, { units: 'kilometers' }).geometry.coordinates[0] as LngLat[]]
+    };
+    
+    const clippedGeometries: Required<Village['assetGeometries']> = { water: [], forest: [], agriculture: [] };
+    const assetCoverage: Village['assetCoverage'] = { water: 0, forest: 0, agriculture: 0 };
 
-    if (!isCenterValid) {
-        console.warn(`Village "${v.name}" center is outside its bounds. Correcting bounds.`);
-        const bufferedCenter = turf.buffer(centerPoint, 0.05, { units: 'kilometers' });
-        const newBounds = turf.getCoords(bufferedCenter)[0] as [number, number][];
-        return {
-            ...v,
-            ndwi: 0,
-            bounds: newBounds,
-            assetGeometries: { ndwi: [], forest: [], agriculture: [] },
-            timeSeriesData: generateTimeSeriesData(new Date('2022-01-01'), 24),
-        };
-    }
+    Object.keys(rawAssetGeometries).forEach(key => {
+        const assetType = key as keyof typeof rawAssetGeometries;
+        let totalAssetArea = 0;
+
+        rawAssetGeometries[assetType].forEach(rawGeom => {
+            const assetPolygon = turf.polygon([rawGeom]);
+            const intersection = turf.intersect(villagePolygon, assetPolygon);
+            
+            if (intersection) {
+                const clippedCoords = turf.getCoords(intersection) as LngLat[][];
+                clippedGeometries[assetType].push(...clippedCoords);
+                totalAssetArea += turf.area(intersection);
+            }
+        });
+        
+        if (villageArea > 0) {
+            assetCoverage[assetType] = (totalAssetArea / villageArea) * 100;
+        }
+    });
 
     return {
         ...v,
-        ndwi: 0, // Placeholder
-        assetGeometries: { ndwi: [], forest: [], agriculture: [] }, // Placeholder
+        assetGeometries: clippedGeometries,
+        assetCoverage: assetCoverage,
         timeSeriesData: generateTimeSeriesData(new Date('2022-01-01'), 24),
     };
 });

@@ -142,9 +142,9 @@ export const VillageAnalysis = ({ villages, claims }: { villages: Village[], cla
                 <p><strong>Pending Claims:</strong> {villageClaims.filter(c => c.status !== 'reviewed' && c.status !== 'linked').length}</p>
                 <p><strong>CFR Claims:</strong> {villageClaims.filter(c => getClaimValue(c.claimType) === 'CFR').length}</p>
                 <p><strong>IFR Claims:</strong> {villageClaims.filter(c => getClaimValue(c.claimType) === 'IFR').length}</p>
-                <p><strong>Water Coverage:</strong> {selectedVillage.assetCoverage.water}%</p>
-                <p><strong>Forest Coverage:</strong> {selectedVillage.assetCoverage.forest}%</p>
-                <p><strong>Agricultural Area:</strong> {selectedVillage.assetCoverage.agriculture}%</p>
+                <p><strong>Water Coverage:</strong> {selectedVillage.assetCoverage.water.toFixed(2)}%</p>
+                <p><strong>Forest Coverage:</strong> {selectedVillage.assetCoverage.forest.toFixed(2)}%</p>
+                <p><strong>Agricultural Area:</strong> {selectedVillage.assetCoverage.agriculture.toFixed(2)}%</p>
             </CardContent>
           </Card>
         )}

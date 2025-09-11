@@ -3,7 +3,7 @@ import type { Village } from '@/types';
 
 // This data has been validated and corrected to ensure geographic consistency.
 // All coordinates are in [longitude, latitude] format.
-export const villages: Omit<Village, 'timeSeriesData' | 'assetGeometries' | 'ndwi'>[] = [
+export const villages: Omit<Village, 'timeSeriesData' | 'assetGeometries' | 'assetCoverage'>[] = [
   {
     id: "village_01",
     name: "Ambassa",
@@ -15,7 +15,6 @@ export const villages: Omit<Village, 'timeSeriesData' | 'assetGeometries' | 'ndw
       [91.850, 23.934],
       [91.850, 23.939],
     ],
-    assetCoverage: { water: 7, forest: 63, agriculture: 30 },
   },
   {
     id: "village_02",
@@ -28,7 +27,6 @@ export const villages: Omit<Village, 'timeSeriesData' | 'assetGeometries' | 'ndw
       [92.006, 24.168],
       [92.006, 24.172],
     ],
-    assetCoverage: { water: 11, forest: 54, agriculture: 35 },
   },
   {
     id: "village_03",
@@ -41,7 +39,6 @@ export const villages: Omit<Village, 'timeSeriesData' | 'assetGeometries' | 'ndw
       [91.480, 23.531],
       [91.480, 23.536],
     ],
-    assetCoverage: { water: 10, forest: 48, agriculture: 42 },
   },
   {
     id: "village_04",
@@ -54,7 +51,6 @@ export const villages: Omit<Village, 'timeSeriesData' | 'assetGeometries' | 'ndw
       [91.270, 23.485],
       [91.270, 23.490],
     ],
-    assetCoverage: { water: 8, forest: 41, agriculture: 51 },
   },
   {
     id: "village_05",
@@ -67,7 +63,6 @@ export const villages: Omit<Village, 'timeSeriesData' | 'assetGeometries' | 'ndw
       [92.279, 24.137],
       [92.279, 24.142],
     ],
-    assetCoverage: { water: 6, forest: 69, agriculture: 25 },
   },
   {
     id: "village_06",
@@ -80,7 +75,6 @@ export const villages: Omit<Village, 'timeSeriesData' | 'assetGeometries' | 'ndw
       [91.395, 23.353],
       [91.395, 23.358],
     ],
-    assetCoverage: { water: 12, forest: 37, agriculture: 51 },
   },
   {
     id: "village_07",
@@ -93,7 +87,6 @@ export const villages: Omit<Village, 'timeSeriesData' | 'assetGeometries' | 'ndw
       [91.830, 23.024],
       [91.830, 23.028],
     ],
-    assetCoverage: { water: 14, forest: 57, agriculture: 29 },
   },
   {
     id: "village_08",
@@ -106,7 +99,6 @@ export const villages: Omit<Village, 'timeSeriesData' | 'assetGeometries' | 'ndw
       [91.595, 23.798],
       [91.595, 23.802],
     ],
-    assetCoverage: { water: 7, forest: 62, agriculture: 31 },
   },
   {
     id: "village_09",
@@ -119,7 +111,6 @@ export const villages: Omit<Village, 'timeSeriesData' | 'assetGeometries' | 'ndw
       [92.105, 24.197],
       [92.105, 24.202],
     ],
-    assetCoverage: { water: 10, forest: 66, agriculture: 22 },
   },
   {
     id: "village_10",
@@ -132,6 +123,5 @@ export const villages: Omit<Village, 'timeSeriesData' | 'assetGeometries' | 'ndw
       [91.282, 23.828],
       [91.282, 23.833],
     ],
-    assetCoverage: { water: 5, forest: 58, agriculture: 35 },
   },
 ];

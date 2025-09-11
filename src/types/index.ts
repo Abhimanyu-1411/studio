@@ -82,7 +82,6 @@ export type TimeSeriesDataPoint = {
 export type Village = {
   id: string;
   name: string;
-  ndwi: number;
   assetCoverage: {
     water: number;
     forest: number;
@@ -91,7 +90,7 @@ export type Village = {
   center: LngLat;
   bounds: LngLat[];
   assetGeometries?: {
-    ndwi: LngLat[][];
+    water: LngLat[][];
     forest: LngLat[][];
     agriculture: LngLat[][];
   }

@@ -55,6 +55,11 @@ const toLatLngExpression = (coords: LngLat[]): L.LatLngExpression[] => {
     return coords.map(([lng, lat]) => ({ lat, lng }));
 };
 
+// Helper for multi-polygons
+const toMultiLatLngExpression = (polygons: LngLat[][]): L.LatLngExpression[][] => {
+    return polygons.map(poly => toLatLngExpression(poly));
+};
+
 const getClaimIcon = (claim: Claim) => {
   const color = claimStatusColors[claim.status as keyof typeof claimStatusColors] || 'hsl(var(--muted-foreground))';
   const markerHtml = `<div style="background-color: ${color}; width: 24px; height: 24px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; color: white; font-weight: bold;">${claim.status === 'unlinked' ? '?' : ''}</div>`;
@@ -129,21 +134,21 @@ const MapViewComponent = ({ claims, villages, assets, pattas, onVillageClick, on
               <Popup>
                 <div className="font-bold text-base">{village.name}</div>
                 <div className="text-sm">
-                  <p>Water Coverage: {village.assetCoverage.water}%</p>
-                  <p>Forest Coverage: {village.assetCoverage.forest}%</p>
-                  <p>Agriculture: {village.assetCoverage.agriculture}%</p>
+                  <p>Water Coverage: {village.assetCoverage.water.toFixed(2)}%</p>
+                  <p>Forest Coverage: {village.assetCoverage.forest.toFixed(2)}%</p>
+                  <p>Agriculture: {village.assetCoverage.agriculture.toFixed(2)}%</p>
                 </div>
               </Popup>
             </Polygon>
             
-            {activeLayers.ndwi && village.assetGeometries?.ndwi.map((poly: LngLat[], i: number) => 
-                <Polygon key={`${village.id}-ndwi-${i}`} positions={toLatLngExpression(poly)} pathOptions={{...assetLayerStyles.ndwi, fillOpacity: 0.5}} />
+            {activeLayers.ndwi && village.assetGeometries?.water && village.assetCoverage.water > 0 && village.assetGeometries.water.map((poly, i) => 
+                <Polygon key={`${village.id}-ndwi-${i}`} positions={toMultiLatLngExpression([poly])} pathOptions={{...assetLayerStyles.ndwi, fillOpacity: 0.5}} />
             )}
-            {activeLayers.forest && village.assetGeometries?.forest.map((poly: LngLat[], i: number) => 
-                <Polygon key={`${village.id}-forest-${i}`} positions={toLatLngExpression(poly)} pathOptions={{...assetLayerStyles.forest, fillOpacity: 0.5}} />
+            {activeLayers.forest && village.assetGeometries?.forest && village.assetCoverage.forest > 0 && village.assetGeometries.forest.map((poly, i) => 
+                <Polygon key={`${village.id}-forest-${i}`} positions={toMultiLatLngExpression([poly])} pathOptions={{...assetLayerStyles.forest, fillOpacity: 0.5}} />
             )}
-            {activeLayers.agriculture && village.assetGeometries?.agriculture.map((poly: LngLat[], i: number) => 
-                <Polygon key={`${village.id}-agri-${i}`} positions={toLatLngExpression(poly)} pathOptions={{...assetLayerStyles.agriculture, fillOpacity: 0.5}} />
+            {activeLayers.agriculture && village.assetGeometries?.agriculture && village.assetCoverage.agriculture > 0 && village.assetGeometries.agriculture.map((poly, i) => 
+                <Polygon key={`${village.id}-agri-${i}`} positions={toMultiLatLngExpression([poly])} pathOptions={{...assetLayerStyles.agriculture, fillOpacity: 0.5}} />
             )}
         </React.Fragment>
       ))}
