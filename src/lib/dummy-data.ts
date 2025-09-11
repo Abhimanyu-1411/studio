@@ -68,11 +68,11 @@ export const dummyVillages: Village[] = [
         ndwi: 0.45,
         assetCoverage: { water: 35, forest: 55, agriculture: 10 },
         center: { lat: 23.91, lng: 91.85 },
-        bounds: createPolygon({ lat: 23.91, lng: 91.85 }, 45, 0.02),
+        bounds: createPolygon({ lat: 23.91, lng: 91.85 }, 15, 0.02),
         assetGeometries: {
-            ndwi: [createPolygon({ lat: 23.915, lng: 91.855 }, 50, 0.003)],
-            forest: [createPolygon({ lat: 23.905, lng: 91.845 }, 50, 0.005)],
-            agriculture: [createPolygon({ lat: 23.91, lng: 91.86 }, 50, 0.002)],
+            ndwi: [createPolygon({ lat: 23.915, lng: 91.855 }, 20, 0.003)],
+            forest: [createPolygon({ lat: 23.905, lng: 91.845 }, 20, 0.005)],
+            agriculture: [createPolygon({ lat: 23.91, lng: 91.86 }, 20, 0.002)],
         },
         timeSeriesData: generateTimeSeries(150, 'rainfall')
     },
@@ -82,11 +82,11 @@ export const dummyVillages: Village[] = [
         ndwi: 0.65,
         assetCoverage: { water: 40, forest: 30, agriculture: 30 },
         center: { lat: 23.53, lng: 91.48 },
-        bounds: createPolygon({ lat: 23.53, lng: 91.48 }, 45, 0.02),
+        bounds: createPolygon({ lat: 23.53, lng: 91.48 }, 15, 0.02),
         assetGeometries: {
-             ndwi: [createPolygon({ lat: 23.535, lng: 91.485 }, 50, 0.004)],
-            forest: [createPolygon({ lat: 23.525, lng: 91.475 }, 50, 0.003)],
-            agriculture: [createPolygon({ lat: 23.53, lng: 91.49 }, 50, 0.006)],
+             ndwi: [createPolygon({ lat: 23.535, lng: 91.485 }, 20, 0.004)],
+            forest: [createPolygon({ lat: 23.525, lng: 91.475 }, 20, 0.003)],
+            agriculture: [createPolygon({ lat: 23.53, lng: 91.49 }, 20, 0.006)],
         },
         timeSeriesData: generateTimeSeries(0.6, 'ndwi')
     },
@@ -96,10 +96,10 @@ export const dummyVillages: Village[] = [
         ndwi: 0.30,
         assetCoverage: { water: 15, forest: 70, agriculture: 15 },
         center: { lat: 24.32, lng: 92.01 },
-        bounds: createPolygon({ lat: 24.32, lng: 92.01 }, 45, 0.02),
+        bounds: createPolygon({ lat: 24.32, lng: 92.01 }, 15, 0.02),
         assetGeometries: {
-            ndwi: [createPolygon({ lat: 24.325, lng: 92.015 }, 50, 0.002)],
-            forest: [createPolygon({ lat: 24.315, lng: 92.005 }, 50, 0.007)],
+            ndwi: [createPolygon({ lat: 24.325, lng: 92.015 }, 20, 0.002)],
+            forest: [createPolygon({ lat: 24.315, lng: 92.005 }, 20, 0.007)],
             agriculture: [],
         },
         timeSeriesData: generateTimeSeries(0.8, 'ndvi')
@@ -183,7 +183,7 @@ export const dummyAssets: CommunityAsset[] = [
         description: 'Community pond used for fishing and irrigation.',
         documentUrl: 'https://picsum.photos/seed/asset1/300/200',
         documentType: 'image/jpeg',
-        geometry: createPolygon({ lat: 23.912, lng: 91.852 }, 50, 0.001)
+        geometry: createPolygon({ lat: 23.912, lng: 91.852 }, 20, 0.001)
     },
     {
         id: 'asset_2',
@@ -192,7 +192,7 @@ export const dummyAssets: CommunityAsset[] = [
         description: 'Sacred grove maintained by the local community.',
         documentUrl: 'https://picsum.photos/seed/asset2/300/200',
         documentType: 'image/jpeg',
-        geometry: createPolygon({ lat: 23.532, lng: 91.482 }, 50, 0.002)
+        geometry: createPolygon({ lat: 23.532, lng: 91.482 }, 20, 0.002)
     }
 ];
 
@@ -202,12 +202,12 @@ export const dummyPattas: Patta[] = [
         id: 'patta_1',
         holderName: 'Ranjit Jamatia',
         villageName: 'Udaipur',
-        geometry: createPolygon({ lat: 23.525, lng: 91.475 }, 4, 0.005)
+        geometry: createPolygon({ lat: 23.525, lng: 91.475 }, 20, 0.005)
     },
      {
         id: 'patta_2',
         holderName: 'Sumitra Reang',
         villageName: 'Ambassa',
-        geometry: createPolygon({ lat: 23.895, lng: 91.845 }, 4, 0.005)
+        geometry: createPolygon({ lat: 23.895, lng: 91.845 }, 20, 0.005)
     }
 ];
