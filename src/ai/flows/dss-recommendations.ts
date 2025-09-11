@@ -44,6 +44,9 @@ export async function dssRecommendations(input: DSSRecommendationsInput): Promis
   // Validate input against the Zod schema to ensure data integrity.
   DSSRecommendationsInputSchema.parse(input);
 
+  // Add a 5-second delay to simulate AI thinking time.
+  await new Promise(resolve => setTimeout(resolve, 5000));
+
   const recommendations = dssRules
     .filter(rule => rule.criteria(input))
     .map(rule => ({
