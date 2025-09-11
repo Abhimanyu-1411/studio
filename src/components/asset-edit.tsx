@@ -21,7 +21,7 @@ import {
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Loader2, UploadCloud, FileCheck2, XCircle, MapPin } from 'lucide-react';
+import { Loader2, UploadCloud, FileCheck2, XCircle, MapPin, File as FileIcon } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useDropzone } from 'react-dropzone';
 import { Progress } from '@/components/ui/progress';
@@ -236,14 +236,19 @@ export function AssetEdit({ open, onOpenChange, onAssetAdded, villages, claimLoc
             ) : (
               <div className="space-y-2">
                 <div className="flex items-center gap-4 p-2 border rounded-md">
-                  <Image
-                    src={preview || 'https://picsum.photos/seed/doc/100/100'}
-                    alt="Document preview"
-                    width={50}
-                    height={50}
-                    className="rounded-md object-cover"
-                    data-ai-hint="document"
-                  />
+                   {preview && file.type.startsWith('image/') ? (
+                      <Image
+                        src={preview}
+                        alt="Document preview"
+                        width={50}
+                        height={50}
+                        className="rounded-md object-cover"
+                      />
+                   ) : (
+                      <div className="h-[50px] w-[50px] flex items-center justify-center bg-muted rounded-md">
+                          <FileIcon className="h-6 w-6 text-muted-foreground" />
+                      </div>
+                   )}
                   <div className="flex-1">
                     <p className="text-sm font-medium truncate">{file.name}</p>
                     <p className="text-xs text-muted-foreground">{Math.round(file.size / 1024)} KB</p>

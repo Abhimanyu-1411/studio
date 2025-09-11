@@ -17,7 +17,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import type { Claim } from '@/types';
-import { Loader2, Save, CheckCircle, X } from 'lucide-react';
+import { Loader2, Save, CheckCircle, X, FileIcon } from 'lucide-react';
 import { ConfidenceBadge } from './confidence-badge';
 import { Textarea } from './ui/textarea';
 
@@ -139,7 +139,8 @@ export function ClaimEdit({ claim, onClose, onClaimUpdate, availableVillages }: 
                   )
                 ) : (
                   <div className="flex items-center justify-center h-full text-muted-foreground">
-                    <p>No document preview available.</p>
+                    <FileIcon className="h-10 w-10" />
+                    <p className="ml-2">No document preview available.</p>
                   </div>
                 )}
                 </div>
