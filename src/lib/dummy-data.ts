@@ -68,7 +68,7 @@ export const dummyVillages: Village[] = [
         ndwi: 0.45,
         assetCoverage: { water: 35, forest: 55, agriculture: 10 },
         center: { lat: 23.91, lng: 91.85 },
-        bounds: createPolygon({ lat: 23.91, lng: 91.85 }, 15, 0.02),
+        bounds: createPolygon({ lat: 23.91, lng: 91.85 }, 8, 0.02),
         assetGeometries: {
             ndwi: [createPolygon({ lat: 23.915, lng: 91.855 }, 20, 0.003)],
             forest: [createPolygon({ lat: 23.905, lng: 91.845 }, 20, 0.005)],
@@ -82,7 +82,7 @@ export const dummyVillages: Village[] = [
         ndwi: 0.65,
         assetCoverage: { water: 40, forest: 30, agriculture: 30 },
         center: { lat: 23.53, lng: 91.48 },
-        bounds: createPolygon({ lat: 23.53, lng: 91.48 }, 15, 0.02),
+        bounds: createPolygon({ lat: 23.53, lng: 91.48 }, 8, 0.02),
         assetGeometries: {
              ndwi: [createPolygon({ lat: 23.535, lng: 91.485 }, 20, 0.004)],
             forest: [createPolygon({ lat: 23.525, lng: 91.475 }, 20, 0.003)],
@@ -96,7 +96,7 @@ export const dummyVillages: Village[] = [
         ndwi: 0.30,
         assetCoverage: { water: 15, forest: 70, agriculture: 15 },
         center: { lat: 24.32, lng: 92.01 },
-        bounds: createPolygon({ lat: 24.32, lng: 92.01 }, 15, 0.02),
+        bounds: createPolygon({ lat: 24.32, lng: 92.01 }, 8, 0.02),
         assetGeometries: {
             ndwi: [createPolygon({ lat: 24.325, lng: 92.015 }, 20, 0.002)],
             forest: [createPolygon({ lat: 24.315, lng: 92.005 }, 20, 0.007)],
@@ -211,3 +211,5 @@ export const dummyPattas: Patta[] = [
         geometry: createPolygon({ lat: 23.895, lng: 91.845 }, 20, 0.005)
     }
 ];
+
+    
