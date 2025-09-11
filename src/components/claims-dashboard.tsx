@@ -25,7 +25,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { AssetEdit } from '@/components/asset-edit';
-import { Skeleton } from '../ui/skeleton';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const StatsCard = ({ title, value, icon: Icon, color, bgColor }: { title: string, value: string | number, icon: React.ElementType, color: string, bgColor: string }) => (
     <Card className="shadow-sm">
