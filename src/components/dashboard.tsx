@@ -72,7 +72,9 @@ export const VillageAnalysis = ({ villages, claims }: { villages: Village[], cla
 
     try {
       const result = await getDssRecommendation(villageId);
-      setRecommendations(result);
+      // Sort recommendations by priority, highest first
+      const sortedResult = result.sort((a, b) => b.priority - a.priority);
+      setRecommendations(sortedResult);
     } catch (error: any) {
       console.error(error);
       const errorMessage = error.message || '';
