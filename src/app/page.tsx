@@ -157,12 +157,19 @@ export default function DashboardPage() {
     setEditingClaim(null); // Close claim edit if open
   }
   
-  const linkedClaims = useMemo(() => claims.filter(c => c.status === 'linked'), [claims]);
-  
+  const claimsForMap = useMemo(() => {
+    const linked = claims.filter(c => c.status === 'linked');
+    if (editingClaim && editingClaim.status !== 'linked') {
+      const otherLinked = linked.filter(c => c.id !== editingClaim.id);
+      return [editingClaim, ...otherLinked];
+    }
+    return linked;
+  }, [claims, editingClaim]);
+
   const linkedPattas = useMemo(() => {
-    const linkedClaimantNames = new Set(linkedClaims.map(c => getClaimValue(c.claimantName)));
+    const linkedClaimantNames = new Set(claimsForMap.filter(c => c.status === 'linked').map(c => getClaimValue(c.claimantName)));
     return pattas.filter(p => linkedClaimantNames.has(p.holderName));
-  }, [linkedClaims, pattas]);
+  }, [claimsForMap, pattas]);
 
 
   const MapCard = ({ className }: { className?: string }) => (
@@ -181,7 +188,7 @@ export default function DashboardPage() {
         </CardHeader>
         <CardContent className="flex-1 p-0">
             <MapView
-                claims={linkedClaims}
+                claims={claimsForMap}
                 villages={villages}
                 assets={assets}
                 pattas={linkedPattas}
@@ -306,5 +313,7 @@ export default function DashboardPage() {
     </>
   );
 }
+
+    
 
     
