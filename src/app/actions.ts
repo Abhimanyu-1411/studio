@@ -22,11 +22,7 @@ let villagesStore: Village[] = [...dummyVillages];
 let assetsStore: CommunityAsset[] = [...dummyAssets];
 let pattasStore: Patta[] = [...dummyPattas];
 
-// Helper to simulate network delay
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-
 export async function handleClaimUpload(documentDataUri: string, documentType: string): Promise<Claim> {
-  await delay(1500);
 
   // Simulate AI data extraction
   const extractedData = await extractClaimData({ documentDataUri });
@@ -62,7 +58,6 @@ export async function handleClaimUpload(documentDataUri: string, documentType: s
 }
 
 export async function handleShapefileUpload(shapefileDataUri: string): Promise<Patta[]> {
-  await delay(1500);
   const newPattas = await processShapefile({ shapefileDataUri });
   
   pattasStore.push(...newPattas);
@@ -72,7 +67,6 @@ export async function handleShapefileUpload(shapefileDataUri: string): Promise<P
 
 
 export async function updateClaim(claimId: string, updatedData: Partial<Claim>) {
-    await delay(500);
     const index = claimsStore.findIndex(c => c.id === claimId);
     if (index !== -1) {
         claimsStore[index] = { ...claimsStore[index], ...updatedData };
@@ -83,14 +77,12 @@ export async function updateClaim(claimId: string, updatedData: Partial<Claim>) 
 }
 
 export async function deleteClaim(claimId: string) {
-    await delay(500);
     claimsStore = claimsStore.filter(c => c.id !== claimId);
     revalidatePath('/');
     revalidatePath('/claims');
 }
 
 export async function deleteVillage(villageId: string) {
-    await delay(500);
     villagesStore = villagesStore.filter(v => v.id !== villageId);
     revalidatePath('/');
     revalidatePath('/villages');
@@ -98,7 +90,6 @@ export async function deleteVillage(villageId: string) {
 
 
 export async function getDssRecommendation(villageId: string): Promise<DssRecommendation[]> {
-    await delay(1000);
     const village = villagesStore.find(v => v.id === villageId);
     if (!village) throw new Error("Village not found");
 
@@ -121,7 +112,6 @@ export async function getPrediction(
     metric: keyof Omit<TimeSeriesDataPoint, 'date'>,
     forecastPeriods: number
 ): Promise<any[]> {
-    await delay(1000);
     const village = villagesStore.find(v => v.id === villageId);
     if (!village || !village.timeSeriesData) {
         throw new Error('Village or time-series data not found');
@@ -156,18 +146,15 @@ export async function getPrediction(
 }
 
 export async function getClaims(): Promise<Claim[]> {
-    await delay(200);
     return claimsStore;
 }
 
 export async function getVillages(): Promise<Village[]> {
-    await delay(200);
     return villagesStore;
 }
 
 
 export async function addCommunityAsset(asset: Omit<CommunityAsset, 'id'>): Promise<CommunityAsset> {
-    await delay(500);
     const newAsset: CommunityAsset = {
         ...asset,
         id: `asset_${Date.now()}`
@@ -178,11 +165,9 @@ export async function addCommunityAsset(asset: Omit<CommunityAsset, 'id'>): Prom
 }
 
 export async function getCommunityAssets(): Promise<CommunityAsset[]> {
-    await delay(200);
     return assetsStore;
 }
 
 export async function getPattas(): Promise<Patta[]> {
-    await delay(200);
     return pattasStore;
 }
