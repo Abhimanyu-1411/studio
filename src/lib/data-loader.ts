@@ -56,12 +56,10 @@ const villages: Village[] = rawVillages.map(v => {
     const villageAssetGeometries = rawAssetGeometries[v.id];
 
     const clippedGeometries: Required<Village['assetGeometries']> = { water: [], forest: [], agriculture: [] };
-    const assetCoverage: Village['assetCoverage'] = { water: 0, forest: 0, agriculture: 0 };
     
     if (villageAssetGeometries) {
         Object.keys(villageAssetGeometries).forEach(key => {
             const assetType = key as keyof typeof villageAssetGeometries;
-            let totalAssetArea = 0;
             const assetGeom = villageAssetGeometries[assetType];
 
             if (assetGeom && assetGeom.coordinates) {
@@ -71,22 +69,19 @@ const villages: Village[] = rawVillages.map(v => {
                     if (intersection) {
                         const clippedCoords = turf.getCoords(intersection) as LngLat[][];
                         clippedGeometries[assetType].push(...clippedCoords);
-                        totalAssetArea += turf.area(intersection);
                     }
                 } catch (e) {
                     console.error(`Error intersecting ${assetType} for village ${v.name}:`, e);
                 }
             }
-            if (villageArea > 0) {
-                assetCoverage[assetType] = (totalAssetArea / villageArea) * 100;
-            }
         });
     }
 
+    // Use pre-calculated coverage but assign the clipped geometries
     return {
         ...v,
         assetGeometries: clippedGeometries,
-        assetCoverage: assetCoverage,
+        // The assetCoverage from rawVillages is already there due to spread `...v`
         timeSeriesData: generateTimeSeriesData(new Date('2022-01-01'), 24),
     };
 });
