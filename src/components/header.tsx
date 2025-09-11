@@ -102,9 +102,9 @@ export function Header({ onClaimAdded: onClaimAddedFromPage }: { onClaimAdded?: 
         </div>
       
         <div className="flex items-center gap-2 ml-auto">
-            <Button variant="secondary" onClick={() => setUploadOpen(true)} className="flex">
-            <Upload className="mr-2 h-4 w-4" />
-            Upload Claim
+            <Button variant="secondary" onClick={() => setUploadOpen(true)} className="flex items-center gap-2">
+                <Upload className="h-4 w-4" />
+                Upload Claim
             </Button>
         </div>
       </header>
