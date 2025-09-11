@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
@@ -281,7 +282,7 @@ export default function DashboardPage() {
             !isMapFullScreen && (showSidePanel ? "grid-cols-1 lg:grid-cols-3" : "grid-cols-1"),
         )}>
             <div className={cn(
-                "transition-all duration-300",
+                "transition-all duration-300 z-10",
                  isMapFullScreen ? "fixed inset-0 z-40" : (showSidePanel ? "lg:col-span-2 h-[calc(100vh-300px)]" : "lg:col-span-3 h-[calc(100vh-250px)]")
             )}>
               <MapCard className="h-full w-full"/>
@@ -323,4 +324,5 @@ export default function DashboardPage() {
     
 
     
+
 
