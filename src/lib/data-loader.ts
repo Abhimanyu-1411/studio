@@ -44,18 +44,17 @@ const villages: Village[] = rawVillages.map(v => {
         console.error(`Village ${v.name} has invalid bounds. Skipping asset processing.`);
         return {
             ...v,
-            assetGeometries: { water: [], forest: [], agriculture: [] },
             assetCoverage: { water: 0, forest: 0, agriculture: 0 },
+            assetGeometries: { water: [], forest: [], agriculture: [] },
             timeSeriesData: generateTimeSeriesData(new Date('2022-01-01'), 24),
         };
     }
     
     const villagePolygon = turf.polygon([v.bounds]);
-    const villageArea = turf.area(villagePolygon);
-
     const villageAssetGeometries = rawAssetGeometries[v.id];
 
     const clippedGeometries: Required<Village['assetGeometries']> = { water: [], forest: [], agriculture: [] };
+    const coverage = { water: 0, forest: 0, agriculture: 0 };
     
     if (villageAssetGeometries) {
         Object.keys(villageAssetGeometries).forEach(key => {
@@ -68,7 +67,7 @@ const villages: Village[] = rawVillages.map(v => {
                     const intersection = turf.intersect(villagePolygon, assetPolygon);
                     if (intersection) {
                         const clippedCoords = turf.getCoords(intersection) as LngLat[][];
-                        clippedGeometries[assetType].push(...clippedCoords);
+                        clippedGeometries[assetType] = clippedCoords;
                     }
                 } catch (e) {
                     console.error(`Error intersecting ${assetType} for village ${v.name}:`, e);
@@ -77,11 +76,15 @@ const villages: Village[] = rawVillages.map(v => {
         });
     }
 
-    // Use pre-calculated coverage but assign the clipped geometries
+    // Assign pre-calculated coverage if available, otherwise default to 0
+    coverage.water = (v as any).assetCoverage?.water || 0;
+    coverage.forest = (v as any).assetCoverage?.forest || 0;
+    coverage.agriculture = (v as any).assetCoverage?.agriculture || 0;
+
     return {
         ...v,
+        assetCoverage: coverage,
         assetGeometries: clippedGeometries,
-        // The assetCoverage from rawVillages is already there due to spread `...v`
         timeSeriesData: generateTimeSeriesData(new Date('2022-01-01'), 24),
     };
 });
