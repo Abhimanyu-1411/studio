@@ -235,8 +235,7 @@ export function PredictiveAnalysis({ villages }: PredictiveAnalysisProps) {
                             labelFormatter={formatTooltipLabel}
                             formatter={(value, name) => {
                                 const formattedValue = typeof value === 'number' ? value.toFixed(2) : value;
-                                const seriesName = name === 'historical' ? 'Historical' : 'Predicted';
-                                return [formattedValue, seriesName];
+                                return [formattedValue, name];
                             }}
                         />
                         <Legend wrapperStyle={{ bottom: 0 }} />
@@ -251,5 +250,3 @@ export function PredictiveAnalysis({ villages }: PredictiveAnalysisProps) {
     </div>
   );
 }
-
-    
