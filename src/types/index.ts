@@ -103,6 +103,20 @@ export type DssRecommendation = {
   priority: number;
 };
 
+export type DSSRecommendationsInput = {
+  villageName: string;
+  claimCount: number;
+  pendingClaims: number;
+  cfrClaims: number;
+  ifrClaims: number;
+  waterCoverage: number;
+  forestCoverage: number;
+  agriculturalArea: number;
+};
+
+export type DSSRecommendationsOutput = DssRecommendation[];
+
+
 export type CommunityAsset = {
   id: string;
   villageId: string;
