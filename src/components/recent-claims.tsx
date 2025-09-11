@@ -15,7 +15,7 @@ const getClaimValue = (field: any): string => {
     if (typeof field === 'object' && field !== null && 'value' in field) {
         return field.value;
     }
-    return field as string;
+    return String(field);
 }
 
 
@@ -55,3 +55,5 @@ export function RecentClaims({ claims, onClaimSelect }: RecentClaimsProps) {
     </Card>
   );
 }
+
+    

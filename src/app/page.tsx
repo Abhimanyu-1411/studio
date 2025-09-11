@@ -55,7 +55,7 @@ const getClaimValue = (field: any): string => {
     if (typeof field === 'object' && field !== null && 'value' in field) {
         return field.value;
     }
-    return field as string;
+    return String(field);
 }
 
 export default function DashboardPage() {
@@ -157,6 +157,14 @@ export default function DashboardPage() {
     setEditingClaim(null); // Close claim edit if open
   }
   
+  const linkedClaims = useMemo(() => claims.filter(c => c.status === 'linked'), [claims]);
+  
+  const linkedPattas = useMemo(() => {
+    const linkedClaimantNames = new Set(linkedClaims.map(c => getClaimValue(c.claimantName)));
+    return pattas.filter(p => linkedClaimantNames.has(p.holderName));
+  }, [linkedClaims, pattas]);
+
+
   const MapCard = ({ className }: { className?: string }) => (
     <Card className={cn("h-full flex flex-col shadow-lg relative", className)}>
         <CardHeader className="relative z-10 flex flex-row items-center justify-between p-4 bg-background/80 backdrop-blur-sm">
@@ -176,7 +184,7 @@ export default function DashboardPage() {
                 claims={linkedClaims}
                 villages={villages}
                 assets={assets}
-                pattas={pattas}
+                pattas={linkedPattas}
                 onVillageClick={() => {}}
                 onClaimEdit={handleClaimEdit}
                 center={mapCenter}
@@ -193,7 +201,6 @@ export default function DashboardPage() {
   const approvedClaims = claims.filter(c => c.status === 'linked').length;
   const totalVillages = villages.length;
 
-  const linkedClaims = useMemo(() => claims.filter(c => c.status === 'linked'), [claims]);
   
   const sidePanelComponent = useMemo(() => {
     if (editingClaim) {
@@ -299,3 +306,5 @@ export default function DashboardPage() {
     </>
   );
 }
+
+    
