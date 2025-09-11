@@ -6,7 +6,7 @@ import dynamic from 'next/dynamic';
 import type { Claim, Village, DssRecommendation } from '@/types';
 import { Skeleton } from './ui/skeleton';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
-import { Lightbulb, ThumbsUp, Loader2, AlertCircle, CheckCircle } from 'lucide-react';
+import { Lightbulb, ThumbsUp, Loader2, AlertCircle, CheckCircle, BrainCircuit } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -49,13 +49,39 @@ const getClaimValue = (field: any): string => {
     return field as string;
 }
 
+const loadingSteps = [
+  "Analyzing village data...",
+  "Cross-referencing ecological metrics...",
+  "Evaluating applicable government schemes...",
+  "Prioritizing recommendations based on impact...",
+  "Finalizing suggestions...",
+];
+
 export const VillageAnalysis = ({ villages, claims }: { villages: Village[], claims: Claim[] }) => {
   const [selectedVillageId, setSelectedVillageId] = useState<string | null>(null);
   const [recommendations, setRecommendations] = useState<DssRecommendation[] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [loadingStep, setLoadingStep] = useState(0);
   const [actedOn, setActedOn] = useState<string[]>([]);
   const [errorState, setErrorState] = useState<{title: string, description: string} | null>(null);
   const { toast } = useToast();
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isLoading) {
+      setLoadingStep(0);
+      interval = setInterval(() => {
+        setLoadingStep(prevStep => {
+          if (prevStep >= loadingSteps.length - 1) {
+            clearInterval(interval);
+            return prevStep;
+          }
+          return prevStep + 1;
+        });
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [isLoading]);
 
   const handleVillageChange = async (villageId: string) => {
     setSelectedVillageId(villageId);
@@ -156,7 +182,12 @@ export const VillageAnalysis = ({ villages, claims }: { villages: Village[], cla
              <CardDescription>AI-powered recommendations based on village data.</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col items-center justify-start min-h-[300px] p-6 space-y-4">
-            {isLoading && <Loader2 className="h-8 w-8 animate-spin text-primary" />}
+            {isLoading && (
+              <div className="text-center flex-1 flex flex-col justify-center items-center">
+                  <BrainCircuit className="h-12 w-12 text-primary mx-auto mb-4" />
+                  <p className="text-muted-foreground font-medium animate-pulse">{loadingSteps[loadingStep]}</p>
+              </div>
+            )}
             
             {!isLoading && !recommendations && !errorState && (
                 <div className="text-center flex-1 flex flex-col justify-center items-center"><Lightbulb className="h-12 w-12 text-muted-foreground mx-auto mb-4" /><p className="text-muted-foreground">Select a village to see recommendations.</p></div>
