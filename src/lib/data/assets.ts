@@ -1,5 +1,6 @@
 
 import type { RawCommunityAsset } from '@/types';
+import imageData from '@/lib/placeholder-images.json';
 
 // This data has been validated and corrected to ensure geographic consistency.
 // All coordinates are in [longitude, latitude] format.
@@ -9,7 +10,8 @@ export const assets: RawCommunityAsset[] = [
     villageId: "village_01",
     assetType: "water",
     description: "Community Pond near Ambassa Bazar",
-    documentUrl: "https://picsum.photos/seed/asset1/300/200",
+    documentUrl: imageData.assets[0].src,
+    documentHint: imageData.assets[0].hint,
     geometry: [
       [91.852, 23.919],
       [91.854, 23.919],
@@ -23,7 +25,8 @@ export const assets: RawCommunityAsset[] = [
     villageId: "village_02",
     assetType: "school",
     description: "Government Primary School at Kanchanpur",
-    documentUrl: "https://picsum.photos/seed/asset2/300/200",
+    documentUrl: imageData.assets[1].src,
+    documentHint: imageData.assets[1].hint,
     geometry: [
       [92.010, 24.173],
       [92.012, 24.173],
@@ -37,7 +40,8 @@ export const assets: RawCommunityAsset[] = [
     villageId: "village_03",
     assetType: "water",
     description: "Local Pond used for irrigation in Udaipur",
-    documentUrl: "https://picsum.photos/seed/asset3/300/200",
+    documentUrl: imageData.assets[2].src,
+    documentHint: imageData.assets[2].hint,
     geometry: [
       [91.481, 23.536],
       [91.483, 23.536],
@@ -51,7 +55,8 @@ export const assets: RawCommunityAsset[] = [
     villageId: "village_04",
     assetType: "school",
     description: "Melaghar Community High School",
-    documentUrl: "https://picsum.photos/seed/asset4/300/200",
+    documentUrl: imageData.assets[3].src,
+    documentHint: imageData.assets[3].hint,
     geometry: [
       [91.271, 23.488],
       [91.273, 23.488],
@@ -65,7 +70,8 @@ export const assets: RawCommunityAsset[] = [
     villageId: "village_05",
     assetType: "water",
     description: "Pond adjacent to the main road in Jampui",
-    documentUrl: "https://picsum.photos/seed/asset5/300/200",
+    documentUrl: imageData.assets[4].src,
+    documentHint: imageData.assets[4].hint,
     geometry: [
       [92.281, 24.141],
       [92.283, 24.141],

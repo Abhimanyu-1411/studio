@@ -35,6 +35,7 @@ export type RawCommunityAsset = {
   assetType: string;
   description: string;
   documentUrl: string;
+  documentHint?: string;
   geometry?: LngLat[];
 };
 
@@ -124,6 +125,7 @@ export type CommunityAsset = {
   description: string;
   documentUrl: string;
   documentType: string;
+  documentHint?: string;
   geometry?: LngLat[];
 }
 

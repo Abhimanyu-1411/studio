@@ -70,6 +70,7 @@ export function CommunityAssets({ assets: initialAssets, villages }: CommunityAs
                             width={300} 
                             height={200}
                             className="rounded-t-lg object-cover w-full aspect-video"
+                            data-ai-hint={asset.documentHint || 'landscape'}
                         />
                     ) : (
                         <div className="flex items-center justify-center w-full aspect-video bg-muted rounded-t-lg">

@@ -1,0 +1,32 @@
+
+{
+    "documents": [
+        { "src": "https://picsum.photos/seed/doc1/400/560", "hint": "official document" },
+        { "src": "https://picsum.photos/seed/doc2/400/560", "hint": "stamped paper" },
+        { "src": "https://picsum.photos/seed/doc3/400/560", "hint": "legal document" },
+        { "src": "https://picsum.photos/seed/doc4/400/560", "hint": "handwritten letter" },
+        { "src": "https://picsum.photos/seed/doc5/400/560", "hint": "archive document" },
+        { "src": "https://picsum.photos/seed/doc6/400/560", "hint": "old paper" },
+        { "src": "https://picsum.photos/seed/doc7/400/560", "hint": "land deed" },
+        { "src": "https://picsum.photos/seed/doc8/400/560", "hint": "certificate paper" },
+        { "src": "https://picsum.photos/seed/doc9/400/560", "hint": "claim form" },
+        { "src": "https://picsum.photos/seed/doc10/400/560", "hint": "signed document" },
+        { "src": "https://picsum.photos/seed/doc11/400/560", "hint": "official document" },
+        { "src": "https://picsum.photos/seed/doc12/400/560", "hint": "stamped paper" },
+        { "src": "https://picsum.photos/seed/doc13/400/560", "hint": "legal document" },
+        { "src": "https://picsum.photos/seed/doc14/400/560", "hint": "handwritten letter" },
+        { "src": "https://picsum.photos/seed/doc15/400/560", "hint": "archive document" },
+        { "src": "https://picsum.photos/seed/doc16/400/560", "hint": "old paper" },
+        { "src": "https://picsum.photos/seed/doc17/400/560", "hint": "land deed" }
+    ],
+    "assets": [
+        { "src": "https://picsum.photos/seed/asset1/300/200", "hint": "forest canopy" },
+        { "src": "https://picsum.photos/seed/asset2/300/200", "hint": "river bend" },
+        { "src": "https://picsum.photos/seed/asset3/300/200", "hint": "village school" },
+        { "src": "https://picsum.photos/seed/asset4/300/200", "hint": "farmland aerial" },
+        { "src": "https://picsum.photos/seed/asset5/300/200", "hint": "mountain path" },
+        { "src": "https://picsum.photos/seed/asset6/300/200", "hint": "jungle stream" },
+        { "src": "https://picsum.photos/seed/asset7/300/200", "hint": "tea plantation" },
+        { "src": "https://picsum.photos/seed/asset8/300/200", "hint": "rice paddy" }
+    ]
+}
