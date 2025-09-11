@@ -158,13 +158,17 @@ export default function DashboardPage() {
   }
   
   const claimsForMap = useMemo(() => {
+    // Show linked claims
     const linked = claims.filter(c => c.status === 'linked');
-    if (editingClaim && editingClaim.status !== 'linked') {
+
+    // If editing a claim, make sure it is on the map, and remove any other version of it
+    if (editingClaim) {
       const otherLinked = linked.filter(c => c.id !== editingClaim.id);
       return [editingClaim, ...otherLinked];
     }
     return linked;
   }, [claims, editingClaim]);
+
 
   const linkedPattas = useMemo(() => {
     const linkedClaimantNames = new Set(claimsForMap.filter(c => c.status === 'linked').map(c => getClaimValue(c.claimantName)));
@@ -254,7 +258,7 @@ export default function DashboardPage() {
   }
   
   const showSidePanel = !!sidePanelComponent;
-  const showDialog = isUploadOpen || isAssetEditOpen;
+  const showDialog = isUploadOpen || isAssetEditOpen || isShapefileUploadOpen;
 
   return (
     <>

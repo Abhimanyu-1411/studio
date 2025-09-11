@@ -3,13 +3,11 @@
 
 import { Button } from '@/components/ui/button';
 import { Upload, Menu, LayoutGrid, List, MapPin as Map, Lightbulb, TrendingUp, LandPlot } from 'lucide-react';
-import { ClaimUpload } from './claim-upload';
 import { useState } from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetTrigger } from './ui/sheet';
 import { usePathname, useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Logo } from './icons';
-import type { Claim } from '@/types';
 
 const navItems = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutGrid, href: '/' },
@@ -20,8 +18,7 @@ const navItems = [
   { id: 'community-assets', label: 'Community Assets', icon: LandPlot, href: '/assets' },
 ];
 
-export function Header({ onClaimAdded: onClaimAddedFromPage }: { onClaimAdded?: (claim: Claim) => void }) {
-  const [isUploadOpen, setUploadOpen] = useState(false);
+export function Header({ onUploadClick }: { onUploadClick: () => void }) {
   const [isSheetOpen, setSheetOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
@@ -31,19 +28,9 @@ export function Header({ onClaimAdded: onClaimAddedFromPage }: { onClaimAdded?: 
     setSheetOpen(false);
   };
   
-  const handleClaimAdded = (claim: Claim) => {
-    // If the page (like the dashboard) provides a specific function to handle claim additions, use it.
-    if (onClaimAddedFromPage) {
-      onClaimAddedFromPage(claim);
-    } else {
-      // Otherwise, just refresh the page data. This is useful for pages like /claims.
-      router.refresh();
-    }
-  }
-
   return (
     <>
-      <header className="sticky top-0 z-20 flex h-24 items-center gap-4 border-b bg-primary px-4 text-primary-foreground sm:px-6">
+      <header className="sticky top-0 z-30 flex h-24 items-center gap-4 border-b bg-primary px-4 text-primary-foreground sm:px-6">
         {/* Mobile Nav */}
         <div className="sm:hidden">
             <Sheet open={isSheetOpen} onOpenChange={setSheetOpen}>
@@ -102,13 +89,12 @@ export function Header({ onClaimAdded: onClaimAddedFromPage }: { onClaimAdded?: 
         </div>
       
         <div className="flex items-center gap-2 ml-auto">
-            <Button variant="secondary" onClick={() => setUploadOpen(true)} className="flex items-center gap-2">
+            <Button variant="secondary" onClick={onUploadClick} className="flex items-center gap-2">
                 <Upload className="h-4 w-4" />
                 Upload Claim
             </Button>
         </div>
       </header>
-      <ClaimUpload open={isUploadOpen} onOpenChange={setUploadOpen} onClaimAdded={handleClaimAdded}/>
     </>
   );
 }
