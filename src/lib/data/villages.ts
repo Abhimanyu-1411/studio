@@ -3,125 +3,85 @@ import type { Village } from '@/types';
 
 // This data has been validated and corrected to ensure geographic consistency.
 // All coordinates are in [longitude, latitude] format.
+
+const createIrregularPolygon = (center: [number, number], avgRadius: number, minSides: number, maxSides: number): [number, number][] => {
+    const [cx, cy] = center;
+    const sides = Math.floor(Math.random() * (maxSides - minSides + 1)) + minSides;
+    const angleStep = (Math.PI * 2) / sides;
+    const points: [number, number][] = [];
+
+    for (let i = 0; i < sides; i++) {
+        const angle = angleStep * i;
+        const radius = avgRadius * (0.8 + Math.random() * 0.4); // Creates irregularity
+        // longitude is x, latitude is y
+        const x = cx + radius * Math.cos(angle);
+        const y = cy + radius * Math.sin(angle) * 1.5; // Stretch vertically for more interesting shapes
+        points.push([x, y]);
+    }
+    points.push(points[0]); // Close the polygon
+    return points;
+};
+
+
 export const villages: Omit<Village, 'timeSeriesData' | 'assetGeometries' | 'assetCoverage'>[] = [
   {
     id: "village_01",
     name: "Ambassa",
     center: [91.8537, 23.9363],
-    bounds: [
-      [91.850, 23.939],
-      [91.858, 23.939],
-      [91.858, 23.934],
-      [91.850, 23.934],
-      [91.850, 23.939],
-    ],
+    bounds: createIrregularPolygon([91.8537, 23.9363], 0.005, 10, 15),
   },
   {
     id: "village_02",
     name: "Kanchanpur",
     center: [92.0093, 24.1702],
-    bounds: [
-      [92.006, 24.172],
-      [92.013, 24.172],
-      [92.013, 24.168],
-      [92.006, 24.168],
-      [92.006, 24.172],
-    ],
+    bounds: createIrregularPolygon([92.0093, 24.1702], 0.004, 10, 15),
   },
   {
     id: "village_03",
     name: "Udaipur",
     center: [91.4825, 23.5336],
-    bounds: [
-      [91.480, 23.536],
-      [91.485, 23.536],
-      [91.485, 23.531],
-      [91.480, 23.531],
-      [91.480, 23.536],
-    ],
+    bounds: createIrregularPolygon([91.4825, 23.5336], 0.003, 10, 15),
   },
   {
     id: "village_04",
     name: "Melaghar",
     center: [91.2725, 23.4875],
-    bounds: [
-      [91.270, 23.490],
-      [91.275, 23.490],
-      [91.275, 23.485],
-      [91.270, 23.485],
-      [91.270, 23.490],
-    ],
+    bounds: createIrregularPolygon([91.2725, 23.4875], 0.0035, 10, 15),
   },
   {
     id: "village_05",
     name: "Jampui",
     center: [92.2822, 24.1397],
-    bounds: [
-      [92.279, 24.142],
-      [92.285, 24.142],
-      [92.285, 24.137],
-      [92.279, 24.137],
-      [92.279, 24.142],
-    ],
+    bounds: createIrregularPolygon([92.2822, 24.1397], 0.004, 10, 15),
   },
   {
     id: "village_06",
     name: "Kakraban",
     center: [91.3965, 23.3551],
-    bounds: [
-      [91.395, 23.358],
-      [91.400, 23.358],
-      [91.400, 23.353],
-      [91.395, 23.353],
-      [91.395, 23.358],
-    ],
+    bounds: createIrregularPolygon([91.3965, 23.3551], 0.003, 10, 15),
   },
   {
     id: "village_07",
     name: "Manubazar",
     center: [91.8330, 23.0261],
-    bounds: [
-      [91.830, 23.028],
-      [91.836, 23.028],
-      [91.836, 23.024],
-      [91.830, 23.024],
-      [91.830, 23.028],
-    ],
+    bounds: createIrregularPolygon([91.8330, 23.0261], 0.004, 10, 15),
   },
   {
     id: "village_08",
     name: "Teliamura",
     center: [91.5972, 23.8001],
-    bounds: [
-      [91.595, 23.802],
-      [91.600, 23.802],
-      [91.600, 23.798],
-      [91.595, 23.798],
-      [91.595, 23.802],
-    ],
+    bounds: createIrregularPolygon([91.5972, 23.8001], 0.003, 10, 15),
   },
   {
     id: "village_09",
     name: "Panisagar",
     center: [92.1070, 24.1998],
-    bounds: [
-      [92.105, 24.202],
-      [92.110, 24.202],
-      [92.110, 24.197],
-      [92.105, 24.197],
-      [92.105, 24.202],
-    ],
+    bounds: createIrregularPolygon([92.1070, 24.1998], 0.003, 10, 15),
   },
   {
     id: "village_10",
     name: "Melarmath",
     center: [91.2848, 23.8307],
-    bounds: [
-      [91.282, 23.833],
-      [91.287, 23.833],
-      [91.287, 23.828],
-      [91.282, 23.828],
-      [91.282, 23.833],
-    ],
+    bounds: createIrregularPolygon([91.2848, 23.8307], 0.0035, 10, 15),
   },
 ];
