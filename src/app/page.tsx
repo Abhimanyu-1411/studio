@@ -254,11 +254,13 @@ export default function DashboardPage() {
   }
   
   const showSidePanel = !!sidePanelComponent;
+  const showDialog = isUploadOpen || isAssetEditOpen;
 
   return (
     <>
       <div className={cn(
-        "flex-1 space-y-6 p-4 sm:p-6 md:p-8",
+        "flex-1 space-y-6 p-4 sm:p-6 md:p-8 transition-all duration-300",
+        showDialog && "blur-sm",
         isMapFullScreen && "p-0"
       )}>
         {!isMapFullScreen && (
