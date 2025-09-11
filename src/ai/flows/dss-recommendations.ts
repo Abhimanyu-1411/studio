@@ -43,7 +43,7 @@ const prompt = ai.definePrompt({
   name: 'dssRecommendationsPrompt',
   input: {schema: DSSRecommendationsInputSchema},
   output: {schema: DSSRecommendationsOutputSchema},
-  prompt: `You are an expert in providing recommendations for village development schemes based on geospatial and claim data. Your task is to analyze the provided data for a specific village and recommend applicable schemes from the list below.
+  prompt: `You are an expert in providing recommendations for village development schemes based on geospatial and claim data. Your task is to analyze the provided data for a specific village and recommend ALL applicable schemes from the list below.
 
   **Village Data:**
   - Village Name: {{{villageName}}}
@@ -58,7 +58,7 @@ const prompt = ai.definePrompt({
   **Instructions:**
   1.  Review the village data provided.
   2.  Compare the data against the "Implementation Criteria" for each of the schemes listed below.
-  3.  Identify **all** schemes where the village data meets the criteria.
+  3.  Identify **ALL** schemes where the village data meets the criteria. It is very important to return every single scheme that is a match.
   4.  For each matching scheme, create a recommendation object.
   5.  The "justification" for your recommendation must be the "Why" text provided for that scheme.
   6.  The "priority" must be the priority level provided for that scheme.
