@@ -8,7 +8,8 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import { dummyPattas } from '@/lib/dummy-data';
+import { pattas as dummyPattas } from '@/lib/data/pattas';
+import type { LngLat } from '@/types';
 
 const LatLngSchema = z.object({
   lat: z.number(),
@@ -18,7 +19,7 @@ const LatLngSchema = z.object({
 const PattaSchema = z.object({
     holderName: z.string().describe("The name of the patta holder."),
     villageName: z.string().describe("The name of the village."),
-    geometry: z.array(LatLngSchema).describe("An array of latitude and longitude points forming the boundary of the patta land."),
+    geometry: z.array(z.array(z.number())).describe("An array of longitude and latitude points forming the boundary of the patta land."),
 });
 
 const ProcessShapefileInputSchema = z.object({
@@ -53,7 +54,7 @@ Your task is to:
 1. Unzip and parse the shapefile (.shp, .shx, .dbf files).
 2. For each feature in the shapefile, extract the boundary geometry (polygon).
 3. From the attribute data (.dbf file), extract the name of the patta holder (look for fields like 'NAME', 'HOLDER', 'OWNER') and the village name (look for 'VILLAGE', 'GP_NAME').
-4. Convert the extracted geometry into an array of latitude and longitude objects.
+4. Convert the extracted geometry into an array of longitude and latitude objects.
 5. Return an array of Patta objects, with each object containing the holder's name, village name, and the geometry.
 
 Here is the zipped shapefile: {{media url=shapefileDataUri}}
