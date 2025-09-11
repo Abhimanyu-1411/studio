@@ -282,7 +282,7 @@ export default function DashboardPage() {
         )}>
             <div className={cn(
                 "transition-all duration-300",
-                 isMapFullScreen ? "fixed inset-0 z-20" : (showSidePanel ? "lg:col-span-2 h-[calc(100vh-300px)]" : "lg:col-span-3 h-[calc(100vh-250px)]")
+                 isMapFullScreen ? "fixed inset-0 z-40" : (showSidePanel ? "lg:col-span-2 h-[calc(100vh-300px)]" : "lg:col-span-3 h-[calc(100vh-250px)]")
             )}>
               <MapCard className="h-full w-full"/>
             </div>
@@ -323,3 +323,4 @@ export default function DashboardPage() {
     
 
     
+
