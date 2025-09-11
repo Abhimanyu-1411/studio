@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Upload, Menu, LayoutGrid, List, MapPin as Map, Lightbulb, TrendingUp, LandPlot } from 'lucide-react';
 import { useState } from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetTrigger } from './ui/sheet';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
+import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { Logo } from './icons';
 
@@ -21,10 +22,8 @@ const navItems = [
 export function Header({ onUploadClick }: { onUploadClick: () => void }) {
   const [isSheetOpen, setSheetOpen] = useState(false);
   const pathname = usePathname();
-  const router = useRouter();
 
-  const handleNav = (href: string) => {
-    router.push(href);
+  const handleSheetNav = () => {
     setSheetOpen(false);
   };
   
@@ -48,13 +47,14 @@ export function Header({ onUploadClick }: { onUploadClick: () => void }) {
                         </SheetDescription>
                     </SheetHeader>
                     <nav className="grid gap-6 text-lg font-medium mt-4">
-                        <button onClick={() => handleNav('/')} className="flex items-center gap-4 px-4 py-2 text-muted-foreground hover:text-foreground rounded-lg">
+                        <Link href="/" onClick={handleSheetNav} className="flex items-center gap-4 px-4 py-2 text-muted-foreground hover:text-foreground rounded-lg">
                             <Logo />
-                        </button>
+                        </Link>
                         {navItems.map(item => (
-                            <button
+                            <Link
                                 key={item.id}
-                                onClick={() => handleNav(item.href)}
+                                href={item.href}
+                                onClick={handleSheetNav}
                                 className={cn(
                                     "flex items-center gap-4 px-4 py-2 text-muted-foreground hover:text-foreground rounded-lg",
                                     pathname === item.href && "bg-accent text-accent-foreground"
@@ -62,7 +62,7 @@ export function Header({ onUploadClick }: { onUploadClick: () => void }) {
                                 >
                                 <item.icon className="h-5 w-5" />
                                 {item.label}
-                            </button>
+                            </Link>
                         ))}
                     </nav>
                 </SheetContent>
@@ -73,17 +73,16 @@ export function Header({ onUploadClick }: { onUploadClick: () => void }) {
         <div className="hidden sm:flex items-center gap-6">
             <Logo />
             {navItems.map(item => (
-                 <Button
-                    key={item.id}
-                    variant="ghost"
-                    onClick={() => handleNav(item.href)}
+                 <Button key={item.id} asChild variant="ghost"
                     className={cn(
                         "flex items-center gap-2 text-sm font-medium",
                         pathname === item.href ? 'bg-green-600' : 'hover:bg-green-600/50'
                     )}
-                    >
-                    <item.icon className="h-4 w-4" />
-                    {item.label}
+                 >
+                    <Link href={item.href}>
+                      <item.icon className="h-4 w-4" />
+                      {item.label}
+                    </Link>
                 </Button>
             ))}
         </div>
