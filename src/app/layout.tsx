@@ -9,7 +9,7 @@ import type { Claim } from '@/types';
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'FRA Atlas',
+  title: 'VanMitra',
   description: 'Forest Rights Act Decision Support System',
 };
 

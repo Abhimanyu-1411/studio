@@ -8,7 +8,7 @@ export function Logo({ className }: { className?: string }) {
       <Leaf className="h-7 w-7" />
       <div>
         <h1 className="text-lg font-bold whitespace-nowrap">
-          FRA Atlas
+          VanMitra
         </h1>
         <p className="text-xs hidden sm:block">Forest Rights Act Decision Support System</p>
       </div>
