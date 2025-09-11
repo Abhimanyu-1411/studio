@@ -106,7 +106,7 @@ export type DssRecommendation = {
 export type CommunityAsset = {
   id: string;
   villageId: string;
-  assetType: 'ndwi' | 'forest' | 'agriculture' | 'school' | string;
+  assetType: 'water' | 'forest' | 'agriculture' | 'school' | string;
   description: string;
   documentUrl: string;
   documentType: string;

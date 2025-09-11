@@ -32,7 +32,11 @@ const ProcessShapefileInputSchema = z.object({
 export type ProcessShapefileInput = z.infer<typeof ProcessShapefileInputSchema>;
 
 
-const ProcessShapefileOutputSchema = z.array(PattaSchema);
+const ProcessShapefileOutputSchema = z.array(z.object({
+    holderName: z.string().describe("The name of the patta holder."),
+    villageName: z.string().describe("The name of the village."),
+    geometry: z.array(z.array(z.number())).describe("An array of longitude and latitude points forming the boundary of the patta land."),
+}));
 export type ProcessShapefileOutput = z.infer<typeof ProcessShapefileOutputSchema>;
 
 // Return dummy data instead of calling the AI flow

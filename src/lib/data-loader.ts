@@ -43,12 +43,10 @@ const villages: Village[] = rawVillages.map(v => {
     const villageArea = turf.area(villagePolygon);
     
     // Simulate fetching raw asset geometries for the village area.
-    // In a real scenario, this would come from an API or a larger dataset.
-    // Here, we'll create some sample raw geometries that might overlap the boundary.
     const rawAssetGeometries = {
-        water: [turf.buffer(turf.point(v.center), 0.05, { units: 'kilometers' }).geometry.coordinates[0] as LngLat[]],
-        forest: [turf.buffer(turf.point([v.center[0] + 0.001, v.center[1] + 0.001]), 0.1, { units: 'kilometers' }).geometry.coordinates[0] as LngLat[]],
-        agriculture: [turf.buffer(turf.point([v.center[0] - 0.001, v.center[1] - 0.001]), 0.08, { units: 'kilometers' }).geometry.coordinates[0] as LngLat[]]
+        water: turf.buffer(turf.point(v.center), 0.05, { units: 'kilometers' })?.geometry.coordinates as LngLat[][] | undefined,
+        forest: turf.buffer(turf.point([v.center[0] + 0.001, v.center[1] + 0.001]), 0.1, { units: 'kilometers' })?.geometry.coordinates as LngLat[][] | undefined,
+        agriculture: turf.buffer(turf.point([v.center[0] - 0.001, v.center[1] - 0.001]), 0.08, { units: 'kilometers' })?.geometry.coordinates as LngLat[][] | undefined
     };
     
     const clippedGeometries: Required<Village['assetGeometries']> = { water: [], forest: [], agriculture: [] };
@@ -57,17 +55,24 @@ const villages: Village[] = rawVillages.map(v => {
     Object.keys(rawAssetGeometries).forEach(key => {
         const assetType = key as keyof typeof rawAssetGeometries;
         let totalAssetArea = 0;
+        const assetGeoms = rawAssetGeometries[assetType];
 
-        rawAssetGeometries[assetType].forEach(rawGeom => {
-            const assetPolygon = turf.polygon([rawGeom]);
-            const intersection = turf.intersect(villagePolygon, assetPolygon);
-            
-            if (intersection) {
-                const clippedCoords = turf.getCoords(intersection) as LngLat[][];
-                clippedGeometries[assetType].push(...clippedCoords);
-                totalAssetArea += turf.area(intersection);
-            }
-        });
+        if (assetGeoms) {
+            assetGeoms.forEach(rawGeom => {
+                if (!rawGeom || rawGeom.length === 0) return;
+                const assetPolygon = turf.polygon([rawGeom]);
+                try {
+                    const intersection = turf.intersect(villagePolygon, assetPolygon);
+                    if (intersection) {
+                        const clippedCoords = turf.getCoords(intersection) as LngLat[][];
+                        clippedGeometries[assetType].push(...clippedCoords);
+                        totalAssetArea += turf.area(intersection);
+                    }
+                } catch (e) {
+                    console.error(`Error intersecting geometries for village ${v.name}:`, e);
+                }
+            });
+        }
         
         if (villageArea > 0) {
             assetCoverage[assetType] = (totalAssetArea / villageArea) * 100;
@@ -181,8 +186,9 @@ class InMemoryStore {
     };
     
     addPattas = async (newPattas: Patta[]): Promise<Patta[]> => {
-        this.pattas.push(...newPattas);
-        return Promise.resolve(newPattas);
+        const pattasWithIds = newPattas.map(p => ({...p, id: `patta_${Date.now()}_${Math.random()}`}));
+        this.pattas.push(...pattasWithIds);
+        return Promise.resolve(pattasWithIds);
     }
     
     updateClaim = async (claimId: string, updatedData: Partial<Claim>): Promise<Claim | undefined> => {
