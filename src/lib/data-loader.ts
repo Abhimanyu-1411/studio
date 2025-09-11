@@ -3,6 +3,7 @@ import { villages as rawVillages } from '@/lib/data/villages';
 import { claims as rawClaims } from '@/lib/data/claims';
 import { assets as rawAssets } from '@/lib/data/assets';
 import { pattas as rawPattas } from '@/lib/data/pattas';
+import { assetGeometries as rawAssetGeometries } from '@/lib/data/asset-geometries';
 import type { Village, Claim, CommunityAsset, Patta, RawClaim, RawCommunityAsset, RawPatta, TimeSeriesDataPoint, LngLat } from '@/types';
 import * as turf from '@turf/turf';
 
@@ -39,29 +40,33 @@ const generateTimeSeriesData = (startDate: Date, numMonths: number): TimeSeriesD
 
 // 1. Process Villages with Asset Clipping and Coverage Calculation
 const villages: Village[] = rawVillages.map(v => {
+    if (!v.bounds || v.bounds.length < 4) {
+        console.error(`Village ${v.name} has invalid bounds. Skipping asset processing.`);
+        return {
+            ...v,
+            assetGeometries: { water: [], forest: [], agriculture: [] },
+            assetCoverage: { water: 0, forest: 0, agriculture: 0 },
+            timeSeriesData: generateTimeSeriesData(new Date('2022-01-01'), 24),
+        };
+    }
+    
     const villagePolygon = turf.polygon([v.bounds]);
     const villageArea = turf.area(villagePolygon);
-    
-    // Simulate fetching raw asset geometries for the village area.
-    const rawAssetGeometries = {
-        water: turf.buffer(turf.point(v.center), 0.05, { units: 'kilometers' })?.geometry.coordinates as LngLat[][] | undefined,
-        forest: turf.buffer(turf.point([v.center[0] + 0.001, v.center[1] + 0.001]), 0.1, { units: 'kilometers' })?.geometry.coordinates as LngLat[][] | undefined,
-        agriculture: turf.buffer(turf.point([v.center[0] - 0.001, v.center[1] - 0.001]), 0.08, { units: 'kilometers' })?.geometry.coordinates as LngLat[][] | undefined
-    };
-    
+
+    const villageAssetGeometries = rawAssetGeometries[v.id];
+
     const clippedGeometries: Required<Village['assetGeometries']> = { water: [], forest: [], agriculture: [] };
     const assetCoverage: Village['assetCoverage'] = { water: 0, forest: 0, agriculture: 0 };
+    
+    if (villageAssetGeometries) {
+        Object.keys(villageAssetGeometries).forEach(key => {
+            const assetType = key as keyof typeof villageAssetGeometries;
+            let totalAssetArea = 0;
+            const assetGeom = villageAssetGeometries[assetType];
 
-    Object.keys(rawAssetGeometries).forEach(key => {
-        const assetType = key as keyof typeof rawAssetGeometries;
-        let totalAssetArea = 0;
-        const assetGeoms = rawAssetGeometries[assetType];
-
-        if (assetGeoms) {
-            assetGeoms.forEach(rawGeom => {
-                if (!rawGeom || rawGeom.length === 0) return;
-                const assetPolygon = turf.polygon([rawGeom]);
-                try {
+            if (assetGeom && assetGeom.coordinates) {
+                const assetPolygon = turf.polygon(assetGeom.coordinates);
+                 try {
                     const intersection = turf.intersect(villagePolygon, assetPolygon);
                     if (intersection) {
                         const clippedCoords = turf.getCoords(intersection) as LngLat[][];
@@ -69,15 +74,14 @@ const villages: Village[] = rawVillages.map(v => {
                         totalAssetArea += turf.area(intersection);
                     }
                 } catch (e) {
-                    console.error(`Error intersecting geometries for village ${v.name}:`, e);
+                    console.error(`Error intersecting ${assetType} for village ${v.name}:`, e);
                 }
-            });
-        }
-        
-        if (villageArea > 0) {
-            assetCoverage[assetType] = (totalAssetArea / villageArea) * 100;
-        }
-    });
+            }
+            if (villageArea > 0) {
+                assetCoverage[assetType] = (totalAssetArea / villageArea) * 100;
+            }
+        });
+    }
 
     return {
         ...v,
