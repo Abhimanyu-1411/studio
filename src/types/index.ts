@@ -1,10 +1,52 @@
 
 
+export type LngLat = [number, number]; // [longitude, latitude]
+
 type FieldWithConfidence<T> = {
     raw: string;
     value: T;
     confidence: number;
 }
+
+// --- Raw Data Types from Files ---
+
+export type RawClaim = {
+  id: string;
+  claimantName: string;
+  villageName: string;
+  claimType: 'IFR' | 'CFR' | 'CR' | string;
+  status: 'unlinked' | 'linked' | 'reviewed' | 'needs-review' | 'rejected';
+  location: LngLat;
+  documentUrl: string;
+  date?: string;
+  pattaNumber?: string;
+  landExtent?: string;
+  gramPanchayat?: string;
+  tehsilTaluka?: string;
+  district?: string;
+  state?: string;
+  address?: string;
+  boundaries?: string;
+};
+
+export type RawCommunityAsset = {
+  id: string;
+  villageId: string;
+  assetType: string;
+  description: string;
+  documentUrl: string;
+  geometry?: LngLat[];
+};
+
+export type RawPatta = {
+    id: string;
+    holderName: string;
+    villageName: string;
+    geometry: LngLat[];
+}
+
+
+// --- Main Application Data Types ---
 
 export type Claim = {
   id: string;
@@ -24,13 +66,10 @@ export type Claim = {
   documentUrl: string;
   documentType: string;
   status: 'unlinked' | 'linked' | 'reviewed' | 'needs-review' | 'rejected';
-  location: { value: { lat: number; lng: number }, confidence: number };
+  location: { value: { lng: number; lat: number }, confidence: number };
   villageId?: string | null;
-  boundary_at_validation?: LatLng[] | null;
   is_location_valid: boolean;
 };
-
-type LatLng = { lat: number; lng: number };
 
 export type TimeSeriesDataPoint = {
   date: string; // YYYY-MM-DD
@@ -49,12 +88,12 @@ export type Village = {
     forest: number;
     agriculture: number;
   };
-  center: LatLng;
-  bounds: LatLng[];
+  center: LngLat;
+  bounds: LngLat[];
   assetGeometries?: {
-    ndwi: LatLng[][];
-    forest: LatLng[][];
-    agriculture: LatLng[][];
+    ndwi: LngLat[][];
+    forest: LngLat[][];
+    agriculture: LngLat[][];
   }
   timeSeriesData?: TimeSeriesDataPoint[];
 };
@@ -68,18 +107,16 @@ export type DssRecommendation = {
 export type CommunityAsset = {
   id: string;
   villageId: string;
-  assetType: 'ndwi' | 'forest' | 'agriculture' | string;
+  assetType: 'ndwi' | 'forest' | 'agriculture' | 'school' | string;
   description: string;
   documentUrl: string;
   documentType: string;
-  geometry?: LatLng[];
+  geometry?: LngLat[];
 }
 
 export type Patta = {
     id: string;
     holderName: string;
     villageName: string;
-    geometry: LatLng[];
+    geometry: LngLat[];
 }
-
-    

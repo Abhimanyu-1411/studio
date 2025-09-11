@@ -3,7 +3,7 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import dynamic from 'next/dynamic';
-import type { Claim, Village, CommunityAsset, Patta } from '@/types';
+import type { Claim, Village, CommunityAsset, Patta, LngLat } from '@/types';
 import { ClaimEdit } from '@/components/claim-edit';
 import { Skeleton } from '@/components/ui/skeleton';
 import { RecentClaims } from '@/components/recent-claims';
@@ -41,9 +41,9 @@ const StatsCard = ({ title, value, icon: Icon, color, borderColor }: { title: st
     </Card>
 );
 
-const getClaimLocation = (location: any): { lat: number; lng: number } | null => {
-    if (typeof location === 'object' && location !== null && 'value' in location) {
-        const { lat, lng } = location.value;
+const getClaimLocation = (claim: Claim): { lat: number; lng: number } | null => {
+    if (claim.location && claim.location.value) {
+        const { lat, lng } = claim.location.value;
         if (typeof lat === 'number' && typeof lng === 'number') {
             return { lat, lng };
         }
@@ -67,7 +67,7 @@ export default function DashboardPage() {
   const [isAssetEditOpen, setAssetEditOpen] = useState(false);
   const [assets, setAssets] = useState<CommunityAsset[]>([]);
   const [pattas, setPattas] = useState<Patta[]>([]);
-  const [mapCenter, setMapCenter] = useState({ lat: 26.5, lng: 82.4 });
+  const [mapCenter, setMapCenter] = useState({ lat: 23.8315, lng: 91.2868 }); // Default center (Tripura)
   const [mapZoom, setMapZoom] = useState(9);
   const [loading, setLoading] = useState(true);
   const [isMapFullScreen, setMapFullScreen] = useState(false);
@@ -111,7 +111,7 @@ export default function DashboardPage() {
 
   const handleClaimAdded = (newClaim: Claim) => {
     setClaims((prevClaims) => [newClaim, ...prevClaims]);
-    const location = getClaimLocation(newClaim.location);
+    const location = getClaimLocation(newClaim);
     if (location) {
         setMapCenter(location);
         setMapZoom(12);
@@ -122,8 +122,9 @@ export default function DashboardPage() {
     setPattas(prev => [...prev, ...newPattas]);
     if (newPattas.length > 0 && newPattas[0].geometry.length > 0) {
       const firstPattaGeometry = newPattas[0].geometry;
-      const centerLat = firstPattaGeometry.reduce((sum, p) => sum + p.lat, 0) / firstPattaGeometry.length;
-      const centerLng = firstPattaGeometry.reduce((sum, p) => sum + p.lng, 0) / firstPattaGeometry.length;
+      // Turf.js would be better here, but for now, average the points
+      const centerLng = firstPattaGeometry.reduce((sum, p) => sum + p[0], 0) / firstPattaGeometry.length;
+      const centerLat = firstPattaGeometry.reduce((sum, p) => sum + p[1], 0) / firstPattaGeometry.length;
       setMapCenter({lat: centerLat, lng: centerLng});
       setMapZoom(14);
     }
@@ -144,7 +145,7 @@ export default function DashboardPage() {
   const handleClaimEdit = (claim: Claim) => {
     setEditingClaim(claim);
     setShapefileUploadOpen(false); // Close shapefile upload if open
-    const location = getClaimLocation(claim.location);
+    const location = getClaimLocation(claim);
     if(location) {
         setMapCenter(location);
         setMapZoom(14);
@@ -242,52 +243,50 @@ export default function DashboardPage() {
 
   return (
     <>
-      {!isUploadOpen && (
+      <div className={cn(
+        "flex-1 space-y-6 p-4 sm:p-6 md:p-8",
+        isMapFullScreen && "p-0"
+      )}>
+        {!isMapFullScreen && (
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                <StatsCard title="Total Claims" value={totalClaims} icon={FileText} color="bg-blue-500" borderColor="border-blue-500"/>
+                <StatsCard title="Pending Review" value={pendingClaims} icon={Clock} color="bg-yellow-500" borderColor="border-yellow-500"/>
+                <StatsCard title="Map-Linked" value={approvedClaims} icon={CheckCircle} color="bg-green-500" borderColor="border-green-500"/>
+                <StatsCard title="Total Villages" value={totalVillages} icon={MapPin} color="bg-purple-500" borderColor="border-purple-500"/>
+            </div>
+        )}
+        
         <div className={cn(
-          "flex-1 space-y-6 p-4 sm:p-6 md:p-8",
-          isMapFullScreen && "p-0"
+            "grid gap-6",
+            !isMapFullScreen && (showSidePanel ? "grid-cols-1 lg:grid-cols-3" : "grid-cols-1"),
         )}>
-          {!isMapFullScreen && (
-              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                  <StatsCard title="Total Claims" value={totalClaims} icon={FileText} color="bg-blue-500" borderColor="border-blue-500"/>
-                  <StatsCard title="Pending Review" value={pendingClaims} icon={Clock} color="bg-yellow-500" borderColor="border-yellow-500"/>
-                  <StatsCard title="Map-Linked" value={approvedClaims} icon={CheckCircle} color="bg-green-500" borderColor="border-green-500"/>
-                  <StatsCard title="Total Villages" value={totalVillages} icon={MapPin} color="bg-purple-500" borderColor="border-purple-500"/>
-              </div>
-          )}
-          
-          <div className={cn(
-              "grid gap-6",
-              !isMapFullScreen && (showSidePanel ? "grid-cols-1 lg:grid-cols-3" : "grid-cols-1"),
-          )}>
-              <div className={cn(
-                  "transition-all duration-300",
-                   isMapFullScreen ? "fixed inset-0 z-10" : (showSidePanel ? "lg:col-span-2 h-[calc(100vh-300px)]" : "lg:col-span-3 h-[calc(100vh-250px)]")
-              )}>
-                <MapCard className="h-full w-full"/>
-              </div>
+            <div className={cn(
+                "transition-all duration-300",
+                 isMapFullScreen ? "fixed inset-0 z-20" : (showSidePanel ? "lg:col-span-2 h-[calc(100vh-300px)]" : "lg:col-span-3 h-[calc(100vh-250px)]")
+            )}>
+              <MapCard className="h-full w-full"/>
+            </div>
 
-              {!isMapFullScreen && (
-                <>
-                  <div className={cn("lg:col-span-1 space-y-6", !showSidePanel && 'hidden')}>
-                     {sidePanelComponent}
+            {!isMapFullScreen && (
+              <>
+                <div className={cn("lg:col-span-1 space-y-6", !showSidePanel && 'hidden')}>
+                   {sidePanelComponent}
+                </div>
+                
+                {!showSidePanel && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                     <RecentClaims claims={claims.slice(0, 5)} onClaimSelect={handleClaimEdit} />
+                     <QuickActions 
+                        onUpload={() => setUploadOpen(true)} 
+                        onViewClaims={() => router.push('/claims')} 
+                        onUploadShapefile={handleShapefileUploadClick}
+                     />
                   </div>
-                  
-                  {!showSidePanel && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                       <RecentClaims claims={claims.slice(0, 5)} onClaimSelect={handleClaimEdit} />
-                       <QuickActions 
-                          onUpload={() => setUploadOpen(true)} 
-                          onViewClaims={() => router.push('/claims')} 
-                          onUploadShapefile={handleShapefileUploadClick}
-                       />
-                    </div>
-                  )}
-                </>
-              )}
-          </div>
+                )}
+              </>
+            )}
         </div>
-      )}
+      </div>
       
       {/* Modals are kept outside the main layout grid */}
       <ClaimUpload open={isUploadOpen} onOpenChange={setUploadOpen} onClaimAdded={handleClaimAdded} />

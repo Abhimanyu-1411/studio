@@ -26,7 +26,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useDropzone } from 'react-dropzone';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
-import type { Village, CommunityAsset, Claim } from '@/types';
+import type { Village, CommunityAsset, Claim, LngLat } from '@/types';
 
 type AssetEditProps = {
   open: boolean;
@@ -38,20 +38,22 @@ type AssetEditProps = {
 };
 
 const assetTypes = [
-  { value: 'ndwi', label: 'Water Body' },
+  { value: 'water', label: 'Water Body' },
   { value: 'forest', label: 'Forest Area' },
   { value: 'agriculture', label: 'Agricultural Land' },
+  { value: 'school', label: 'School' },
   { value: 'other', label: 'Other' },
 ];
 
-// Helper to generate a regular polygon
-const createPolygon = (center: { lat: number; lng: number }, sides: number, radius: number) => {
-    const coords = [];
+// Helper to generate a regular polygon from a LngLat center
+const createPolygon = (center: LngLat, sides: number, radiusDegrees: number): LngLat[] => {
+    const [lng, lat] = center;
+    const coords: LngLat[] = [];
     for (let i = 0; i < sides; i++) {
         const angle = (i / sides) * 2 * Math.PI;
-        const lat = center.lat + radius * Math.cos(angle);
-        const lng = center.lng + radius * Math.sin(angle);
-        coords.push({ lat, lng });
+        const pointLng = lng + radiusDegrees * Math.sin(angle);
+        const pointLat = lat + radiusDegrees * Math.cos(angle);
+        coords.push([pointLng, pointLat]);
     }
     coords.push(coords[0]); // Close the polygon
     return coords;
@@ -133,7 +135,14 @@ export function AssetEdit({ open, onOpenChange, onAssetAdded, villages, claimLoc
     setProgress(80);
 
     const selectedVillage = villages.find(v => v.id === villageId);
-    const center = claimLocation || selectedVillage?.center;
+    
+    // Determine the center for the new asset
+    let center: LngLat | undefined;
+    if (claimLocation?.value) {
+        center = [claimLocation.value.lng, claimLocation.value.lat];
+    } else if (selectedVillage?.center) {
+        center = selectedVillage.center;
+    }
 
     await new Promise(resolve => setTimeout(resolve, 500)); // Simulate processing
 

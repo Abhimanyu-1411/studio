@@ -4,7 +4,7 @@
 import * as React from 'react';
 import { MapContainer, TileLayer, Polygon, Marker, Popup, useMap } from 'react-leaflet';
 import { useEffect, memo, type ReactNode } from 'react';
-import type { Claim, Village, CommunityAsset, Patta } from '@/types';
+import type { Claim, Village, CommunityAsset, Patta, LngLat } from '@/types';
 import { Badge } from './ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from './ui/card';
 import { Button } from './ui/button';
@@ -40,9 +40,9 @@ const getClaimValue = (field: any): string => {
     return field as string;
 }
 
-const getClaimLocation = (location: any): L.LatLngExpression | null => {
-    if (typeof location === 'object' && location !== null && 'value' in location) {
-        const { lat, lng } = location.value;
+const getClaimLocation = (claim: Claim): L.LatLngExpression | null => {
+    if (claim.location && claim.location.value) {
+        const { lat, lng } = claim.location.value;
         if (typeof lat === 'number' && typeof lng === 'number') {
             return { lat, lng };
         }
@@ -50,6 +50,10 @@ const getClaimLocation = (location: any): L.LatLngExpression | null => {
     return null;
 }
 
+// Helper to convert [lng, lat] to {lat, lng}
+const toLatLngExpression = (coords: LngLat[]): L.LatLngExpression[] => {
+    return coords.map(([lng, lat]) => ({ lat, lng }));
+};
 
 const getClaimIcon = (claim: Claim) => {
   const color = claimStatusColors[claim.status as keyof typeof claimStatusColors] || 'hsl(var(--muted-foreground))';
@@ -65,8 +69,6 @@ const getClaimIcon = (claim: Claim) => {
 const MapController = ({ center, zoom }: { center: { lat: number, lng: number }, zoom: number }) => {
   const map = useMap();
   useEffect(() => {
-    // Only pan/zoom if the map's current center/zoom is different from the props.
-    // This prevents resetting the view on every render.
     const mapCenter = map.getCenter();
     if (mapCenter.lat !== center.lat || mapCenter.lng !== center.lng || map.getZoom() !== zoom) {
       map.setView(center, zoom);
@@ -80,6 +82,7 @@ const assetLayerStyles = {
   forest: { color: '#166534', fillColor: '#22c55e', weight: 1 },
   agriculture: { color: '#ca8a04', fillColor: '#facc15', weight: 1 },
   other: { color: '#a21caf', fillColor: '#c026d3', weight: 1},
+  school: { color: '#fb923c', fillColor: '#fdba74', weight: 1},
 };
 
 const pattaStyle = {
@@ -117,7 +120,7 @@ const MapViewComponent = ({ claims, villages, assets, pattas, onVillageClick, on
       {villages.map((village) => (
         <React.Fragment key={village.id}>
             <Polygon
-            positions={village.bounds as L.LatLngExpression[]}
+            positions={toLatLngExpression(village.bounds)}
             pathOptions={getPolygonOptions(village)}
             eventHandlers={{
                 click: () => onVillageClick(village),
@@ -126,27 +129,27 @@ const MapViewComponent = ({ claims, villages, assets, pattas, onVillageClick, on
               <Popup>
                 <div className="font-bold text-base">{village.name}</div>
                 <div className="text-sm">
-                  <p>Water Coverage: {(village.assetCoverage as any).water}%</p>
-                  <p>Forest Coverage: {(village.assetCoverage as any).forest}%</p>
-                  <p>Agriculture: {(village.assetCoverage as any).agriculture}%</p>
+                  <p>Water Coverage: {village.assetCoverage.water}%</p>
+                  <p>Forest Coverage: {village.assetCoverage.forest}%</p>
+                  <p>Agriculture: {village.assetCoverage.agriculture}%</p>
                 </div>
               </Popup>
             </Polygon>
             
-            {activeLayers.ndwi && (village.assetGeometries as any)?.ndwi.map((poly: any, i: number) => 
-                <Polygon key={`${village.id}-ndwi-${i}`} positions={poly} pathOptions={{...assetLayerStyles.ndwi, fillOpacity: 0.5}} />
+            {activeLayers.ndwi && village.assetGeometries?.ndwi.map((poly: LngLat[], i: number) => 
+                <Polygon key={`${village.id}-ndwi-${i}`} positions={toLatLngExpression(poly)} pathOptions={{...assetLayerStyles.ndwi, fillOpacity: 0.5}} />
             )}
-            {activeLayers.forest && (village.assetGeometries as any)?.forest.map((poly: any, i: number) => 
-                <Polygon key={`${village.id}-forest-${i}`} positions={poly} pathOptions={{...assetLayerStyles.forest, fillOpacity: 0.5}} />
+            {activeLayers.forest && village.assetGeometries?.forest.map((poly: LngLat[], i: number) => 
+                <Polygon key={`${village.id}-forest-${i}`} positions={toLatLngExpression(poly)} pathOptions={{...assetLayerStyles.forest, fillOpacity: 0.5}} />
             )}
-            {activeLayers.agriculture && (village.assetGeometries as any)?.agriculture.map((poly: any, i: number) => 
-                <Polygon key={`${village.id}-agri-${i}`} positions={poly} pathOptions={{...assetLayerStyles.agriculture, fillOpacity: 0.5}} />
+            {activeLayers.agriculture && village.assetGeometries?.agriculture.map((poly: LngLat[], i: number) => 
+                <Polygon key={`${village.id}-agri-${i}`} positions={toLatLngExpression(poly)} pathOptions={{...assetLayerStyles.agriculture, fillOpacity: 0.5}} />
             )}
         </React.Fragment>
       ))}
       
       {pattas.map((patta) => (
-        <Polygon key={patta.id} positions={patta.geometry as L.LatLngExpression[]} pathOptions={pattaStyle}>
+        <Polygon key={patta.id} positions={toLatLngExpression(patta.geometry)} pathOptions={pattaStyle}>
             <Popup>
                 <div className="font-bold text-base">{patta.holderName}</div>
                 <p className="text-sm">{patta.villageName}</p>
@@ -155,7 +158,7 @@ const MapViewComponent = ({ claims, villages, assets, pattas, onVillageClick, on
       ))}
 
       {assets.map((asset) => (
-         asset.geometry && <Polygon key={asset.id} positions={asset.geometry as L.LatLngExpression[]} pathOptions={{...assetLayerStyles[asset.assetType as keyof typeof assetLayerStyles] || assetLayerStyles.other, fillOpacity: 0.7}}>
+         asset.geometry && <Polygon key={asset.id} positions={toLatLngExpression(asset.geometry)} pathOptions={{...assetLayerStyles[asset.assetType as keyof typeof assetLayerStyles] || assetLayerStyles.other, fillOpacity: 0.7}}>
             <Popup>
                 <div className="font-bold text-base capitalize">{asset.assetType.replace('_', ' ')}</div>
                 <p className="text-sm">{asset.description}</p>
@@ -164,7 +167,7 @@ const MapViewComponent = ({ claims, villages, assets, pattas, onVillageClick, on
       ))}
 
       {claims.map((claim) => {
-        const location = getClaimLocation(claim.location);
+        const location = getClaimLocation(claim);
         if (!location) return null;
         
         return (
@@ -206,5 +209,3 @@ const MapViewComponent = ({ claims, villages, assets, pattas, onVillageClick, on
 }
 
 export const MapView = memo(MapViewComponent);
-
-    

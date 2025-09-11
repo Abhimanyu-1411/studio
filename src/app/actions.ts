@@ -6,21 +6,19 @@ import { dssRecommendations } from '@/ai/flows/dss-recommendations';
 import { predictiveAnalysis } from '@/ai/flows/predictive-analysis';
 import { processShapefile } from '@/ai/flows/process-shapefile';
 import { geocodeAddress } from '@/ai/flows/geocode-address';
-import { getVillageBoundary } from '@/ai/flows/get-village-boundary';
-import type { DssRecommendation, Claim, Village, CommunityAsset, TimeSeriesDataPoint, Patta } from '@/types';
-// import { createClient } from '@/lib/supabase/server';
+import type { DssRecommendation, Claim, Village, CommunityAsset, TimeSeriesDataPoint, Patta, LngLat } from '@/types';
 import { revalidatePath } from 'next/cache';
-import { dummyClaims, dummyVillages, dummyAssets, dummyPattas } from '@/lib/dummy-data';
+import { dataStore } from '@/lib/data-loader';
 
 // =================================================================================
-// THIS FILE NOW USES DUMMY DATA INSTEAD OF A LIVE DATABASE CONNECTION.
-// All functions have been modified to work with in-memory data arrays.
+// This file now uses a singleton data store that holds validated in-memory data.
 // =================================================================================
 
-let claimsStore: Claim[] = [...dummyClaims];
-let villagesStore: Village[] = [...dummyVillages];
-let assetsStore: CommunityAsset[] = [...dummyAssets];
-let pattasStore: Patta[] = [...dummyPattas];
+const createField = <T extends string | number>(value: T) => ({
+    raw: String(value),
+    value: value,
+    confidence: 1.0, 
+});
 
 export async function handleClaimUpload(documentDataUri: string, documentType: string): Promise<Claim> {
 
@@ -47,10 +45,10 @@ export async function handleClaimUpload(documentDataUri: string, documentType: s
         value: { lat: locationResult.lat, lng: locationResult.lng },
         confidence: locationResult.confidenceScore
     },
-    is_location_valid: true, // Assume valid for dummy data
+    is_location_valid: true, // Assume valid for new uploads for now
   };
 
-  claimsStore.unshift(newClaim);
+  await dataStore.addClaim(newClaim);
   revalidatePath('/');
   revalidatePath('/claims');
   
@@ -60,40 +58,39 @@ export async function handleClaimUpload(documentDataUri: string, documentType: s
 export async function handleShapefileUpload(shapefileDataUri: string): Promise<Patta[]> {
   const newPattas = await processShapefile({ shapefileDataUri });
   
-  pattasStore.push(...newPattas);
+  await dataStore.addPattas(newPattas);
   revalidatePath('/');
   return newPattas;
 }
 
-
 export async function updateClaim(claimId: string, updatedData: Partial<Claim>) {
-    const index = claimsStore.findIndex(c => c.id === claimId);
-    if (index !== -1) {
-        claimsStore[index] = { ...claimsStore[index], ...updatedData };
-    }
+    const updated = await dataStore.updateClaim(claimId, updatedData);
     revalidatePath('/');
     revalidatePath('/claims');
-    return claimsStore[index];
+    return updated;
 }
 
 export async function deleteClaim(claimId: string) {
-    claimsStore = claimsStore.filter(c => c.id !== claimId);
+    await dataStore.deleteClaim(claimId);
     revalidatePath('/');
     revalidatePath('/claims');
 }
 
 export async function deleteVillage(villageId: string) {
-    villagesStore = villagesStore.filter(v => v.id !== villageId);
+    await dataStore.deleteVillage(villageId);
     revalidatePath('/');
     revalidatePath('/villages');
 }
 
 
 export async function getDssRecommendation(villageId: string): Promise<DssRecommendation[]> {
-    const village = villagesStore.find(v => v.id === villageId);
+    const villages = await dataStore.getVillages();
+    const claims = await dataStore.getClaims();
+
+    const village = villages.find(v => v.id === villageId);
     if (!village) throw new Error("Village not found");
 
-    const claimsInVillage = claimsStore.filter(c => c.village.value === village.name);
+    const claimsInVillage = claims.filter(c => c.village.value === village.name);
     
     return dssRecommendations({
         villageName: village.name,
@@ -112,7 +109,8 @@ export async function getPrediction(
     metric: keyof Omit<TimeSeriesDataPoint, 'date'>,
     forecastPeriods: number
 ): Promise<any[]> {
-    const village = villagesStore.find(v => v.id === villageId);
+    const villages = await dataStore.getVillages();
+    const village = villages.find(v => v.id === villageId);
     if (!village || !village.timeSeriesData) {
         throw new Error('Village or time-series data not found');
     }
@@ -146,28 +144,24 @@ export async function getPrediction(
 }
 
 export async function getClaims(): Promise<Claim[]> {
-    return claimsStore;
+    return dataStore.getClaims();
 }
 
 export async function getVillages(): Promise<Village[]> {
-    return villagesStore;
+    return dataStore.getVillages();
 }
 
 
 export async function addCommunityAsset(asset: Omit<CommunityAsset, 'id'>): Promise<CommunityAsset> {
-    const newAsset: CommunityAsset = {
-        ...asset,
-        id: `asset_${Date.now()}`
-    };
-    assetsStore.unshift(newAsset);
+    const newAsset = await dataStore.addAsset(asset);
     revalidatePath('/assets');
     return newAsset;
 }
 
 export async function getCommunityAssets(): Promise<CommunityAsset[]> {
-    return assetsStore;
+    return dataStore.getCommunityAssets();
 }
 
 export async function getPattas(): Promise<Patta[]> {
-    return pattasStore;
+    return dataStore.getPattas();
 }

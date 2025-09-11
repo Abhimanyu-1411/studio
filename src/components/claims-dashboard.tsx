@@ -1,12 +1,12 @@
 
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import type { Claim, Village, CommunityAsset } from '@/types';
 import { ClaimsTable } from '@/components/claims-table';
 import { useToast } from '@/hooks/use-toast';
 import { ClaimEdit } from '@/components/claim-edit';
-import { updateClaim, deleteClaim, addCommunityAsset } from '@/app/actions';
+import { updateClaim, deleteClaim, addCommunityAsset, getClaims, getVillages } from '@/app/actions';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { FileDown, Upload, FileText, CheckCircle2, Clock, XCircle, Trash2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -25,6 +25,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { AssetEdit } from '@/components/asset-edit';
+import { Skeleton } from '../ui/skeleton';
 
 const StatsCard = ({ title, value, icon: Icon, color, bgColor }: { title: string, value: string | number, icon: React.ElementType, color: string, bgColor: string }) => (
     <Card className="shadow-sm">
@@ -40,20 +41,39 @@ const StatsCard = ({ title, value, icon: Icon, color, bgColor }: { title: string
     </Card>
 );
 
-type ClaimsDashboardProps = {
-    initialClaims: Claim[];
-    initialVillages: Village[];
-}
-
-export function ClaimsDashboard({ initialClaims, initialVillages }: ClaimsDashboardProps) {
-  const [allClaims, setAllClaims] = useState<Claim[]>(initialClaims);
-  const [villages, setVillages] = useState<Village[]>(initialVillages);
+export function ClaimsDashboard() {
+  const [allClaims, setAllClaims] = useState<Claim[]>([]);
+  const [villages, setVillages] = useState<Village[]>([]);
   const [editingClaim, setEditingClaim] = useState<Claim | null>(null);
   const [deletingClaim, setDeletingClaim] = useState<Claim | null>(null);
   const [isUploadOpen, setUploadOpen] = useState(false);
   const [isAssetEditOpen, setAssetEditOpen] = useState(false);
   const [claimForAsset, setClaimForAsset] = useState<Claim | null>(null);
+  const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+
+  useEffect(() => {
+    async function fetchData() {
+        try {
+            const [claimsData, villagesData] = await Promise.all([
+                getClaims(),
+                getVillages(),
+            ]);
+            setAllClaims(claimsData);
+            setVillages(villagesData);
+        } catch (error) {
+            console.error("Failed to fetch dashboard data", error);
+            toast({
+                variant: 'destructive',
+                title: 'Error',
+                description: 'Failed to load claims data.',
+            });
+        } finally {
+            setLoading(false);
+        }
+    }
+    fetchData();
+  }, [toast]);
 
   // Filtering states
   const [searchQuery, setSearchQuery] = useState('');
@@ -171,6 +191,21 @@ export function ClaimsDashboard({ initialClaims, initialVillages }: ClaimsDashbo
     setAllClaims((prevClaims) => [newClaim, ...prevClaims]);
   };
 
+  if (loading) {
+    return (
+        <div className="space-y-6">
+            <Skeleton className="h-12 w-1/3" />
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                <Skeleton className="h-24" />
+                <Skeleton className="h-24" />
+                <Skeleton className="h-24" />
+                <Skeleton className="h-24" />
+            </div>
+            <Skeleton className="h-96 w-full" />
+        </div>
+    )
+  }
+
   return (
     <>
       <div className="space-y-6">
@@ -270,7 +305,7 @@ export function ClaimsDashboard({ initialClaims, initialVillages }: ClaimsDashbo
           onOpenChange={setAssetEditOpen} 
           onAssetAdded={handleAssetAdded} 
           villages={villages}
-          claimLocation={getClaimValue(claimForAsset?.location)}
+          claimLocation={claimForAsset?.location}
           preselectedVillageName={getClaimValue(claimForAsset?.village)}
       />
       <AlertDialog open={!!deletingClaim} onOpenChange={(open) => !open && setDeletingClaim(null)}>

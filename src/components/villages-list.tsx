@@ -1,11 +1,11 @@
 
 'use client';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Search, Trash2 } from "lucide-react";
 import type { Village } from '@/types';
-import { deleteVillage } from '@/app/actions';
+import { deleteVillage, getVillages } from '@/app/actions';
 import { Button, buttonVariants } from '@/components/ui/button';
 import {
   AlertDialog,
@@ -18,13 +18,33 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useToast } from '@/hooks/use-toast';
-import { cn } from '@/lib/utils';
+import { Skeleton } from './ui/skeleton';
 
-export function VillagesList({ initialVillages }: { initialVillages: Village[] }) {
-    const [villages, setVillages] = useState<Village[]>(initialVillages);
+export function VillagesList() {
+    const [villages, setVillages] = useState<Village[]>([]);
     const [villageSearchQuery, setVillageSearchQuery] = useState('');
     const [deletingVillage, setDeletingVillage] = useState<Village | null>(null);
+    const [loading, setLoading] = useState(true);
     const { toast } = useToast();
+
+    useEffect(() => {
+        async function fetchData() {
+            try {
+                const villagesData = await getVillages();
+                setVillages(villagesData);
+            } catch (error) {
+                console.error("Failed to fetch villages", error);
+                toast({
+                    variant: 'destructive',
+                    title: 'Error',
+                    description: 'Failed to load village data.',
+                });
+            } finally {
+                setLoading(false);
+            }
+        }
+        fetchData();
+    }, [toast]);
 
     const filteredVillages = useMemo(() => {
         return villages.filter(v => v.name.toLowerCase().includes(villageSearchQuery.toLowerCase()));
@@ -48,6 +68,10 @@ export function VillagesList({ initialVillages }: { initialVillages: Village[] }
         } finally {
             setDeletingVillage(null);
         }
+    }
+
+    if (loading) {
+        return <Skeleton className="h-96 w-full" />;
     }
 
     return (
