@@ -101,6 +101,9 @@ export function ClaimEdit({ claim, onClose, onClaimUpdate, availableVillages }: 
   const isReviewAction = claim.status === 'needs-review';
   const isDocumentImage = claim.documentType?.startsWith('image/');
   
+  // Hide preview for pre-loaded claims using picsum.photos
+  const showPreview = claim.documentUrl && !claim.documentUrl.includes('picsum.photos');
+
   const getConfidence = (field: any) => {
     return (typeof field === 'object' && field !== null && 'confidence' in field) ? field.confidence : 0;
   }
@@ -126,7 +129,7 @@ export function ClaimEdit({ claim, onClose, onClaimUpdate, availableVillages }: 
             <div className="border rounded-lg bg-muted/20 p-2 h-[25vh] flex flex-col">
                 <Label className="text-center pb-2">Document Preview</Label>
                 <div className="relative flex-1 w-full h-full">
-                  {claim.documentUrl ? (
+                  {showPreview ? (
                       isDocumentImage ? (
                           <Image
                               src={claim.documentUrl}
@@ -251,5 +254,3 @@ export function ClaimEdit({ claim, onClose, onClaimUpdate, availableVillages }: 
     </Card>
   );
 }
-
-    
