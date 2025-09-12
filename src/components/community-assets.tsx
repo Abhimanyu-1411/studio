@@ -60,10 +60,12 @@ export function CommunityAssets({ assets: initialAssets, villages }: CommunityAs
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {assets.map((asset) => (
+            {assets.map((asset) => {
+              const showPreview = asset.documentUrl && asset.documentType.startsWith('image') && !asset.documentUrl.includes('picsum.photos');
+              return (
               <Card key={asset.id}>
                 <CardHeader>
-                    {asset.documentUrl && asset.documentType.startsWith('image') ? (
+                    {showPreview ? (
                         <Image 
                             src={asset.documentUrl} 
                             alt={asset.description} 
@@ -84,7 +86,7 @@ export function CommunityAssets({ assets: initialAssets, villages }: CommunityAs
                   <p className="text-sm mt-2">{asset.description}</p>
                 </CardContent>
               </Card>
-            ))}
+            )})}
           </div>
         )}
       </CardContent>
