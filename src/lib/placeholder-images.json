@@ -20,7 +20,7 @@
         { "src": "https://picsum.photos/seed/doc17/400/560", "hint": "land deed" }
     ],
     "assets": [
-        { "src": "https://picsum.photos/seed/asset1/300/200", "hint": "forest canopy" },
+        { "src": "https://images.unsplash.com/photo-1602632270779-e1baa06074cc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxwb25kfGVufDB8fHx8MTc1NzYxMzIxMHww&ixlib=rb-4.1.0&q=80&w=1080", "hint": "community pond" },
         { "src": "https://picsum.photos/seed/asset2/300/200", "hint": "river bend" },
         { "src": "https://picsum.photos/seed/asset3/300/200", "hint": "village school" },
         { "src": "https://picsum.photos/seed/asset4/300/200", "hint": "farmland aerial" },
