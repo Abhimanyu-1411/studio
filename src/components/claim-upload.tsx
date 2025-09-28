@@ -197,5 +197,3 @@ export function ClaimUpload({ open, onOpenChange, onClaimAdded }: ClaimUploadPro
     </Dialog>
   );
 }
-
-    

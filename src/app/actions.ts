@@ -20,39 +20,55 @@ const createField = <T extends string | number>(value: T) => ({
     confidence: 1.0, 
 });
 
+const handleAIApiError = (error: any) => {
+    console.error('AI API Error:', error);
+    // Check for specific error messages related to service availability
+    const errorMessage = error.message || '';
+    if (errorMessage.includes('503') || errorMessage.toLowerCase().includes('overloaded')) {
+        throw new Error('503: AI service is currently overloaded. Please try again later.');
+    }
+    // For other errors, re-throw the original error
+    throw error;
+}
+
 export async function handleClaimUpload(documentDataUri: string, documentType: string): Promise<Claim> {
+  try {
+    // Simulate AI data extraction
+    const extractedData = await extractClaimData({ documentDataUri });
 
-  // Simulate AI data extraction
-  const extractedData = await extractClaimData({ documentDataUri });
+    // Simulate geocoding
+    const locationResult = await geocodeAddress({
+      address: extractedData.address.value,
+      village: extractedData.village.value,
+      tehsilTaluka: extractedData.tehsilTaluka.value,
+      district: extractedData.district.value,
+      state: extractedData.state.value,
+    });
 
-  // Simulate geocoding
-  const locationResult = await geocodeAddress({
-    address: extractedData.address.value,
-    village: extractedData.village.value,
-    tehsilTaluka: extractedData.tehsilTaluka.value,
-    district: extractedData.district.value,
-    state: extractedData.state.value,
-  });
+    const newClaim: Claim = {
+      id: `claim_${Date.now()}`,
+      created_at: new Date().toISOString(),
+      ...extractedData,
+      documentUrl: documentDataUri,
+      documentType: documentType,
+      status: 'needs-review',
+      location: {
+          value: { lat: locationResult.lat, lng: locationResult.lng },
+          confidence: locationResult.confidenceScore
+      },
+      is_location_valid: true, // Assume valid for new uploads for now
+    };
 
-  const newClaim: Claim = {
-    id: `claim_${Date.now()}`,
-    created_at: new Date().toISOString(),
-    ...extractedData,
-    documentUrl: documentDataUri,
-    documentType: documentType,
-    status: 'needs-review',
-    location: {
-        value: { lat: locationResult.lat, lng: locationResult.lng },
-        confidence: locationResult.confidenceScore
-    },
-    is_location_valid: true, // Assume valid for new uploads for now
-  };
-
-  await dataStore.addClaim(newClaim);
-  revalidatePath('/');
-  revalidatePath('/claims');
-  
-  return newClaim;
+    await dataStore.addClaim(newClaim);
+    revalidatePath('/');
+    revalidatePath('/claims');
+    
+    return newClaim;
+  } catch (error) {
+      handleAIApiError(error);
+      // This line will only be reached if the error is not a 503 error
+      throw new Error('Failed to handle claim upload due to an unexpected error.');
+  }
 }
 
 export async function handleShapefileUpload(shapefileDataUri: string): Promise<Patta[]> {
@@ -92,16 +108,21 @@ export async function getDssRecommendation(villageId: string): Promise<DssRecomm
 
     const claimsInVillage = claims.filter(c => c.village.value === village.name);
     
-    return dssRecommendations({
-        villageName: village.name,
-        claimCount: claimsInVillage.length,
-        pendingClaims: claimsInVillage.filter(c => c.status !== 'reviewed' && c.status !== 'linked').length,
-        cfrClaims: claimsInVillage.filter(c => c.claimType.value === 'CFR').length,
-        ifrClaims: claimsInVillage.filter(c => c.claimType.value === 'IFR').length,
-        waterCoverage: village.assetCoverage.water,
-        forestCoverage: village.assetCoverage.forest,
-        agriculturalArea: village.assetCoverage.agriculture,
-    });
+    try {
+        return dssRecommendations({
+            villageName: village.name,
+            claimCount: claimsInVillage.length,
+            pendingClaims: claimsInVillage.filter(c => c.status !== 'reviewed' && c.status !== 'linked').length,
+            cfrClaims: claimsInVillage.filter(c => c.claimType.value === 'CFR').length,
+            ifrClaims: claimsInVillage.filter(c => c.claimType.value === 'IFR').length,
+            waterCoverage: village.assetCoverage.water,
+            forestCoverage: village.assetCoverage.forest,
+            agriculturalArea: village.assetCoverage.agriculture,
+        });
+    } catch (error) {
+        handleAIApiError(error);
+        throw new Error('Failed to get DSS recommendations due to an unexpected error.');
+    }
 }
 
 export async function getPrediction(
@@ -122,25 +143,30 @@ export async function getPrediction(
         value: d[metric] as number
     }));
 
-    const forecast = await predictiveAnalysis({
-        metricName: metric,
-        historicalData,
-        forecastPeriods,
-    });
-    
-    const formattedHistoricalData = historicalData.map(d => ({
-        date: d.date,
-        historical: d.value,
-        predicted: null,
-    }));
-    
-    const formattedForecastData = forecast.map(d => ({
-        date: d.date,
-        historical: null,
-        predicted: d.value,
-    }));
+    try {
+        const forecast = await predictiveAnalysis({
+            metricName: metric,
+            historicalData,
+            forecastPeriods,
+        });
+        
+        const formattedHistoricalData = historicalData.map(d => ({
+            date: d.date,
+            historical: d.value,
+            predicted: null,
+        }));
+        
+        const formattedForecastData = forecast.map(d => ({
+            date: d.date,
+            historical: null,
+            predicted: d.value,
+        }));
 
-    return [...formattedHistoricalData, ...formattedForecastData];
+        return [...formattedHistoricalData, ...formattedForecastData];
+    } catch (error) {
+        handleAIApiError(error);
+        throw new Error('Failed to get prediction due to an unexpected error.');
+    }
 }
 
 export async function getClaims(): Promise<Claim[]> {
